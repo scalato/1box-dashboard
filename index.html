@@ -733,7 +733,8 @@ Return this exact structure (use null for missing values, numbers not strings fo
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': CONFIG.apiKey,
-      'anthropic-version': '2023-06-01'
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
