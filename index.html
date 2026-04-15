@@ -580,32 +580,57 @@ function startAuth() {
 // ─────────────────────────────────────────────
 async function refreshData() {
   if (IS_DEMO) { renderAll(); return; }
-  setStatus('loading', 'Connecting to OneDrive…');
+  setStatus('loading', 'Loading dashboard data…');
   setProgress(10);
 
   try {
-    // 1. List files in the folder
+    // Find the OneDrive folder
     const folderPath = CONFIG.folder.replace(/^\//, '');
-    // Use root children lookup to avoid URL encoding issues with folder names
     const rootRes = await graphFetch('https://graph.microsoft.com/v1.0/me/drive/root/children');
     if (!rootRes.ok) throw new Error('Cannot access OneDrive. Check your Microsoft account permissions.');
     const rootData = await rootRes.json();
     const folder = (rootData.value||[]).find(f => f.name === folderPath);
-    if (!folder) throw new Error(`Folder "${folderPath}" not found in OneDrive. Check the folder path in settings.`);
-    const listRes = await graphFetch(`https://graph.microsoft.com/v1.0/me/drive/items/${folder.id}/children?$orderby=lastModifiedDateTime desc&$top=50`);
+    if (!folder) throw new Error(`Folder "${folderPath}" not found in OneDrive.`);
+
+    // List all files
+    const listRes = await graphFetch(`https://graph.microsoft.com/v1.0/me/drive/items/${folder.id}/children?$orderby=lastModifiedDateTime desc&$top=100`);
     if (!listRes.ok) throw new Error('Cannot list OneDrive folder contents.');
     const listData = await listRes.json();
-    const files = (listData.value || []).filter(f => f.name.endsWith('.pdf'));
+    const allFiles = listData.value || [];
 
-    if (files.length === 0) throw new Error('No PDF files found in the OneDrive folder. Check Power Automate is running.');
+    // Try to load pre-processed JSON files first (instant, no Claude API needed)
+    const jsonFiles = allFiles.filter(f => f.name.endsWith('.json'));
+    const todayJsonFiles = getTodaysFiles(jsonFiles);
 
-    // Get today's files only (or most recent batch)
-    const todayFiles = getTodaysFiles(files);
-    setStatus('loading', `Found ${todayFiles.length} MIS report(s). Extracting data with Claude…`);
-    setProgress(30);
+    if (todayJsonFiles.length > 0) {
+      setStatus('loading', `Loading ${todayJsonFiles.length} pre-processed reports…`);
+      setProgress(30);
+      const siteDataArr = [];
+      const results = await Promise.all(todayJsonFiles.map(async (f) => {
+        const dlRes = await graphFetch(f['@microsoft.graph.downloadUrl'] || `https://graph.microsoft.com/v1.0/me/drive/items/${f.id}/content`);
+        const text = await dlRes.text();
+        try { return JSON.parse(text); } catch(e) { return null; }
+      }));
+      results.forEach(r => { if (r) siteDataArr.push(r); });
+      if (siteDataArr.length > 0) {
+        RAW_DATA = siteDataArr;
+        setProgress(100);
+        renderAll();
+        setTimeout(() => setProgress(0), 500);
+        setStatus('success', `Loaded ${siteDataArr.length} sites — ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`);
+        setTimeout(() => hideStatus(), 3000);
+        document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+        return;
+      }
+    }
 
-    // 2. Download all PDFs first, then process in batches of 3
-    setStatus('loading', `Downloading ${todayFiles.length} PDFs…`);
+    // Fallback: no JSON files yet — process PDFs with Claude (first-time setup)
+    const pdfFiles = allFiles.filter(f => f.name.endsWith('.pdf'));
+    if (pdfFiles.length === 0) throw new Error('No reports found in OneDrive. Check Power Automate is running.');
+    const todayFiles = getTodaysFiles(pdfFiles);
+    setStatus('loading', `First-time setup: processing ${todayFiles.length} PDFs with Claude. This will be instant next time…`);
+    setProgress(20);
+
     const downloads = await Promise.all(todayFiles.map(async (f) => {
       const dlRes = await graphFetch(f['@microsoft.graph.downloadUrl'] || `https://graph.microsoft.com/v1.0/me/drive/items/${f.id}/content`);
       const blob = await dlRes.blob();
@@ -613,17 +638,15 @@ async function refreshData() {
       return { name: f.name, b64 };
     }));
 
-    // Process with Claude in batches of 3 (rate limit friendly)
     const siteDataArr = [];
     const BATCH = 3;
     for (let i = 0; i < downloads.length; i += BATCH) {
       const batch = downloads.slice(i, i + BATCH);
-      setStatus('loading', `Extracting data ${i+1}–${Math.min(i+BATCH, downloads.length)} of ${downloads.length}…`);
-      setProgress(30 + (50 * i / downloads.length));
+      setStatus('loading', `Processing ${i+1}–${Math.min(i+BATCH, downloads.length)} of ${downloads.length}…`);
+      setProgress(20 + (70 * i / downloads.length));
       const results = await Promise.all(batch.map(d => extractWithClaude(d.b64, d.name)));
       results.forEach(r => { if (r) siteDataArr.push(r); });
-      // Small pause between batches to avoid rate limits
-      if (i + BATCH < downloads.length) await new Promise(r => setTimeout(r, 3000));
+      if (i + BATCH < downloads.length) await new Promise(r => setTimeout(r, 2000));
     }
 
     RAW_DATA = siteDataArr;
