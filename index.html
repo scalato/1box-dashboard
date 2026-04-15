@@ -586,11 +586,16 @@ async function refreshData() {
   try {
     // 1. List files in the folder
     const folderPath = CONFIG.folder.replace(/^\//, '');
-    const listUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/${encodeURIComponent(folderPath)}:/children?$filter=endswith(name,'.pdf')&$orderby=lastModifiedDateTime desc&$top=20`;
-    const listRes = await graphFetch(listUrl);
-    if (!listRes.ok) throw new Error('Cannot access OneDrive folder. Check the folder path in settings.');
+    // Use root children lookup to avoid URL encoding issues with folder names
+    const rootRes = await graphFetch('https://graph.microsoft.com/v1.0/me/drive/root/children');
+    if (!rootRes.ok) throw new Error('Cannot access OneDrive. Check your Microsoft account permissions.');
+    const rootData = await rootRes.json();
+    const folder = (rootData.value||[]).find(f => f.name === folderPath);
+    if (!folder) throw new Error(`Folder "${folderPath}" not found in OneDrive. Check the folder path in settings.`);
+    const listRes = await graphFetch(`https://graph.microsoft.com/v1.0/me/drive/items/${folder.id}/children?$orderby=lastModifiedDateTime desc&$top=50`);
+    if (!listRes.ok) throw new Error('Cannot list OneDrive folder contents.');
     const listData = await listRes.json();
-    const files = listData.value || [];
+    const files = (listData.value || []).filter(f => f.name.endsWith('.pdf'));
 
     if (files.length === 0) throw new Error('No PDF files found in the OneDrive folder. Check Power Automate is running.');
 
