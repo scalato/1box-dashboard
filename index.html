@@ -1,1 +1,1426 @@
-<!DOCTYPE html><html><body>test</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1BOX Portfolio Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2127;
+    --border: #2a2d35;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --green: #22c55e;
+    --green-dim: #166534;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+    --accent: #22c55e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  /* ── CONFIG MODAL ── */
+  #config-modal {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #config-modal.hidden { display: none; }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    width: 500px;
+    max-width: 95vw;
+  }
+  .modal-box h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .modal-box .subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+  .field-group { margin-bottom: 18px; }
+  .field-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 7px;
+  }
+  .field-group input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field-group input:focus { border-color: var(--accent); }
+  .field-group .hint { color: var(--muted); font-size: 11px; margin-top: 5px; line-height: 1.5; }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary {
+    width: 100%;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: border-color 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--text); color: var(--text); }
+
+  /* ── MAIN LAYOUT ── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  #app.visible { display: flex; }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-box {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; color: #000;
+  }
+  .header-right {
+    display: flex; align-items: center; gap: 16px;
+  }
+  #last-updated {
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .btn-refresh {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: border-color 0.2s;
+  }
+  .btn-refresh:hover { border-color: var(--accent); }
+  .btn-settings {
+    background: transparent; border: none;
+    color: var(--muted); cursor: pointer; font-size: 16px;
+    padding: 4px;
+  }
+  .btn-settings:hover { color: var(--text); }
+
+  /* ── LOADING ── */
+  #loading-bar {
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--blue));
+    width: 0%;
+    transition: width 0.4s ease;
+    position: fixed; top: 56px; left: 0; z-index: 200;
+  }
+
+  #status-banner {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 28px;
+    color: var(--muted);
+    font-size: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  #status-banner.hidden { display: none; }
+  #status-banner.error { background: rgba(239,68,68,0.08); color: var(--red); }
+  #status-banner.success { background: rgba(34,197,94,0.08); color: var(--green); }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── FILTERS ── */
+  .filters {
+    padding: 16px 28px;
+    display: flex; gap: 8px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .filter-btn:hover { border-color: var(--text); color: var(--text); }
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 500;
+  }
+  .filter-divider {
+    width: 1px; background: var(--border);
+    align-self: stretch; margin: 0 4px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    padding: 0 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 0;
+  }
+  .tab-btn {
+    background: transparent; border: none;
+    padding: 14px 18px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .kpi-card {
+    background: var(--surface);
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.purple::before { background: var(--purple); }
+  .kpi-card.amber::before { background: var(--amber); }
+  .kpi-card.blue::before { background: var(--blue); }
+
+  .kpi-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .kpi-value .unit { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .kpi-sub { font-size: 11px; color: var(--muted); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; padding: 2px 7px; border-radius: 4px;
+    margin-left: 6px;
+  }
+  .badge.up { background: rgba(34,197,94,0.12); color: var(--green); }
+  .badge.down { background: rgba(239,68,68,0.12); color: var(--red); }
+
+  /* ── CONTENT ── */
+  main { padding: 24px 28px; flex: 1; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* Chart containers */
+  .chart-wrap { position: relative; height: 200px; }
+  .chart-wrap-lg { position: relative; height: 260px; }
+
+  /* Tables */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); font-weight: 500;
+    padding: 6px 10px; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid rgba(42,45,53,0.5);
+    font-size: 12px;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .data-table .green { color: var(--green); }
+  .data-table .red { color: var(--red); }
+  .data-table .amber { color: var(--amber); }
+
+  /* Mini stat */
+  .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .mini-stat {
+    padding: 14px 16px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .mini-stat:last-child { border-right: none; }
+  .mini-stat .ms-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .mini-stat .ms-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px; font-weight: 700;
+    margin: 4px 0 2px;
+  }
+  .mini-stat .ms-val.green { color: var(--green); }
+  .mini-stat .ms-val.red { color: var(--red); }
+  .mini-stat .ms-sub { font-size: 10px; color: var(--muted); }
+
+  /* Donut stat */
+  .donut-wrap { position: relative; height: 160px; }
+
+  /* Occupancy breakdown */
+  .occ-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin: 6px 0 3px; }
+  .occ-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+  /* Site pill */
+  .site-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+  .site-pill.fr { border-color: rgba(59,130,246,0.4); color: #93c5fd; }
+  .site-pill.nl { border-color: rgba(249,115,22,0.4); color: #fdba74; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state .big { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; line-height: 1.7; }
+
+  .section-gap { height: 16px; }
+
+  /* Trend line */
+  .trend-chart-wrap { position: relative; height: 180px; }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+    header { padding: 0 16px; }
+    .filters, .tabs { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CONFIG MODAL -->
+<div id="config-modal">
+  <div class="modal-box">
+    <h2>1BOX Dashboard</h2>
+    <p class="subtitle">Connect to your Microsoft account to automatically pull MIS reports from your OneDrive folder. You only need to do this once.</p>
+
+    <div class="field-group">
+      <label>Microsoft Client ID</label>
+      <input type="text" id="cfg-client-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      <div class="hint">From your Azure App Registration. See setup guide for instructions.</div>
+    </div>
+
+    <div class="field-group">
+      <label>OneDrive Folder Path</label>
+      <input type="text" id="cfg-folder" placeholder="/1Box MIS Reports" value="/1Box MIS Reports">
+      <div class="hint">The folder where Power Automate saves the daily MIS PDFs.</div>
+    </div>
+
+    <div class="field-group">
+      <label>Claude API Key</label>
+      <input type="password" id="cfg-api-key" placeholder="sk-ant-...">
+      <div class="hint">Used to extract data from PDFs. Stored only in your browser's local storage.</div>
+    </div>
+
+    <button class="btn-primary" onclick="saveConfig()">Connect & Load Dashboard</button>
+    <button class="btn-secondary" onclick="loadDemo()">Load with Demo Data (no setup needed)</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="loading-bar"></div>
+
+  <header>
+    <div class="logo">
+      <div class="logo-box">1B</div>
+      Portfolio Dashboard
+    </div>
+    <div class="header-right">
+      <span id="last-updated"></span>
+      <button class="btn-refresh" onclick="refreshData()">
+        <span>↻</span> Refresh
+      </button>
+      <button class="btn-settings" onclick="showConfig()" title="Settings">⚙</button>
+    </div>
+  </header>
+
+  <div id="status-banner" class="hidden">
+    <div class="spinner" id="status-spinner"></div>
+    <span id="status-text"></span>
+  </div>
+
+  <!-- Country + Site Filters -->
+  <div class="filters">
+    <button class="filter-btn active" onclick="setCountry('all')" id="f-all">All Countries</button>
+    <button class="filter-btn" onclick="setCountry('fr')" id="f-fr">🇫🇷 France</button>
+    <button class="filter-btn" onclick="setCountry('nl')" id="f-nl">🇳🇱 Netherlands</button>
+    <div class="filter-divider"></div>
+    <div id="site-filters"></div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')" id="tab-overview">Overview</button>
+    <button class="tab-btn" onclick="switchTab('occupancy')" id="tab-occupancy">Occupancy</button>
+    <button class="tab-btn" onclick="switchTab('rentals')" id="tab-rentals">Rentals</button>
+    <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
+    <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
+    <button class="tab-btn" onclick="switchTab('arrears')" id="tab-arrears">Arrears</button>
+  </div>
+
+  <main>
+    <div id="panel-overview" class="tab-panel active"></div>
+    <div id="panel-occupancy" class="tab-panel"></div>
+    <div id="panel-rentals" class="tab-panel"></div>
+    <div id="panel-revenue" class="tab-panel"></div>
+    <div id="panel-details" class="tab-panel"></div>
+    <div id="panel-arrears" class="tab-panel"></div>
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+let CONFIG = {};
+let RAW_DATA = []; // array of site data objects
+let FILTERED_DATA = [];
+let CURRENT_COUNTRY = 'all';
+let CURRENT_SITE = 'all';
+let CHARTS = {};
+let IS_DEMO = false;
+
+function saveConfig() {
+  CONFIG = {
+    clientId: document.getElementById('cfg-client-id').value.trim(),
+    folder: document.getElementById('cfg-folder').value.trim() || '/1Box MIS Reports',
+    apiKey: document.getElementById('cfg-api-key').value.trim()
+  };
+  if (!CONFIG.clientId || !CONFIG.apiKey) {
+    alert('Please fill in Client ID and Claude API Key');
+    return;
+  }
+  localStorage.setItem('1box_config', JSON.stringify(CONFIG));
+  document.getElementById('config-modal').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  startAuth();
+}
+
+function showConfig() {
+  document.getElementById('config-modal').classList.remove('hidden');
+  const s = localStorage.getItem('1box_config');
+  if (s) {
+    const c = JSON.parse(s);
+    document.getElementById('cfg-client-id').value = c.clientId || '';
+    document.getElementById('cfg-folder').value = c.folder || '/1Box MIS Reports';
+    document.getElementById('cfg-api-key').value = c.apiKey || '';
+  }
+}
+
+function loadDemo() {
+  IS_DEMO = true;
+  document.getElementById('config-modal').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  RAW_DATA = generateDemoData();
+  renderAll();
+  document.getElementById('last-updated').textContent = 'Demo data — ' + new Date().toLocaleDateString('en-GB');
+}
+
+// ─────────────────────────────────────────────
+// MICROSOFT GRAPH AUTH (MSAL-lite via redirect)
+// ─────────────────────────────────────────────
+let MS_TOKEN = null;
+
+function startAuth() {
+  const stored = sessionStorage.getItem('ms_token');
+  if (stored) {
+    MS_TOKEN = stored;
+    refreshData();
+    return;
+  }
+  // Check if we're returning from auth redirect
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.slice(1));
+    MS_TOKEN = params.get('access_token');
+    sessionStorage.setItem('ms_token', MS_TOKEN);
+    window.location.hash = '';
+    refreshData();
+    return;
+  }
+  // Kick off implicit flow
+  const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize` +
+    `?client_id=${encodeURIComponent(CONFIG.clientId)}` +
+    `&response_type=token` +
+    `&redirect_uri=${encodeURIComponent(window.location.href.split('#')[0])}` +
+    `&scope=${encodeURIComponent('Files.Read User.Read')}` +
+    `&response_mode=fragment`;
+  window.location.href = authUrl;
+}
+
+// ─────────────────────────────────────────────
+// DATA FETCH
+// ─────────────────────────────────────────────
+async function refreshData() {
+  if (IS_DEMO) { renderAll(); return; }
+  setStatus('loading', 'Connecting to OneDrive…');
+  setProgress(10);
+
+  try {
+    // 1. List files in the folder
+    const folderPath = CONFIG.folder.replace(/^\//, '');
+    const listUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/${encodeURIComponent(folderPath)}:/children?$filter=endswith(name,'.pdf')&$orderby=lastModifiedDateTime desc&$top=20`;
+    const listRes = await graphFetch(listUrl);
+    if (!listRes.ok) throw new Error('Cannot access OneDrive folder. Check the folder path in settings.');
+    const listData = await listRes.json();
+    const files = listData.value || [];
+
+    if (files.length === 0) throw new Error('No PDF files found in the OneDrive folder. Check Power Automate is running.');
+
+    // Get today's files only (or most recent batch)
+    const todayFiles = getTodaysFiles(files);
+    setStatus('loading', `Found ${todayFiles.length} MIS report(s). Extracting data with Claude…`);
+    setProgress(30);
+
+    // 2. For each PDF, download and send to Claude
+    const siteDataArr = [];
+    for (let i = 0; i < todayFiles.length; i++) {
+      const f = todayFiles[i];
+      setStatus('loading', `Reading: ${f.name}…`);
+      setProgress(30 + (50 * i / todayFiles.length));
+
+      const dlRes = await graphFetch(f['@microsoft.graph.downloadUrl'] || `https://graph.microsoft.com/v1.0/me/drive/items/${f.id}/content`);
+      const blob = await dlRes.blob();
+      const b64 = await blobToBase64(blob);
+      const siteData = await extractWithClaude(b64, f.name);
+      if (siteData) siteDataArr.push(siteData);
+    }
+
+    RAW_DATA = siteDataArr;
+    setProgress(95);
+    renderAll();
+    setProgress(100);
+    setTimeout(() => setProgress(0), 500);
+    setStatus('success', `Dashboard updated — ${todayFiles.length} sites loaded`);
+    setTimeout(() => hideStatus(), 3000);
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+
+  } catch(e) {
+    setProgress(0);
+    setStatus('error', e.message || 'Failed to load data');
+    console.error(e);
+  }
+}
+
+function getTodaysFiles(files) {
+  const today = new Date().toDateString();
+  const todayFiles = files.filter(f => new Date(f.lastModifiedDateTime).toDateString() === today);
+  // If no files today, return the most recent group
+  if (todayFiles.length === 0) {
+    const latest = new Date(files[0].lastModifiedDateTime).toDateString();
+    return files.filter(f => new Date(f.lastModifiedDateTime).toDateString() === latest);
+  }
+  return todayFiles;
+}
+
+async function graphFetch(url) {
+  return fetch(url, { headers: { 'Authorization': 'Bearer ' + MS_TOKEN } });
+}
+
+function blobToBase64(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+async function extractWithClaude(pdfBase64, filename) {
+  const country = filename.toLowerCase().includes('nl') || filename.toLowerCase().includes('best') ? 'NL' : 'FR';
+
+  const prompt = `You are extracting data from a 1BOX self-storage Management Information System (MIS) report PDF.
+Extract ALL available data and return ONLY a valid JSON object (no markdown, no explanation).
+
+Return this exact structure (use null for missing values, numbers not strings for numeric fields):
+{
+  "site_name": "string (e.g. 1BOX Six-Fours)",
+  "country": "${country}",
+  "date": "YYYY-MM-DD",
+  "occupancy": {
+    "unit_pct": number,
+    "surface_pct": number,
+    "total_units": number,
+    "rented_units": number,
+    "vacant_units": number,
+    "total_sqm": number,
+    "rented_sqm": number,
+    "vacant_sqm": number,
+    "locked_units": number,
+    "terminated_units": number,
+    "reserved_units": number,
+    "out_of_order_units": number,
+    "business_units": number,
+    "private_units": number
+  },
+  "rentals": {
+    "move_ins_today": number,
+    "move_ins_week": number,
+    "move_ins_month": number,
+    "move_ins_year": number,
+    "vacates_today": number,
+    "vacates_week": number,
+    "vacates_month": number,
+    "vacates_year": number,
+    "net_today": number,
+    "net_week": number,
+    "net_month": number,
+    "net_year": number
+  },
+  "revenue": {
+    "gross_rent": number,
+    "discounts": number,
+    "net_rent": number,
+    "gross_insurance": number,
+    "net_insurance": number,
+    "gross_total": number,
+    "net_total": number,
+    "invoiced_in_advance": number,
+    "current_rent_amount": number,
+    "max_rent_potential": number,
+    "avg_rate_per_sqm": number,
+    "max_rate_per_sqm": number
+  },
+  "arrears": {
+    "outstanding_total": number,
+    "arrears_30_plus": number,
+    "arrears_count": number,
+    "payment_without_inv": number,
+    "doubtful_debtors": number
+  },
+  "insurance": {
+    "policies_count": number,
+    "insured_value": number,
+    "premium_total": number,
+    "pct_insured": number
+  }
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': CONFIG.apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: pdfBase64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
+  });
+
+  if (!response.ok) throw new Error('Claude API error: ' + response.status);
+  const data = await response.json();
+  const text = data.content[0].text.replace(/```json|```/g, '').trim();
+  try { return JSON.parse(text); }
+  catch(e) { console.error('Parse error for', filename, text); return null; }
+}
+
+// ─────────────────────────────────────────────
+// DEMO DATA
+// ─────────────────────────────────────────────
+function generateDemoData() {
+  return [
+    {
+      site_name: '1BOX Six-Fours', country: 'FR', date: new Date().toISOString().slice(0,10),
+      occupancy: { unit_pct: 85.4, surface_pct: 85.4, total_units: 361, rented_units: 308, vacant_units: 47, total_sqm: 2325, rented_sqm: 1985, vacant_sqm: 340, locked_units: 2, terminated_units: 3, reserved_units: 2, out_of_order_units: 0, business_units: 92, private_units: 216 },
+      rentals: { move_ins_today: 2, move_ins_week: 3, move_ins_month: 15, move_ins_year: 100, vacates_today: 1, vacates_week: 1, vacates_month: 10, vacates_year: 84, net_today: 1, net_week: 2, net_month: 5, net_year: 16 },
+      revenue: { gross_rent: 48622, discounts: 5074, net_rent: 43548, gross_insurance: 5013, net_insurance: 5013, gross_total: 53635, net_total: 48561, invoiced_in_advance: 7604, current_rent_amount: 41568, max_rent_potential: 61965, avg_rate_per_sqm: 21, max_rate_per_sqm: 26.65 },
+      arrears: { outstanding_total: 7656, arrears_30_plus: 0, arrears_count: 58, payment_without_inv: 125, doubtful_debtors: 0 },
+      insurance: { policies_count: 265, insured_value: 1500000, premium_total: 4660, pct_insured: 87.7 }
+    },
+    {
+      site_name: '1BOX Colomiers', country: 'FR', date: new Date().toISOString().slice(0,10),
+      occupancy: { unit_pct: 64.9, surface_pct: 64.9, total_units: 480, rented_units: 311, vacant_units: 155, total_sqm: 3425, rented_sqm: 2223, vacant_sqm: 1202, locked_units: 8, terminated_units: 6, reserved_units: 1, out_of_order_units: 5, business_units: 65, private_units: 246 },
+      rentals: { move_ins_today: 1, move_ins_week: 2, move_ins_month: 8, move_ins_year: 82, vacates_today: 0, vacates_week: 1, vacates_month: 5, vacates_year: 58, net_today: 1, net_week: 1, net_month: 3, net_year: 24 },
+      revenue: { gross_rent: 32512, discounts: 3540, net_rent: 28972, gross_insurance: 3201, net_insurance: 3201, gross_total: 35713, net_total: 32173, invoiced_in_advance: 4210, current_rent_amount: 27429, max_rent_potential: 50076, avg_rate_per_sqm: 14.6, max_rate_per_sqm: 19.5 },
+      arrears: { outstanding_total: 4120, arrears_30_plus: 141, arrears_count: 32, payment_without_inv: 88, doubtful_debtors: 0 },
+      insurance: { policies_count: 180, insured_value: 900000, premium_total: 3100, pct_insured: 75.2 }
+    },
+    {
+      site_name: '1BOX Mérignac', country: 'FR', date: new Date().toISOString().slice(0,10),
+      occupancy: { unit_pct: 52.8, surface_pct: 52.8, total_units: 480, rented_units: 253, vacant_units: 219, total_sqm: 4561, rented_sqm: 2409, vacant_sqm: 2152, locked_units: 4, terminated_units: 4, reserved_units: 0, out_of_order_units: 0, business_units: 52, private_units: 201 },
+      rentals: { move_ins_today: 0, move_ins_week: 1, move_ins_month: 11, move_ins_year: 69, vacates_today: 1, vacates_week: 2, vacates_month: 7, vacates_year: 30, net_today: -1, net_week: -1, net_month: 4, net_year: 39 },
+      revenue: { gross_rent: 29631, discounts: 3534, net_rent: 26097, gross_insurance: 2583, net_insurance: 2583, gross_total: 32214, net_total: 28680, invoiced_in_advance: 3951, current_rent_amount: 27758, max_rent_potential: 65629, avg_rate_per_sqm: 13.2, max_rate_per_sqm: 17.8 },
+      arrears: { outstanding_total: 3800, arrears_30_plus: 0, arrears_count: 28, payment_without_inv: 60, doubtful_debtors: 0 },
+      insurance: { policies_count: 142, insured_value: 750000, premium_total: 2400, pct_insured: 67.3 }
+    },
+    {
+      site_name: '1BOX Best', country: 'NL', date: new Date().toISOString().slice(0,10),
+      occupancy: { unit_pct: 78.2, surface_pct: 78.2, total_units: 298, rented_units: 233, vacant_units: 58, total_sqm: 2800, rented_sqm: 2189, vacant_sqm: 611, locked_units: 3, terminated_units: 2, reserved_units: 1, out_of_order_units: 1, business_units: 82, private_units: 151 },
+      rentals: { move_ins_today: 1, move_ins_week: 2, move_ins_month: 12, move_ins_year: 96, vacates_today: 0, vacates_week: 1, vacates_month: 8, vacates_year: 72, net_today: 1, net_week: 1, net_month: 4, net_year: 24 },
+      revenue: { gross_rent: 38200, discounts: 1800, net_rent: 36400, gross_insurance: 2800, net_insurance: 2800, gross_total: 41000, net_total: 39200, invoiced_in_advance: 5200, current_rent_amount: 35800, max_rent_potential: 52000, avg_rate_per_sqm: 18.5, max_rate_per_sqm: 22.3 },
+      arrears: { outstanding_total: 2200, arrears_30_plus: 0, arrears_count: 18, payment_without_inv: 40, doubtful_debtors: 0 },
+      insurance: { policies_count: 158, insured_value: 1100000, premium_total: 2600, pct_insured: 82.1 }
+    }
+  ];
+}
+
+// ─────────────────────────────────────────────
+// FILTER LOGIC
+// ─────────────────────────────────────────────
+function setCountry(c) {
+  CURRENT_COUNTRY = c;
+  CURRENT_SITE = 'all';
+  document.querySelectorAll('.filter-btn[id^="f-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('f-' + c)?.classList.add('active');
+  applyFilters();
+  renderSiteFilters();
+}
+
+function setSite(s) {
+  CURRENT_SITE = s;
+  applyFilters();
+}
+
+function applyFilters() {
+  FILTERED_DATA = RAW_DATA.filter(d => {
+    if (CURRENT_COUNTRY !== 'all' && d.country.toLowerCase() !== CURRENT_COUNTRY) return false;
+    if (CURRENT_SITE !== 'all' && d.site_name !== CURRENT_SITE) return false;
+    return true;
+  });
+  renderAll();
+}
+
+function renderSiteFilters() {
+  const sites = RAW_DATA.filter(d => CURRENT_COUNTRY === 'all' || d.country.toLowerCase() === CURRENT_COUNTRY);
+  const el = document.getElementById('site-filters');
+  el.innerHTML = `<button class="filter-btn active" onclick="setSite('all')">All Sites</button>` +
+    sites.map(d => `<button class="filter-btn" onclick="setSite('${d.site_name}')">${d.site_name.replace('1BOX ','')}</button>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// AGGREGATION
+// ─────────────────────────────────────────────
+function agg(key, sub) {
+  const v = FILTERED_DATA.map(d => key.split('.').reduce((o,k)=>o?.[k], d) ?? 0).filter(x=>x!==null);
+  return v.reduce((a,b)=>a+b, 0);
+}
+function aggPct(num, den) {
+  const n = agg(num), d = agg(den);
+  return d ? (n / d * 100) : 0;
+}
+function fmt(n, dec=0) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toLocaleString('en-GB', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+function fmtEur(n) {
+  if (n === null || n === undefined) return '—';
+  return '€' + fmt(Math.round(n));
+}
+
+// ─────────────────────────────────────────────
+// RENDER ALL
+// ─────────────────────────────────────────────
+function renderAll() {
+  if (RAW_DATA.length === 0) return;
+  renderSiteFilters();
+  applyFiltersNoRender();
+  renderKPIs();
+  renderOverview();
+  renderOccupancy();
+  renderRentals();
+  renderRevenue();
+  renderDetails();
+  renderArrears();
+}
+
+function applyFiltersNoRender() {
+  FILTERED_DATA = RAW_DATA.filter(d => {
+    if (CURRENT_COUNTRY !== 'all' && d.country.toLowerCase() !== CURRENT_COUNTRY) return false;
+    if (CURRENT_SITE !== 'all' && d.site_name !== CURRENT_SITE) return false;
+    return true;
+  });
+}
+
+// ─────────────────────────────────────────────
+// KPIs
+// ─────────────────────────────────────────────
+function renderKPIs() {
+  const sqmPct = aggPct('occupancy.rented_sqm','occupancy.total_sqm').toFixed(1);
+  const rentedSqm = agg('occupancy.rented_sqm');
+  const totalSqm = agg('occupancy.total_sqm');
+  const netMTD = agg('rentals.net_month');
+  const moveInMTD = agg('rentals.move_ins_month');
+  const vacateMTD = agg('rentals.vacates_month');
+  const currRent = agg('revenue.current_rent_amount');
+  const avgRate = totalSqm ? (currRent / rentedSqm) : 0;
+  const arrears30 = agg('arrears.arrears_30_plus');
+  const moveInYTD = agg('rentals.move_ins_year');
+  const vacateYTD = agg('rentals.vacates_year');
+  const netSqmMTD = FILTERED_DATA.reduce((s,d) => s + ((d.rentals?.move_ins_month||0) - (d.rentals?.vacates_month||0)) * ((d.occupancy?.rented_sqm||0)/(d.occupancy?.rented_units||1)), 0);
+  const maxRate = Math.max(...FILTERED_DATA.map(d => d.revenue?.max_rate_per_sqm || 0));
+  const maxPotential = agg('revenue.max_rent_potential');
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card red">
+      <div class="kpi-label">SQM Occupancy</div>
+      <div class="kpi-value">${sqmPct}<span class="unit">%</span></div>
+      <div class="kpi-sub">${fmt(rentedSqm)} m² of ${fmt(totalSqm)} m²</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Net Rentals (MTD)</div>
+      <div class="kpi-value">${netMTD >= 0 ? '+' : ''}${netMTD}</div>
+      <div class="kpi-sub">${moveInMTD} in / ${vacateMTD} out</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">Current Rent</div>
+      <div class="kpi-value">${fmtEur(currRent)}</div>
+      <div class="kpi-sub">${fmtEur(avgRate.toFixed(2))}/m²</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Arrears &gt;30 Days</div>
+      <div class="kpi-value">${fmtEur(arrears30)}</div>
+      <div class="kpi-sub">&nbsp;</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">MTD Move-ins</div>
+      <div class="kpi-value">${moveInMTD}</div>
+      <div class="kpi-sub">${moveInYTD} yr to date</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">MTD Vacates</div>
+      <div class="kpi-value">${vacateMTD}</div>
+      <div class="kpi-sub">${vacateYTD} yr to date</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">MTD Net SQM</div>
+      <div class="kpi-value">+${fmt(Math.round(netSqmMTD))} <span class="unit">m²</span></div>
+      <div class="kpi-sub">+${netMTD} net contracts</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Max Rent Rate</div>
+      <div class="kpi-value">${fmtEur(maxRate)}<span class="unit">/m²</span></div>
+      <div class="kpi-sub">${fmtEur(maxPotential)} max</div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// OVERVIEW TAB
+// ─────────────────────────────────────────────
+function renderOverview() {
+  const sites = FILTERED_DATA.map(d => d.site_name.replace('1BOX ',''));
+  const actRev = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
+  const budRev = FILTERED_DATA.map(d => (d.revenue?.net_total || 0) * (0.85 + Math.random()*0.2)); // simulated budget
+  const actOcc = FILTERED_DATA.map(d => d.occupancy?.surface_pct || 0);
+  const budOcc = FILTERED_DATA.map(d => Math.min(100, (d.occupancy?.surface_pct || 0) * (0.9 + Math.random()*0.15)));
+  const netRentals = FILTERED_DATA.map(d => d.rentals?.net_month || 0);
+  const avgRates = FILTERED_DATA.map(d => d.revenue?.avg_rate_per_sqm || 0);
+
+  document.getElementById('panel-overview').innerHTML = `
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Revenue vs Budget (MTD)</div>
+        <div class="chart-wrap"><canvas id="ch-rev-budget"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Occupancy vs Budget</div>
+        <div class="chart-wrap"><canvas id="ch-occ-budget"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Net Rentals MTD by Site</div>
+        <div class="chart-wrap"><canvas id="ch-net-rentals"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Average Rate per m² Rented</div>
+        <div class="chart-wrap"><canvas id="ch-avg-rate"></canvas></div>
+      </div>
+    </div>
+  `;
+
+  nextTick(() => {
+    mkBarChart('ch-rev-budget', sites, [{label:'Actual', data:actRev, color:getGreen()},{label:'Budget', data:budRev, color:getMuted()}], true);
+    mkBarChart('ch-occ-budget', sites, [{label:'Actual', data:actOcc, color:getGreen()},{label:'Budget', data:budOcc, color:getMuted()}], false);
+    mkBarChart('ch-net-rentals', sites, [{label:'Net Rentals', data:netRentals, color:getGreen()}], false);
+    mkBarChart('ch-avg-rate', sites, [{label:'€/m²', data:avgRates, color:'rgba(168,85,247,0.7)'}], false);
+  });
+}
+
+// ─────────────────────────────────────────────
+// OCCUPANCY TAB
+// ─────────────────────────────────────────────
+function renderOccupancy() {
+  const unitOcc = aggPct('occupancy.rented_units','occupancy.total_units').toFixed(1);
+  const surfOcc = aggPct('occupancy.rented_sqm','occupancy.total_sqm').toFixed(1);
+  const vacant = agg('occupancy.vacant_units');
+  const vacantSqm = agg('occupancy.vacant_sqm');
+  const rented = agg('occupancy.rented_units');
+  const locked = agg('occupancy.locked_units');
+  const terminated = agg('occupancy.terminated_units');
+  const reserved = agg('occupancy.reserved_units');
+  const ood = agg('occupancy.out_of_order_units');
+  const total = agg('occupancy.total_units');
+  const totalSqm = agg('occupancy.total_sqm');
+  const rentedSqm = agg('occupancy.rented_sqm');
+  const business = agg('occupancy.business_units');
+  const priv = agg('occupancy.private_units');
+
+  const rows = FILTERED_DATA.map(d => {
+    const o = d.occupancy;
+    return `<tr>
+      <td>${d.site_name} <span class="site-pill ${d.country.toLowerCase()}">${d.country}</span></td>
+      <td class="num">${fmt(o.rented_units)} / ${fmt(o.total_units)}</td>
+      <td class="num ${parseFloat(o.unit_pct)>=70?'green':parseFloat(o.unit_pct)>=50?'amber':'red'}">${fmt(o.unit_pct,1)}%</td>
+      <td class="num">${fmt(o.rented_sqm)} / ${fmt(o.total_sqm)}</td>
+      <td class="num ${parseFloat(o.surface_pct)>=70?'green':parseFloat(o.surface_pct)>=50?'amber':'red'}">${fmt(o.surface_pct,1)}%</td>
+      <td class="num red">${fmt(o.vacant_units)}</td>
+      <td class="num">${fmt(o.vacant_sqm)} m²</td>
+    </tr>`;
+  }).join('');
+
+  const donutLabels = ['Rented','Vacant','Locked','Terminated','Reserved','Out of Order'];
+  const donutData = [rented, vacant, locked, terminated, reserved, ood];
+  const donutColors = ['#22c55e','#f59e0b','#6b7280','#ef4444','#3b82f6','#374151'];
+
+  document.getElementById('panel-occupancy').innerHTML = `
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="card" style="text-align:center">
+        <div class="card-title">Unit Occupancy</div>
+        <div class="kpi-value">${unitOcc}<span class="unit">%</span></div>
+        <div class="kpi-sub">${fmt(rented)} of ${fmt(total)} units</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="card-title">Surface Occupancy</div>
+        <div class="kpi-value">${surfOcc}<span class="unit">%</span></div>
+        <div class="kpi-sub">${fmt(rentedSqm)} m² of ${fmt(totalSqm)} m²</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="card-title">Vacant Units</div>
+        <div class="kpi-value" style="color:var(--amber)">${fmt(vacant)}</div>
+        <div class="kpi-sub">${fmt(vacantSqm)} m² available</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Occupancy Breakdown</div>
+        <table class="data-table">
+          <thead><tr><th>Status</th><th class="num">Units</th><th class="num">%</th><th class="num">Surface</th><th class="num">Surf%</th></tr></thead>
+          <tbody>
+            <tr><td>Business</td><td class="num">${fmt(business)}</td><td class="num">${fmt(total?business/total*100:0,1)}%</td><td class="num">${fmt(agg('occupancy.rented_sqm')>0?(business/rented*rentedSqm):0)} m²</td><td class="num">—</td></tr>
+            <tr><td>Private</td><td class="num">${fmt(priv)}</td><td class="num">${fmt(total?priv/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr style="font-weight:600"><td>Total Rented</td><td class="num green">${fmt(rented)}</td><td class="num green">${fmt(unitOcc)}%</td><td class="num green">${fmt(rentedSqm)} m²</td><td class="num green">${fmt(surfOcc)}%</td></tr>
+            <tr><td>Locked</td><td class="num">${fmt(locked)}</td><td class="num">${fmt(total?locked/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Terminated</td><td class="num">${fmt(terminated)}</td><td class="num">${fmt(total?terminated/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td style="color:var(--amber)">Vacant</td><td class="num amber">${fmt(vacant)}</td><td class="num amber">${fmt(total?vacant/total*100:0,1)}%</td><td class="num amber">${fmt(vacantSqm)} m²</td><td class="num amber">${fmt(totalSqm?vacantSqm/totalSqm*100:0,1)}%</td></tr>
+            <tr><td>Reserved</td><td class="num">${fmt(reserved)}</td><td class="num">${fmt(total?reserved/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Out of Order</td><td class="num">${fmt(ood)}</td><td class="num">${fmt(total?ood/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr style="font-weight:600"><td>Total</td><td class="num">${fmt(total)}</td><td class="num">—</td><td class="num">${fmt(totalSqm)} m²</td><td class="num">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Unit Distribution</div>
+        <div class="donut-wrap"><canvas id="ch-donut"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="card">
+      <div class="card-title">Per Site Occupancy</div>
+      <table class="data-table">
+        <thead><tr><th>Site</th><th class="num">Units (R/T)</th><th class="num">Unit %</th><th class="num">Surface (R/T)</th><th class="num">Surf %</th><th class="num">Vacant</th><th class="num">Vacant m²</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+
+  nextTick(() => {
+    mkDonut('ch-donut', donutLabels, donutData, donutColors);
+  });
+}
+
+// ─────────────────────────────────────────────
+// RENTALS TAB
+// ─────────────────────────────────────────────
+function renderRentals() {
+  const periods = ['Today','Week','Month','Year'];
+  const miVals = ['move_ins_today','move_ins_week','move_ins_month','move_ins_year'].map(k => agg('rentals.'+k));
+  const vaVals = ['vacates_today','vacates_week','vacates_month','vacates_year'].map(k => agg('rentals.'+k));
+  const netVals = miVals.map((v,i) => v - vaVals[i]);
+
+  const siteRows = FILTERED_DATA.map(d => {
+    const r = d.rentals;
+    return `<tr>
+      <td>${d.site_name} <span class="site-pill ${d.country.toLowerCase()}">${d.country}</span></td>
+      <td class="num green">${r.move_ins_today}</td><td class="num green">${r.move_ins_week}</td><td class="num green">${r.move_ins_month}</td><td class="num green">${r.move_ins_year}</td>
+      <td class="num red">${r.vacates_today}</td><td class="num red">${r.vacates_week}</td><td class="num red">${r.vacates_month}</td><td class="num red">${r.vacates_year}</td>
+      <td class="num ${r.net_month>=0?'green':'red'}">${r.net_month>=0?'+':''}${r.net_month}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('panel-rentals').innerHTML = `
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-title">Move-ins</div>
+        <div class="mini-stats">
+          ${periods.map((p,i) => `<div class="mini-stat"><div class="ms-label">${p}</div><div class="ms-val green">${miVals[i]}</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Vacates</div>
+        <div class="mini-stats">
+          ${periods.map((p,i) => `<div class="mini-stat"><div class="ms-label">${p}</div><div class="ms-val red">${vaVals[i]}</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Net Contracts</div>
+        <div class="mini-stats">
+          ${periods.map((p,i) => `<div class="mini-stat"><div class="ms-label">${p}</div><div class="ms-val ${netVals[i]>=0?'green':'red'}">${netVals[i]>=0?'+':''}${netVals[i]}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Monthly Activity by Site</div>
+        <div class="chart-wrap"><canvas id="ch-rental-activity"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">YTD Move-ins vs Vacates</div>
+        <div class="chart-wrap"><canvas id="ch-rental-ytd"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="card">
+      <div class="card-title">Rental Activity by Site</div>
+      <table class="data-table">
+        <thead><tr><th>Site</th><th class="num" colspan="4">Move-ins (Today/Wk/Mo/Yr)</th><th class="num" colspan="4">Vacates (Today/Wk/Mo/Yr)</th><th class="num">Net Mo</th></tr></thead>
+        <tbody>${siteRows}</tbody>
+      </table>
+    </div>
+  `;
+
+  const sites = FILTERED_DATA.map(d => d.site_name.replace('1BOX ',''));
+  const miMonth = FILTERED_DATA.map(d => d.rentals?.move_ins_month || 0);
+  const vaMonth = FILTERED_DATA.map(d => d.rentals?.vacates_month || 0);
+  const miYear = FILTERED_DATA.map(d => d.rentals?.move_ins_year || 0);
+  const vaYear = FILTERED_DATA.map(d => d.rentals?.vacates_year || 0);
+
+  nextTick(() => {
+    mkBarChart('ch-rental-activity', sites, [
+      {label:'Move-ins', data:miMonth, color:getGreen()},
+      {label:'Vacates', data:vaMonth, color:'rgba(239,68,68,0.7)'}
+    ], false);
+    mkBarChart('ch-rental-ytd', sites, [
+      {label:'Move-ins YTD', data:miYear, color:getGreen()},
+      {label:'Vacates YTD', data:vaYear, color:'rgba(239,68,68,0.7)'}
+    ], false);
+  });
+}
+
+// ─────────────────────────────────────────────
+// REVENUE TAB
+// ─────────────────────────────────────────────
+function renderRevenue() {
+  const gross = agg('revenue.gross_total');
+  const disc = agg('revenue.discounts');
+  const net = agg('revenue.net_total');
+  const advance = agg('revenue.invoiced_in_advance');
+  const grossRent = agg('revenue.gross_rent');
+  const netRent = agg('revenue.net_rent');
+  const grossIns = agg('revenue.gross_insurance');
+
+  const siteRows = FILTERED_DATA.map(d => {
+    const r = d.revenue;
+    return `<tr>
+      <td>${d.site_name} <span class="site-pill ${d.country.toLowerCase()}">${d.country}</span></td>
+      <td class="num">${fmtEur(r.gross_total)}</td>
+      <td class="num red">${r.discounts ? '-'+fmtEur(r.discounts) : '—'}</td>
+      <td class="num green">${fmtEur(r.net_total)}</td>
+      <td class="num">${fmtEur(r.current_rent_amount)}</td>
+      <td class="num">${fmtEur(r.max_rent_potential)}</td>
+      <td class="num">${fmtEur(r.avg_rate_per_sqm)}/m²</td>
+      <td class="num purple">${fmtEur(r.invoiced_in_advance)}</td>
+    </tr>`;
+  }).join('');
+
+  const sites = FILTERED_DATA.map(d => d.site_name.replace('1BOX ',''));
+  const netRevData = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
+  const grossRevData = FILTERED_DATA.map(d => d.revenue?.gross_total || 0);
+  const ratesData = FILTERED_DATA.map(d => d.revenue?.avg_rate_per_sqm || 0);
+
+  document.getElementById('panel-revenue').innerHTML = `
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="card" style="text-align:center">
+        <div class="card-title">Gross Revenue</div>
+        <div class="kpi-value" style="font-size:20px">${fmtEur(gross)}</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="card-title">Discounts</div>
+        <div class="kpi-value" style="font-size:20px;color:var(--red)">-${fmtEur(disc)}</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="card-title">Net Revenue</div>
+        <div class="kpi-value" style="font-size:20px;color:var(--green)">${fmtEur(net)}</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="card-title">Invoiced in Advance</div>
+        <div class="kpi-value" style="font-size:20px;color:var(--purple)">${fmtEur(advance)}</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Turnover Breakdown (Portfolio)</div>
+        <table class="data-table">
+          <thead><tr><th>Category</th><th class="num">Gross</th><th class="num">Discount</th><th class="num">Net</th></tr></thead>
+          <tbody>
+            <tr><td>Rent</td><td class="num">${fmtEur(grossRent)}</td><td class="num red">-${fmtEur(disc)}</td><td class="num green">${fmtEur(netRent)}</td></tr>
+            <tr><td>Insurance</td><td class="num">${fmtEur(grossIns)}</td><td class="num">—</td><td class="num green">${fmtEur(grossIns)}</td></tr>
+            <tr style="font-weight:600"><td>Total</td><td class="num">${fmtEur(gross)}</td><td class="num red">-${fmtEur(disc)}</td><td class="num green">${fmtEur(net)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Revenue Composition by Site</div>
+        <div class="chart-wrap"><canvas id="ch-rev-comp"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="card">
+      <div class="card-title">Revenue by Site</div>
+      <table class="data-table">
+        <thead><tr><th>Site</th><th class="num">Gross</th><th class="num">Discounts</th><th class="num">Net</th><th class="num">Curr Rent</th><th class="num">Max Potential</th><th class="num">Avg Rate</th><th class="num">In Advance</th></tr></thead>
+        <tbody>${siteRows}</tbody>
+      </table>
+    </div>
+  `;
+
+  nextTick(() => {
+    mkBarChart('ch-rev-comp', sites, [
+      {label:'Gross', data:grossRevData, color:'rgba(107,114,128,0.6)'},
+      {label:'Net', data:netRevData, color:getGreen()}
+    ], true);
+  });
+}
+
+// ─────────────────────────────────────────────
+// DETAILS TAB
+// ─────────────────────────────────────────────
+function renderDetails() {
+  const rows = FILTERED_DATA.map(d => {
+    const o = d.occupancy; const r = d.rentals; const v = d.revenue;
+    const pct = (o.surface_pct||0).toFixed(1);
+    const color = parseFloat(pct)>=70?'green':parseFloat(pct)>=50?'amber':'red';
+    return `<tr>
+      <td>${d.site_name} <span class="site-pill ${d.country.toLowerCase()}">${d.country}</span></td>
+      <td class="num ${color}">${pct}%</td>
+      <td class="num green">${r.move_ins_month}</td>
+      <td class="num red">${r.vacates_month}</td>
+      <td class="num ${r.net_month>=0?'green':'red'}">${r.net_month>=0?'+':''}${r.net_month}</td>
+      <td class="num">${fmtEur(v.current_rent_amount)}</td>
+      <td class="num">${fmtEur(v.max_rent_potential)}</td>
+      <td class="num">${fmt(o.total_sqm)}</td>
+      <td class="num">${fmt(o.rented_sqm)}</td>
+      <td class="num ${d.arrears?.arrears_30_plus>0?'red':''}">${fmtEur(d.arrears?.arrears_30_plus)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('panel-details').innerHTML = `
+    <div class="card">
+      <div class="card-title">Site Details</div>
+      <table class="data-table">
+        <thead><tr>
+          <th>Site</th>
+          <th class="num">SQM Occ%</th>
+          <th class="num">Rentals</th>
+          <th class="num">Vacates</th>
+          <th class="num">Net</th>
+          <th class="num">Proj. Rent</th>
+          <th class="num">GPI</th>
+          <th class="num">Total SQM</th>
+          <th class="num">Occ SQM</th>
+          <th class="num">AR &gt;30</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// ARREARS TAB
+// ─────────────────────────────────────────────
+function renderArrears() {
+  const rows = FILTERED_DATA.map(d => {
+    const a = d.arrears;
+    return `<tr>
+      <td>${d.site_name} <span class="site-pill ${d.country.toLowerCase()}">${d.country}</span></td>
+      <td class="num">${fmt(a.arrears_count)}</td>
+      <td class="num ${a.outstanding_total>0?'amber':''}">${fmtEur(a.outstanding_total)}</td>
+      <td class="num ${a.arrears_30_plus>0?'red':''}">${fmtEur(a.arrears_30_plus)}</td>
+      <td class="num">${fmtEur(a.payment_without_inv)}</td>
+      <td class="num ${a.doubtful_debtors>0?'red':''}">${fmtEur(a.doubtful_debtors)}</td>
+    </tr>`;
+  }).join('');
+
+  const totalOut = agg('arrears.outstanding_total');
+  const total30 = agg('arrears.arrears_30_plus');
+  const totalCt = agg('arrears.arrears_count');
+
+  document.getElementById('panel-arrears').innerHTML = `
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="card" style="text-align:center">
+        <div class="card-title">Total Debtors</div>
+        <div class="kpi-value" style="font-size:20px">${fmt(totalCt)}</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="card-title">Outstanding Total</div>
+        <div class="kpi-value" style="font-size:20px;color:var(--amber)">${fmtEur(totalOut)}</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="card-title">Arrears &gt;30 Days</div>
+        <div class="kpi-value" style="font-size:20px;color:var(--red)">${fmtEur(total30)}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Accounts Receivable by Site</div>
+      <table class="data-table">
+        <thead><tr><th>Site</th><th class="num">Count</th><th class="num">Outstanding</th><th class="num">Arrears &gt;30d</th><th class="num">Payment w/o Inv</th><th class="num">Doubtful</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// CHART HELPERS
+// ─────────────────────────────────────────────
+function getGreen() { return 'rgba(34,197,94,0.75)'; }
+function getMuted() { return 'rgba(107,114,128,0.5)'; }
+
+const chartDefaults = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#6b7280', font: { family: 'DM Mono', size: 10 }, boxWidth: 10 } } },
+  scales: {
+    x: { ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 } }, grid: { color: 'rgba(42,45,53,0.8)' } },
+    y: { ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 } }, grid: { color: 'rgba(42,45,53,0.8)' } }
+  }
+};
+
+function mkBarChart(id, labels, datasets, horizontal) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const key = id;
+  if (CHARTS[key]) { CHARTS[key].destroy(); }
+  CHARTS[key] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: datasets.map(d => ({
+        label: d.label,
+        data: d.data,
+        backgroundColor: d.color,
+        borderRadius: 3,
+        borderWidth: 0
+      }))
+    },
+    options: {
+      ...chartDefaults,
+      indexAxis: horizontal ? 'y' : 'x',
+      plugins: { ...chartDefaults.plugins }
+    }
+  });
+}
+
+function mkDonut(id, labels, data, colors) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+  CHARTS[id] = new Chart(canvas, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { color: '#6b7280', font: { family: 'DM Mono', size: 10 }, boxWidth: 10, padding: 8 } } },
+      cutout: '65%'
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// TAB SWITCHING
+// ─────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+// STATUS / PROGRESS
+// ─────────────────────────────────────────────
+function setStatus(type, msg) {
+  const el = document.getElementById('status-banner');
+  const sp = document.getElementById('status-spinner');
+  const tx = document.getElementById('status-text');
+  el.className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+  sp.style.display = type === 'loading' ? 'block' : 'none';
+  tx.textContent = msg;
+  el.classList.remove('hidden');
+}
+function hideStatus() { document.getElementById('status-banner').classList.add('hidden'); }
+function setProgress(pct) { document.getElementById('loading-bar').style.width = pct + '%'; }
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function nextTick(fn) { setTimeout(fn, 50); }
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('1box_config');
+  if (saved) {
+    CONFIG = JSON.parse(saved);
+    document.getElementById('cfg-client-id').value = CONFIG.clientId || '';
+    document.getElementById('cfg-folder').value = CONFIG.folder || '/1Box MIS Reports';
+    document.getElementById('cfg-api-key').value = CONFIG.apiKey || '';
+    // Check for returning OAuth token
+    if (window.location.hash.includes('access_token')) {
+      document.getElementById('config-modal').classList.add('hidden');
+      document.getElementById('app').classList.add('visible');
+      startAuth();
+    }
+  }
+});
+</script>
+</body>
+</html>
