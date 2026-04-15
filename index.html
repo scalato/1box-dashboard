@@ -549,7 +549,7 @@ function loadDemo() {
 let MS_TOKEN = null;
 
 function startAuth() {
-  const stored = sessionStorage.getItem('ms_token');
+  const stored = localStorage.getItem('ms_token');
   if (stored) {
     MS_TOKEN = stored;
     refreshData();
@@ -560,7 +560,7 @@ function startAuth() {
   if (hash.includes('access_token')) {
     const params = new URLSearchParams(hash.slice(1));
     MS_TOKEN = params.get('access_token');
-    sessionStorage.setItem('ms_token', MS_TOKEN);
+    localStorage.setItem('ms_token', MS_TOKEN);
     window.location.hash = '';
     refreshData();
     return;
@@ -629,8 +629,8 @@ async function refreshData() {
 
   } catch(e) {
     setProgress(0);
-    setStatus('error', e.message || 'Failed to load data');
-    console.error(e);
+    setStatus('error', e.message || 'Failed to fetch');
+    console.error('Dashboard error:', e);
   }
 }
 
