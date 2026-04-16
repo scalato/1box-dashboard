@@ -666,12 +666,14 @@ async function refreshData() {
 }
 
 function getTodaysFiles(files) {
+  if (!files || files.length === 0) return [];
+  const validFiles = files.filter(f => f && f.lastModifiedDateTime);
+  if (validFiles.length === 0) return [];
   const today = new Date().toDateString();
-  const todayFiles = files.filter(f => new Date(f.lastModifiedDateTime).toDateString() === today);
-  // If no files today, return the most recent group
+  const todayFiles = validFiles.filter(f => new Date(f.lastModifiedDateTime).toDateString() === today);
   if (todayFiles.length === 0) {
-    const latest = new Date(files[0].lastModifiedDateTime).toDateString();
-    return files.filter(f => new Date(f.lastModifiedDateTime).toDateString() === latest);
+    const latest = new Date(validFiles[0].lastModifiedDateTime).toDateString();
+    return validFiles.filter(f => new Date(f.lastModifiedDateTime).toDateString() === latest);
   }
   return todayFiles;
 }
