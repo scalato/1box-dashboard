@@ -639,14 +639,14 @@ async function refreshData() {
     }));
 
     const siteDataArr = [];
-    const BATCH = 3;
+    const BATCH = 1;
     for (let i = 0; i < downloads.length; i += BATCH) {
       const batch = downloads.slice(i, i + BATCH);
       setStatus('loading', `Processing ${i+1}–${Math.min(i+BATCH, downloads.length)} of ${downloads.length}…`);
       setProgress(20 + (70 * i / downloads.length));
       const results = await Promise.all(batch.map(d => extractWithClaude(d.b64, d.name)));
       results.forEach(r => { if (r) siteDataArr.push(r); });
-      if (i + BATCH < downloads.length) await new Promise(r => setTimeout(r, 2000));
+      if (i + BATCH < downloads.length) await new Promise(r => setTimeout(r, 6000));
     }
 
     RAW_DATA = siteDataArr;
