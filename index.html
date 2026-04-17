@@ -33,7 +33,7 @@
     min-height: 100vh;
   }
 
-  /* ââ CONFIG MODAL ââ */
+  /* ── CONFIG MODAL ── */
   #config-modal {
     position: fixed; inset: 0; z-index: 1000;
     background: rgba(0,0,0,0.85);
@@ -117,7 +117,7 @@
   }
   .btn-secondary:hover { border-color: var(--text); color: var(--text); }
 
-  /* ââ MAIN LAYOUT ââ */
+  /* ── MAIN LAYOUT ── */
   #app { display: none; flex-direction: column; min-height: 100vh; }
   #app.visible { display: flex; }
 
@@ -172,7 +172,7 @@
   }
   .btn-settings:hover { color: var(--text); }
 
-  /* ââ LOADING ââ */
+  /* ── LOADING ── */
   #loading-bar {
     height: 2px;
     background: linear-gradient(90deg, var(--accent), var(--blue));
@@ -202,7 +202,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ââ FILTERS ââ */
+  /* ── FILTERS ── */
   .filters {
     padding: 16px 28px;
     display: flex; gap: 8px; flex-wrap: wrap;
@@ -234,7 +234,7 @@
     align-self: stretch; margin: 0 4px;
   }
 
-  /* ââ TABS ââ */
+  /* ── TABS ── */
   .tabs {
     padding: 0 28px;
     border-bottom: 1px solid var(--border);
@@ -253,7 +253,7 @@
   .tab-btn:hover { color: var(--text); }
   .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
 
-  /* ââ KPI CARDS ââ */
+  /* ── KPI CARDS ── */
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -303,7 +303,7 @@
   .badge.up { background: rgba(34,197,94,0.12); color: var(--green); }
   .badge.down { background: rgba(239,68,68,0.12); color: var(--red); }
 
-  /* ââ CONTENT ââ */
+  /* ── CONTENT ── */
   main { padding: 24px 28px; flex: 1; }
 
   .tab-panel { display: none; }
@@ -454,9 +454,9 @@
     <div class="header-right">
       <span id="last-updated"></span>
       <button class="btn-refresh" onclick="refreshData()">
-        <span>â»</span> Refresh
+        <span>↻</span> Refresh
       </button>
-      <button class="btn-settings" onclick="showConfig()" title="Settings">â</button>
+      <button class="btn-settings" onclick="showConfig()" title="Settings">⚙</button>
     </div>
   </header>
 
@@ -468,8 +468,8 @@
   <!-- Country + Site Filters -->
   <div class="filters">
     <button class="filter-btn active" onclick="setCountry('all')" id="f-all">All Countries</button>
-    <button class="filter-btn" onclick="setCountry('fr')" id="f-fr">ð«ð· France</button>
-    <button class="filter-btn" onclick="setCountry('nl')" id="f-nl">ð³ð± Netherlands</button>
+    <button class="filter-btn" onclick="setCountry('fr')" id="f-fr">🇫🇷 France</button>
+    <button class="filter-btn" onclick="setCountry('nl')" id="f-nl">🇳🇱 Netherlands</button>
     <div class="filter-divider"></div>
     <div id="site-filters"></div>
   </div>
@@ -498,9 +498,9 @@
 </div>
 
 <script>
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // CONFIG
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 let CONFIG = {};
 let RAW_DATA = []; // array of site data objects
 let FILTERED_DATA = [];
@@ -542,12 +542,12 @@ function loadDemo() {
   document.getElementById('app').classList.add('visible');
   RAW_DATA = generateDemoData();
   renderAll();
-  document.getElementById('last-updated').textContent = 'Demo data â ' + new Date().toLocaleDateString('en-GB');
+  document.getElementById('last-updated').textContent = 'Demo data — ' + new Date().toLocaleDateString('en-GB');
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // MICROSOFT GRAPH AUTH (MSAL-lite via redirect)
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 let MS_TOKEN = null;
 
 function startAuth() {
@@ -589,9 +589,9 @@ function startAuth() {
   window.location.href = authUrl;
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // DATA FETCH
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // Try GitHub-hosted JSON first (written by local Python script). Instant, no auth.
 async function tryLoadFromGitHub() {
   try {
@@ -649,7 +649,7 @@ async function tryLoadFromGitHub() {
     const todayJsonFiles = getTodaysFiles(jsonFiles);
 
     if (todayJsonFiles.length > 0) {
-      setStatus('loading', `Loading ${todayJsonFiles.length} pre-processed reportsâ¦`);
+      setStatus('loading', `Loading ${todayJsonFiles.length} pre-processed reports…`);
       setProgress(30);
       const siteDataArr = [];
       const results = await Promise.all(todayJsonFiles.map(async (f) => {
@@ -663,18 +663,18 @@ async function tryLoadFromGitHub() {
         setProgress(100);
         renderAll();
         setTimeout(() => setProgress(0), 500);
-        setStatus('success', `Loaded ${siteDataArr.length} sites â ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`);
+        setStatus('success', `Loaded ${siteDataArr.length} sites — ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`);
         setTimeout(() => hideStatus(), 3000);
         document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
         return;
       }
     }
 
-    // Fallback: no JSON files yet â process PDFs with Claude (first-time setup)
+    // Fallback: no JSON files yet — process PDFs with Claude (first-time setup)
     const pdfFiles = allFiles.filter(f => f.name.endsWith('.pdf'));
     if (pdfFiles.length === 0) throw new Error('No reports found in OneDrive. Check Power Automate is running.');
     const todayFiles = getTodaysFiles(pdfFiles);
-    setStatus('loading', `First-time setup: processing ${todayFiles.length} PDFs with Claude. This will be instant next timeâ¦`);
+    setStatus('loading', `First-time setup: processing ${todayFiles.length} PDFs with Claude. This will be instant next time…`);
     setProgress(20);
 
     const downloads = await Promise.all(todayFiles.map(async (f) => {
@@ -688,7 +688,7 @@ async function tryLoadFromGitHub() {
     const BATCH = 1;
     for (let i = 0; i < downloads.length; i += BATCH) {
       const batch = downloads.slice(i, i + BATCH);
-      setStatus('loading', `Processing ${i+1}â${Math.min(i+BATCH, downloads.length)} of ${downloads.length}â¦`);
+      setStatus('loading', `Processing ${i+1}–${Math.min(i+BATCH, downloads.length)} of ${downloads.length}…`);
       setProgress(20 + (70 * i / downloads.length));
       const results = await Promise.all(batch.map(d => extractWithClaude(d.b64, d.name)));
       results.forEach(r => { if (r) siteDataArr.push(r); });
@@ -700,7 +700,7 @@ async function tryLoadFromGitHub() {
     renderAll();
     setProgress(100);
     setTimeout(() => setProgress(0), 500);
-    setStatus('success', `Dashboard updated â ${todayFiles.length} sites loaded`);
+    setStatus('success', `Dashboard updated — ${todayFiles.length} sites loaded`);
     setTimeout(() => hideStatus(), 3000);
     document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
 
@@ -846,9 +846,9 @@ Return this exact structure (use null for missing values, numbers not strings fo
   catch(e) { console.error('Parse error for', filename, text); return null; }
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // DEMO DATA
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function generateDemoData() {
   return [
     {
@@ -868,7 +868,7 @@ function generateDemoData() {
       insurance: { policies_count: 180, insured_value: 900000, premium_total: 3100, pct_insured: 75.2 }
     },
     {
-      site_name: '1BOX MÃ©rignac', country: 'FR', date: new Date().toISOString().slice(0,10),
+      site_name: '1BOX Mérignac', country: 'FR', date: new Date().toISOString().slice(0,10),
       occupancy: { unit_pct: 52.8, surface_pct: 52.8, total_units: 480, rented_units: 253, vacant_units: 219, total_sqm: 4561, rented_sqm: 2409, vacant_sqm: 2152, locked_units: 4, terminated_units: 4, reserved_units: 0, out_of_order_units: 0, business_units: 52, private_units: 201 },
       rentals: { move_ins_today: 0, move_ins_week: 1, move_ins_month: 11, move_ins_year: 69, vacates_today: 1, vacates_week: 2, vacates_month: 7, vacates_year: 30, net_today: -1, net_week: -1, net_month: 4, net_year: 39 },
       revenue: { gross_rent: 29631, discounts: 3534, net_rent: 26097, gross_insurance: 2583, net_insurance: 2583, gross_total: 32214, net_total: 28680, invoiced_in_advance: 3951, current_rent_amount: 27758, max_rent_potential: 65629, avg_rate_per_sqm: 13.2, max_rate_per_sqm: 17.8 },
@@ -886,9 +886,9 @@ function generateDemoData() {
   ];
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // FILTER LOGIC
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function setCountry(c) {
   CURRENT_COUNTRY = c;
   CURRENT_SITE = 'all';
@@ -928,9 +928,9 @@ function renderSiteFilters() {
   el.innerHTML = html;
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // AGGREGATION
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function agg(key, sub) {
   const v = FILTERED_DATA.map(d => key.split('.').reduce((o,k)=>o?.[k], d) ?? 0).filter(x=>x!==null);
   return v.reduce((a,b)=>a+b, 0);
@@ -940,17 +940,17 @@ function aggPct(num, den) {
   return d ? (n / d * 100) : 0;
 }
 function fmt(n, dec=0) {
-  if (n === null || n === undefined) return 'â';
+  if (n === null || n === undefined) return '—';
   return Number(n).toLocaleString('en-GB', {minimumFractionDigits:dec, maximumFractionDigits:dec});
 }
 function fmtEur(n) {
-  if (n === null || n === undefined) return 'â';
-  return 'â¬' + fmt(Math.round(n));
+  if (n === null || n === undefined) return '—';
+  return '€' + fmt(Math.round(n));
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // RENDER ALL
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function renderAll() {
   if (RAW_DATA.length === 0) return;
   renderSiteFilters();
@@ -972,9 +972,9 @@ function applyFiltersNoRender() {
   });
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // KPIs
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function renderKPIs() {
   const sqmPct = aggPct('occupancy.rented_sqm','occupancy.total_sqm').toFixed(1);
   const rentedSqm = agg('occupancy.rented_sqm');
@@ -995,7 +995,7 @@ function renderKPIs() {
     <div class="kpi-card red">
       <div class="kpi-label">SQM Occupancy</div>
       <div class="kpi-value">${sqmPct}<span class="unit">%</span></div>
-      <div class="kpi-sub">${fmt(rentedSqm)} mÂ² of ${fmt(totalSqm)} mÂ²</div>
+      <div class="kpi-sub">${fmt(rentedSqm)} m² of ${fmt(totalSqm)} m²</div>
     </div>
     <div class="kpi-card green">
       <div class="kpi-label">Net Rentals (MTD)</div>
@@ -1005,7 +1005,7 @@ function renderKPIs() {
     <div class="kpi-card purple">
       <div class="kpi-label">Current Rent</div>
       <div class="kpi-value">${fmtEur(currRent)}</div>
-      <div class="kpi-sub">${fmtEur(avgRate.toFixed(2))}/mÂ²</div>
+      <div class="kpi-sub">${fmtEur(avgRate.toFixed(2))}/m²</div>
     </div>
     <div class="kpi-card amber">
       <div class="kpi-label">Arrears &gt;30 Days</div>
@@ -1024,20 +1024,20 @@ function renderKPIs() {
     </div>
     <div class="kpi-card blue">
       <div class="kpi-label">MTD Net SQM</div>
-      <div class="kpi-value">+${fmt(Math.round(netSqmMTD))} <span class="unit">mÂ²</span></div>
+      <div class="kpi-value">+${fmt(Math.round(netSqmMTD))} <span class="unit">m²</span></div>
       <div class="kpi-sub">+${netMTD} net contracts</div>
     </div>
     <div class="kpi-card green">
       <div class="kpi-label">Max Rent Rate</div>
-      <div class="kpi-value">${fmtEur(maxRate)}<span class="unit">/mÂ²</span></div>
+      <div class="kpi-value">${fmtEur(maxRate)}<span class="unit">/m²</span></div>
       <div class="kpi-sub">${fmtEur(maxPotential)} max</div>
     </div>
   `;
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // OVERVIEW TAB
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function renderOverview() {
   const sites = FILTERED_DATA.map(d => d.site_name.replace('1BOX ',''));
   const actRev = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
@@ -1065,7 +1065,7 @@ function renderOverview() {
         <div class="chart-wrap"><canvas id="ch-net-rentals"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">Average Rate per mÂ² Rented</div>
+        <div class="card-title">Average Rate per m² Rented</div>
         <div class="chart-wrap"><canvas id="ch-avg-rate"></canvas></div>
       </div>
     </div>
@@ -1075,13 +1075,13 @@ function renderOverview() {
     mkBarChart('ch-rev-budget', sites, [{label:'Actual', data:actRev, color:getGreen()},{label:'Budget', data:budRev, color:getMuted()}], true);
     mkBarChart('ch-occ-budget', sites, [{label:'Actual', data:actOcc, color:getGreen()},{label:'Budget', data:budOcc, color:getMuted()}], false);
     mkBarChart('ch-net-rentals', sites, [{label:'Net Rentals', data:netRentals, color:getGreen()}], false);
-    mkBarChart('ch-avg-rate', sites, [{label:'â¬/mÂ²', data:avgRates, color:'rgba(168,85,247,0.7)'}], false);
+    mkBarChart('ch-avg-rate', sites, [{label:'€/m²', data:avgRates, color:'rgba(168,85,247,0.7)'}], false);
   });
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // OCCUPANCY TAB
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function renderOccupancy() {
   const unitOcc = aggPct('occupancy.rented_units','occupancy.total_units').toFixed(1);
   const surfOcc = aggPct('occupancy.rented_sqm','occupancy.total_sqm').toFixed(1);
@@ -1107,7 +1107,7 @@ function renderOccupancy() {
       <td class="num">${fmt(o.rented_sqm)} / ${fmt(o.total_sqm)}</td>
       <td class="num ${parseFloat(o.surface_pct)>=70?'green':parseFloat(o.surface_pct)>=50?'amber':'red'}">${fmt(o.surface_pct,1)}%</td>
       <td class="num red">${fmt(o.vacant_units)}</td>
-      <td class="num">${fmt(o.vacant_sqm)} mÂ²</td>
+      <td class="num">${fmt(o.vacant_sqm)} m²</td>
     </tr>`;
   }).join('');
 
@@ -1125,12 +1125,12 @@ function renderOccupancy() {
       <div class="card" style="text-align:center">
         <div class="card-title">Surface Occupancy</div>
         <div class="kpi-value">${surfOcc}<span class="unit">%</span></div>
-        <div class="kpi-sub">${fmt(rentedSqm)} mÂ² of ${fmt(totalSqm)} mÂ²</div>
+        <div class="kpi-sub">${fmt(rentedSqm)} m² of ${fmt(totalSqm)} m²</div>
       </div>
       <div class="card" style="text-align:center">
         <div class="card-title">Vacant Units</div>
         <div class="kpi-value" style="color:var(--amber)">${fmt(vacant)}</div>
-        <div class="kpi-sub">${fmt(vacantSqm)} mÂ² available</div>
+        <div class="kpi-sub">${fmt(vacantSqm)} m² available</div>
       </div>
     </div>
     <div class="grid-2">
@@ -1139,15 +1139,15 @@ function renderOccupancy() {
         <table class="data-table">
           <thead><tr><th>Status</th><th class="num">Units</th><th class="num">%</th><th class="num">Surface</th><th class="num">Surf%</th></tr></thead>
           <tbody>
-            <tr><td>Business</td><td class="num">${fmt(business)}</td><td class="num">${fmt(total?business/total*100:0,1)}%</td><td class="num">${fmt(agg('occupancy.rented_sqm')>0?(business/rented*rentedSqm):0)} mÂ²</td><td class="num">â</td></tr>
-            <tr><td>Private</td><td class="num">${fmt(priv)}</td><td class="num">${fmt(total?priv/total*100:0,1)}%</td><td class="num">â</td><td class="num">â</td></tr>
-            <tr style="font-weight:600"><td>Total Rented</td><td class="num green">${fmt(rented)}</td><td class="num green">${fmt(unitOcc)}%</td><td class="num green">${fmt(rentedSqm)} mÂ²</td><td class="num green">${fmt(surfOcc)}%</td></tr>
-            <tr><td>Locked</td><td class="num">${fmt(locked)}</td><td class="num">${fmt(total?locked/total*100:0,1)}%</td><td class="num">â</td><td class="num">â</td></tr>
-            <tr><td>Terminated</td><td class="num">${fmt(terminated)}</td><td class="num">${fmt(total?terminated/total*100:0,1)}%</td><td class="num">â</td><td class="num">â</td></tr>
-            <tr><td style="color:var(--amber)">Vacant</td><td class="num amber">${fmt(vacant)}</td><td class="num amber">${fmt(total?vacant/total*100:0,1)}%</td><td class="num amber">${fmt(vacantSqm)} mÂ²</td><td class="num amber">${fmt(totalSqm?vacantSqm/totalSqm*100:0,1)}%</td></tr>
-            <tr><td>Reserved</td><td class="num">${fmt(reserved)}</td><td class="num">${fmt(total?reserved/total*100:0,1)}%</td><td class="num">â</td><td class="num">â</td></tr>
-            <tr><td>Out of Order</td><td class="num">${fmt(ood)}</td><td class="num">${fmt(total?ood/total*100:0,1)}%</td><td class="num">â</td><td class="num">â</td></tr>
-            <tr style="font-weight:600"><td>Total</td><td class="num">${fmt(total)}</td><td class="num">â</td><td class="num">${fmt(totalSqm)} mÂ²</td><td class="num">â</td></tr>
+            <tr><td>Business</td><td class="num">${fmt(business)}</td><td class="num">${fmt(total?business/total*100:0,1)}%</td><td class="num">${fmt(agg('occupancy.rented_sqm')>0?(business/rented*rentedSqm):0)} m²</td><td class="num">—</td></tr>
+            <tr><td>Private</td><td class="num">${fmt(priv)}</td><td class="num">${fmt(total?priv/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr style="font-weight:600"><td>Total Rented</td><td class="num green">${fmt(rented)}</td><td class="num green">${fmt(unitOcc)}%</td><td class="num green">${fmt(rentedSqm)} m²</td><td class="num green">${fmt(surfOcc)}%</td></tr>
+            <tr><td>Locked</td><td class="num">${fmt(locked)}</td><td class="num">${fmt(total?locked/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Terminated</td><td class="num">${fmt(terminated)}</td><td class="num">${fmt(total?terminated/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td style="color:var(--amber)">Vacant</td><td class="num amber">${fmt(vacant)}</td><td class="num amber">${fmt(total?vacant/total*100:0,1)}%</td><td class="num amber">${fmt(vacantSqm)} m²</td><td class="num amber">${fmt(totalSqm?vacantSqm/totalSqm*100:0,1)}%</td></tr>
+            <tr><td>Reserved</td><td class="num">${fmt(reserved)}</td><td class="num">${fmt(total?reserved/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Out of Order</td><td class="num">${fmt(ood)}</td><td class="num">${fmt(total?ood/total*100:0,1)}%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr style="font-weight:600"><td>Total</td><td class="num">${fmt(total)}</td><td class="num">—</td><td class="num">${fmt(totalSqm)} m²</td><td class="num">—</td></tr>
           </tbody>
         </table>
       </div>
@@ -1160,7 +1160,7 @@ function renderOccupancy() {
     <div class="card">
       <div class="card-title">Per Site Occupancy</div>
       <table class="data-table">
-        <thead><tr><th>Site</th><th class="num">Units (R/T)</th><th class="num">Unit %</th><th class="num">Surface (R/T)</th><th class="num">Surf %</th><th class="num">Vacant</th><th class="num">Vacant mÂ²</th></tr></thead>
+        <thead><tr><th>Site</th><th class="num">Units (R/T)</th><th class="num">Unit %</th><th class="num">Surface (R/T)</th><th class="num">Surf %</th><th class="num">Vacant</th><th class="num">Vacant m²</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
@@ -1171,9 +1171,9 @@ function renderOccupancy() {
   });
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // RENTALS TAB
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function renderRentals() {
   const periods = ['Today','Week','Month','Year'];
   const miVals = ['move_ins_today','move_ins_week','move_ins_month','move_ins_year'].map(k => agg('rentals.'+k));
@@ -1249,9 +1249,9 @@ function renderRentals() {
   });
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // REVENUE TAB
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function renderRevenue() {
   const gross = agg('revenue.gross_total');
   const disc = agg('revenue.discounts');
@@ -1266,11 +1266,11 @@ function renderRevenue() {
     return `<tr>
       <td>${d.site_name} <span class="site-pill ${d.country.toLowerCase()}">${d.country}</span></td>
       <td class="num">${fmtEur(r.gross_total)}</td>
-      <td class="num red">${r.discounts ? '-'+fmtEur(r.discounts) : 'â'}</td>
+      <td class="num red">${r.discounts ? '-'+fmtEur(r.discounts) : '—'}</td>
       <td class="num green">${fmtEur(r.net_total)}</td>
       <td class="num">${fmtEur(r.current_rent_amount)}</td>
       <td class="num">${fmtEur(r.max_rent_potential)}</td>
-      <td class="num">${fmtEur(r.avg_rate_per_sqm)}/mÂ²</td>
+      <td class="num">${fmtEur(r.avg_rate_per_sqm)}/m²</td>
       <td class="num purple">${fmtEur(r.invoiced_in_advance)}</td>
     </tr>`;
   }).join('');
@@ -1306,7 +1306,7 @@ function renderRevenue() {
           <thead><tr><th>Category</th><th class="num">Gross</th><th class="num">Discount</th><th class="num">Net</th></tr></thead>
           <tbody>
             <tr><td>Rent</td><td class="num">${fmtEur(grossRent)}</td><td class="num red">-${fmtEur(disc)}</td><td class="num green">${fmtEur(netRent)}</td></tr>
-            <tr><td>Insurance</td><td class="num">${fmtEur(grossIns)}</td><td class="num">â</td><td class="num green">${fmtEur(grossIns)}</td></tr>
+            <tr><td>Insurance</td><td class="num">${fmtEur(grossIns)}</td><td class="num">—</td><td class="num green">${fmtEur(grossIns)}</td></tr>
             <tr style="font-weight:600"><td>Total</td><td class="num">${fmtEur(gross)}</td><td class="num red">-${fmtEur(disc)}</td><td class="num green">${fmtEur(net)}</td></tr>
           </tbody>
         </table>
@@ -1334,9 +1334,9 @@ function renderRevenue() {
   });
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // DETAILS TAB
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function renderDetails() {
   const rows = FILTERED_DATA.map(d => {
     const o = d.occupancy; const r = d.rentals; const v = d.revenue;
@@ -1378,9 +1378,9 @@ function renderDetails() {
   `;
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // ARREARS TAB
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function renderArrears() {
   const rows = FILTERED_DATA.map(d => {
     const a = d.arrears;
@@ -1423,9 +1423,9 @@ function renderArrears() {
   `;
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // CHART HELPERS
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function getGreen() { return 'rgba(34,197,94,0.75)'; }
 function getMuted() { return 'rgba(107,114,128,0.5)'; }
 
@@ -1478,9 +1478,9 @@ function mkDonut(id, labels, data, colors) {
   });
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // TAB SWITCHING
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -1488,9 +1488,9 @@ function switchTab(name) {
   document.getElementById('panel-' + name).classList.add('active');
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // STATUS / PROGRESS
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function setStatus(type, msg) {
   const el = document.getElementById('status-banner');
   const sp = document.getElementById('status-spinner');
@@ -1503,14 +1503,14 @@ function setStatus(type, msg) {
 function hideStatus() { document.getElementById('status-banner').classList.add('hidden'); }
 function setProgress(pct) { document.getElementById('loading-bar').style.width = pct + '%'; }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // UTILS
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function nextTick(fn) { setTimeout(fn, 50); }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 // INIT
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 window.addEventListener('load', async () => {
   // Try GitHub cache first — if today's data is there, skip the login screen entirely
   const cached = await tryLoadFromGitHub();
