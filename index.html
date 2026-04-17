@@ -918,11 +918,11 @@ function renderSiteFilters() {
   const frSites = sites.filter(s => RAW_DATA.find(d => d.site === s && d.country === 'FR'));
   const nlSites = sites.filter(s => RAW_DATA.find(d => d.site === s && d.country === 'NL'));
   let html = '<div class="site-filter-bar">';
-  html += '<button class="filter-btn' + (CURRENT_SITE === 'all' ? ' active' : '') + '" onclick="setSite(\\'all\\')">All Sites</button>';
+  html += '<button class="filter-btn' + (CURRENT_SITE === 'all' ? ' active' : '') + '" onclick="setSite(\'all\')">All Sites</button>';
   const showSites = CURRENT_COUNTRY === 'FR' ? frSites : CURRENT_COUNTRY === 'NL' ? nlSites : sites;
   showSites.forEach(s => {
     const label = s.replace('1BOX ', '').replace('1Box ', '');
-    html += '<button class="filter-btn' + (CURRENT_SITE === s ? ' active' : '') + '" onclick="setSite(\\'' + s.replace(/'/g, "\\\\'") + '\\')">' + label + '</button>';
+    html += '<button class="filter-btn' + (CURRENT_SITE === s ? ' active' : '') + '" onclick="setSite(\'' + s.replace(/'/g, "\\'") + '\')">' + label + '</button>';
   });
   html += '</div>';
   el.innerHTML = html;
