@@ -914,7 +914,7 @@ function applyFilters() {
 
 function renderSiteFilters() {
   const el = document.getElementById('site-filters');
-  const sites = [...new Set(RAW_DATA.map(d => d.name))].sort();
+  const sites = [...new Set(RAW_DATA.map(d => d.site_name).filter(Boolean))].sort();
   const frSites = sites.filter(s => RAW_DATA.find(d => d.name === s && d.country === 'FR'));
   const nlSites = sites.filter(s => RAW_DATA.find(d => d.name === s && d.country === 'NL'));
   let html = '<div class="site-filter-bar">';
