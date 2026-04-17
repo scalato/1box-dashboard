@@ -1,0 +1,46 @@
+name: Fetch 1BOX MIS Data
+
+on:
+  schedule:
+    # 5:45 PM CST = 23:45 UTC (5 min buffer after 5:40 PM email)
+    - cron: '45 23 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch and process MIS reports
+        env:
+          MS_CLIENT_ID: ${{ secrets.MS_CLIENT_ID }}
+          MS_CLIENT_SECRET: ${{ secrets.MS_CLIENT_SECRET }}
+          MS_TENANT_ID: ${{ secrets.MS_TENANT_ID }}
+          MS_REFRESH_TOKEN: ${{ secrets.MS_REFRESH_TOKEN }}
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+          ONEDRIVE_FOLDER: '/1Box MIS Reports'
+        run: node .github/scripts/fetch-mis-data.js
+
+      - name: Commit data if changed
+        run: |
+          git config user.name "1BOX Bot"
+          git config user.email "bot@1box.nl"
+          git add data/
+          if git diff --staged --quiet; then
+            echo "No new data to commit"
+          else
+            git commit -m "Update MIS data - $(date -u +%Y-%m-%d)"
+            git push
+          fi
