@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>1BOX — Get Auth Code</title>
+<title>1BOX - Get Refresh Token</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,63 +14,132 @@
   .step { background: #1a1f2b; border: 1px solid #252d3d; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
   .step-label { font-size: 0.65rem; color: #6b7a99; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
   .step-text { font-size: 0.8rem; line-height: 1.6; }
-  button { background: #22c55e; color: #000; border: none; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem; padding: 14px 28px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 8px; transition: opacity 0.15s; }
+  button { background: #22c55e; color: #000; border: none; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem; padding: 14px 28px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 8px; }
   button:hover { opacity: 0.85; }
-  .code-box { background: #0a0c10; border: 1px solid #22c55e; border-radius: 8px; padding: 16px; margin-top: 16px; word-break: break-all; font-size: 0.7rem; color: #22c55e; max-height: 200px; overflow-y: auto; display: none; }
-  .code-box.visible { display: block; }
+  .token-box { background: #0a0c10; border: 1px solid #22c55e; border-radius: 8px; padding: 16px; margin-top: 16px; word-break: break-all; font-size: 0.7rem; color: #22c55e; max-height: 200px; overflow-y: auto; display: none; }
+  .token-box.visible { display: block; }
   .copy-btn { background: #252d3d; color: #e8eaf0; font-size: 0.7rem; padding: 6px 14px; width: auto; margin-top: 12px; }
+  .status { font-size: 0.75rem; margin-top: 12px; padding: 10px; border-radius: 6px; display: none; }
+  .status.error { display: block; background: #2a1215; color: #ef4444; border: 1px solid #7f1d1d; }
+  .status.success { display: block; background: #0a2015; color: #22c55e; border: 1px solid #166534; }
+  .status.info { display: block; background: #0a1628; color: #3b82f6; border: 1px solid #1e3a5f; }
 </style>
 </head>
 <body>
 <div class="card">
-  <h1>1BOX DASHBOARD — AUTH CODE</h1>
-  <p class="sub">Get an authorization code to exchange for a refresh token</p>
+  <h1>1BOX DASHBOARD - REFRESH TOKEN</h1>
+  <p class="sub">One-time setup using PKCE (no client secret needed)</p>
   <div class="step">
     <div class="step-label">Step 1</div>
-    <div class="step-text">Click below. Sign in with your Volta Global account. After consent, you'll be redirected back here.</div>
+    <div class="step-text">Click below to sign in with Microsoft. After consent, you'll be redirected back and the refresh token will appear automatically.</div>
     <button id="auth-btn" onclick="startAuth()">Sign in with Microsoft</button>
   </div>
   <div class="step">
     <div class="step-label">Step 2</div>
-    <div class="step-text">After login, your authorization code will appear below. Copy it and paste it into the Claude chat.</div>
-    <div id="code-box" class="code-box"></div>
-    <button id="copy-btn" class="copy-btn" onclick="copyCode()" style="display:none">Copy Authorization Code</button>
+    <div class="step-text">Copy the refresh token below. Add it as a GitHub Secret named <strong>MS_REFRESH_TOKEN</strong>.</div>
+    <div id="token-box" class="token-box"></div>
+    <button id="copy-btn" class="copy-btn" onclick="copyToken()" style="display:none">Copy Refresh Token</button>
   </div>
+  <div id="status" class="status"></div>
 </div>
 <script>
 const CLIENT_ID = '08413fef-411e-495a-91f6-a35384e91c70';
 const TENANT_ID = 'd3203b0e-c1dd-4a86-af87-1f4de9256288';
 const REDIRECT_URI = window.location.href.split('?')[0].split('#')[0];
 const SCOPE = 'offline_access Files.Read User.Read';
-function startAuth() {
+
+function setStatus(type, msg) {
+  const el = document.getElementById('status');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+}
+
+function base64UrlEncode(buf) {
+  return btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+async function generatePKCE() {
+  const verifier = base64UrlEncode(crypto.getRandomValues(new Uint8Array(32)));
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  const challenge = base64UrlEncode(hash);
+  return { verifier, challenge };
+}
+
+async function startAuth() {
+  const { verifier, challenge } = await generatePKCE();
+  sessionStorage.setItem('pkce_verifier', verifier);
   const authUrl = 'https://login.microsoftonline.com/' + TENANT_ID + '/oauth2/v2.0/authorize' +
     '?client_id=' + encodeURIComponent(CLIENT_ID) +
     '&response_type=code' +
     '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) +
     '&scope=' + encodeURIComponent(SCOPE) +
     '&response_mode=query' +
+    '&code_challenge=' + challenge +
+    '&code_challenge_method=S256' +
     '&prompt=consent';
   window.location.href = authUrl;
 }
-function copyCode() {
-  if (window._authCode) {
-    navigator.clipboard.writeText(window._authCode).then(function() {
+
+async function exchangeCode(code) {
+  setStatus('info', 'Exchanging authorization code for refresh token...');
+  const verifier = sessionStorage.getItem('pkce_verifier');
+  if (!verifier) {
+    setStatus('error', 'PKCE verifier not found. Please click Sign in again.');
+    return;
+  }
+  const body = new URLSearchParams({
+    client_id: CLIENT_ID,
+    scope: SCOPE,
+    code: code,
+    redirect_uri: REDIRECT_URI,
+    grant_type: 'authorization_code',
+    code_verifier: verifier
+  });
+  try {
+    const resp = await fetch('https://login.microsoftonline.com/' + TENANT_ID + '/oauth2/v2.0/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
+    });
+    const data = await resp.json();
+    if (data.error) {
+      setStatus('error', 'Error: ' + (data.error_description || data.error));
+      return;
+    }
+    if (data.refresh_token) {
+      sessionStorage.removeItem('pkce_verifier');
+      const tokenBox = document.getElementById('token-box');
+      tokenBox.textContent = data.refresh_token;
+      tokenBox.classList.add('visible');
+      document.getElementById('copy-btn').style.display = 'inline-block';
+      document.getElementById('auth-btn').style.display = 'none';
+      setStatus('success', 'Success! Copy the refresh token above and save it as MS_REFRESH_TOKEN.');
+      window._refreshToken = data.refresh_token;
+    } else {
+      setStatus('error', 'No refresh token in response.');
+    }
+  } catch(e) {
+    setStatus('error', 'Network error: ' + e.message);
+  }
+}
+
+function copyToken() {
+  if (window._refreshToken) {
+    navigator.clipboard.writeText(window._refreshToken).then(function() {
       document.getElementById('copy-btn').textContent = 'Copied!';
       setTimeout(function() {
-        document.getElementById('copy-btn').textContent = 'Copy Authorization Code';
+        document.getElementById('copy-btn').textContent = 'Copy Refresh Token';
       }, 2000);
     });
   }
 }
+
 var urlParams = new URLSearchParams(window.location.search);
 var code = urlParams.get('code');
 if (code) {
-  window._authCode = code;
-  var codeBox = document.getElementById('code-box');
-  codeBox.textContent = code;
-  codeBox.classList.add('visible');
-  document.getElementById('copy-btn').style.display = 'inline-block';
-  document.getElementById('auth-btn').style.display = 'none';
+  window.history.replaceState({}, document.title, window.location.pathname);
+  exchangeCode(code);
 }
 </script>
 </body>
