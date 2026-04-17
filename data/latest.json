@@ -1,7 +1,7 @@
 {
   "date": "2026-04-17",
   "updated_at": "2026-04-17T17:40:13.324376",
-  "site_count": 34,
+  "site_count": 32,
   "files_processed": 34,
   "sites": [
     {
@@ -195,70 +195,6 @@
       },
       "_source_file": "2026-04-17_MIS 1BOX FR-03-Mérignac-639120693097167710.pdf",
       "_processed_at": "2026-04-17T17:32:51.202329"
-    },
-    {
-      "site_name": "1BOX",
-      "country": "FR",
-      "date": "2026-04-17",
-      "occupancy": {
-        "unit_pct": 61.5,
-        "surface_pct": 64.6,
-        "total_units": 1619,
-        "rented_units": 995,
-        "vacant_units": 597,
-        "total_sqm": 10310.52,
-        "rented_sqm": 6656.98,
-        "vacant_sqm": 3443.65,
-        "locked_units": 42,
-        "terminated_units": 27,
-        "reserved_units": 2,
-        "out_of_order_units": 15,
-        "business_units": 210,
-        "private_units": 785
-      },
-      "rentals": {
-        "move_ins_today": 1,
-        "move_ins_week": 11,
-        "move_ins_month": 43,
-        "move_ins_year": 286,
-        "vacates_today": 0,
-        "vacates_week": 6,
-        "vacates_month": 28,
-        "vacates_year": 208,
-        "net_today": 1,
-        "net_week": 5,
-        "net_month": 15,
-        "net_year": 78
-      },
-      "revenue": {
-        "gross_rent": 111302.97,
-        "discounts": 12215.3,
-        "net_rent": 99087.67,
-        "gross_insurance": 16908.38,
-        "net_insurance": 16908.38,
-        "gross_total": 130876.63,
-        "net_total": 118661.33,
-        "invoiced_in_advance": 152162.74,
-        "current_rent_amount": 97386.6,
-        "max_rent_potential": 177722.76,
-        "avg_rate_per_sqm": 14.63,
-        "max_rate_per_sqm": 17.24
-      },
-      "arrears": {
-        "outstanding_total": 148526.61,
-        "arrears_30_plus": 14223.41,
-        "arrears_count": 155,
-        "payment_without_inv": 2380.97,
-        "doubtful_debtors": 0.0
-      },
-      "insurance": {
-        "policies_count": 838,
-        "insured_value": 4134300.0,
-        "premium_total": 16580.0,
-        "pct_insured": 84.2
-      },
-      "_source_file": "2026-04-17_MIS 1BOX FR-639120693100917690.pdf",
-      "_processed_at": "2026-04-17T17:33:05.336036"
     },
     {
       "site_name": "1BOX Eindhoven Best",
@@ -2115,70 +2051,6 @@
       },
       "_source_file": "2026-04-17_MIS 1BOX-30-Lelystad-639120690187150019.pdf",
       "_processed_at": "2026-04-17T17:39:59.119589"
-    },
-    {
-      "site_name": null,
-      "country": "NL",
-      "date": "2026-04-17",
-      "occupancy": {
-        "unit_pct": 72.5,
-        "surface_pct": 75.8,
-        "total_units": 13327,
-        "rented_units": 9668,
-        "vacant_units": 3363,
-        "total_sqm": 72825.31,
-        "rented_sqm": 55195.43,
-        "vacant_sqm": 15648.58,
-        "locked_units": 363,
-        "terminated_units": 315,
-        "reserved_units": 87,
-        "out_of_order_units": 26,
-        "business_units": 1482,
-        "private_units": 8186
-      },
-      "rentals": {
-        "move_ins_today": 22,
-        "move_ins_week": 94,
-        "move_ins_month": 302,
-        "move_ins_year": 1783,
-        "vacates_today": 27,
-        "vacates_week": 120,
-        "vacates_month": 234,
-        "vacates_year": 1745,
-        "net_today": -5,
-        "net_week": -26,
-        "net_month": 68,
-        "net_year": 38
-      },
-      "revenue": {
-        "gross_rent": 1057758.05,
-        "discounts": 23103.03,
-        "net_rent": 1034655.02,
-        "gross_insurance": 146792.8,
-        "net_insurance": 146792.8,
-        "gross_total": 1270413.0,
-        "net_total": 1247298.12,
-        "invoiced_in_advance": 1403567.97,
-        "current_rent_amount": 1026747.43,
-        "max_rent_potential": 1272151.35,
-        "avg_rate_per_sqm": 18.6,
-        "max_rate_per_sqm": 17.47
-      },
-      "arrears": {
-        "outstanding_total": 1287136.54,
-        "arrears_30_plus": 74059.7,
-        "arrears_count": 1286,
-        "payment_without_inv": 3348.04,
-        "doubtful_debtors": 0.0
-      },
-      "insurance": {
-        "policies_count": 8136,
-        "insured_value": 29534168.0,
-        "premium_total": 146479.92,
-        "pct_insured": 84.2
-      },
-      "_source_file": "2026-04-17_MIS 1BOX-639120690195900123.pdf",
-      "_processed_at": "2026-04-17T17:40:13.324363"
     }
   ]
 }
