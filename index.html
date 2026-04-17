@@ -914,9 +914,9 @@ function applyFilters() {
 
 function renderSiteFilters() {
   const el = document.getElementById('site-filters');
-  const sites = [...new Set(RAW_DATA.map(d => d.site))].sort();
-  const frSites = sites.filter(s => RAW_DATA.find(d => d.site === s && d.country === 'FR'));
-  const nlSites = sites.filter(s => RAW_DATA.find(d => d.site === s && d.country === 'NL'));
+  const sites = [...new Set(RAW_DATA.map(d => d.name))].sort();
+  const frSites = sites.filter(s => RAW_DATA.find(d => d.name === s && d.country === 'FR'));
+  const nlSites = sites.filter(s => RAW_DATA.find(d => d.name === s && d.country === 'NL'));
   let html = '<div class="site-filter-bar">';
   html += '<button class="filter-btn' + (CURRENT_SITE === 'all' ? ' active' : '') + '" onclick="setSite(\'all\')">All Sites</button>';
   const showSites = CURRENT_COUNTRY === 'FR' ? frSites : CURRENT_COUNTRY === 'NL' ? nlSites : sites;
