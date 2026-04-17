@@ -592,9 +592,41 @@ function startAuth() {
 // âââââââââââââââââââââââââââââââââââââââââââââ
 // DATA FETCH
 // âââââââââââââââââââââââââââââââââââââââââââââ
-async function refreshData() {
+// Try GitHub-hosted JSON first (written by local Python script). Instant, no auth.
+async function tryLoadFromGitHub() {
+  try {
+    const resp = await fetch('data/latest.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const today = new Date().toISOString().slice(0, 10);
+    if (data.date !== today) {
+      console.log(`GitHub data is from ${data.date}, not today`);
+      return null;
+    }
+    if (!Array.isArray(data.sites) || data.sites.length === 0) return null;
+    console.log(`Loaded ${data.sites.length} sites from GitHub JSON`);
+    return data.sites;
+  } catch (e) {
+    console.log('No GitHub data available:', e.message);
+    return null;
+  }
+}
+ async function refreshData() {
   if (IS_DEMO) { renderAll(); return; }
-  setStatus('loading', 'Loading dashboard dataâ¦');
+  
+  // Try GitHub-hosted JSON first — instant, no Microsoft login needed
+  setStatus('loading', 'Checking for today\'s data…');
+  const cached = await tryLoadFromGitHub();
+  if (cached) {
+    RAW_DATA = cached;
+    renderAll();
+    setStatus('success', `Loaded ${cached.length} sites from cache`);
+    setTimeout(() => hideStatus(), 2000);
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    return;
+  }
+  
+  setStatus('loading', 'Loading dashboard data…');
   setProgress(10);
 
   try {
@@ -692,7 +724,7 @@ function getTodaysFiles(files) {
   return todayFiles;
 }
 
-async async function graphFetch(url) {
+async function graphFetch(url) {
   const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + MS_TOKEN } });
   if (res.status === 401) {
     console.log('Graph API returned 401, re-authenticating...');
@@ -1479,7 +1511,19 @@ function nextTick(fn) { setTimeout(fn, 50); }
 // âââââââââââââââââââââââââââââââââââââââââââââ
 // INIT
 // âââââââââââââââââââââââââââââââââââââââââââââ
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  // Try GitHub cache first — if today's data is there, skip the login screen entirely
+  const cached = await tryLoadFromGitHub();
+  if (cached) {
+    IS_DEMO = false;
+    RAW_DATA = cached;
+    document.getElementById('config-modal').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    renderAll();
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    return;
+  }
+  
   const saved = localStorage.getItem('1box_config');
   if (saved) {
     CONFIG = JSON.parse(saved);
