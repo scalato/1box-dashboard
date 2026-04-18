@@ -402,6 +402,28 @@
   /* Trend line */
   .trend-chart-wrap { position: relative; height: 180px; }
 
+  /* ── TRENDS TAB ── */
+  .trends-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .trends-scope {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 600;
+    color: var(--text);
+  }
+  .trends-scope .muted-sub {
+    color: var(--muted); font-weight: 400;
+    margin-left: 8px; font-size: 12px;
+  }
+  .trend-chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .trend-chart-inner { position: relative; height: 260px; }
+
   @media (max-width: 900px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
@@ -485,6 +507,7 @@
     <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
     <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
     <button class="tab-btn" onclick="switchTab('arrears')" id="tab-arrears">Arrears</button>
+    <button class="tab-btn" onclick="switchTab('trends')" id="tab-trends">Trends</button>
   </div>
 
   <main>
@@ -494,15 +517,16 @@
     <div id="panel-revenue" class="tab-panel"></div>
     <div id="panel-details" class="tab-panel"></div>
     <div id="panel-arrears" class="tab-panel"></div>
+    <div id="panel-trends" class="tab-panel"></div>
   </main>
 </div>
-
 <script>
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
 let CONFIG = {};
-let RAW_DATA = []; // array of site data objects
+let RAW_DATA = []; // array of site data objects (latest snapshot)
+let HISTORY_DATA = null; // monthly history.json
 let FILTERED_DATA = [];
 let CURRENT_COUNTRY = 'all';
 let CURRENT_SITE = 'all';
@@ -569,7 +593,6 @@ function startAuth() {
     }
   }
 
-  // Check if we're returning from auth redirect
   const hash = window.location.hash;
   if (hash.includes('access_token')) {
     const params = new URLSearchParams(hash.slice(1));
@@ -579,7 +602,6 @@ function startAuth() {
     refreshData();
     return;
   }
-  // Kick off implicit flow
   const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize` +
     `?client_id=${encodeURIComponent(CONFIG.clientId)}` +
     `&response_type=token` +
@@ -592,7 +614,6 @@ function startAuth() {
 // ─────────────────────────────────────────────
 // DATA FETCH
 // ─────────────────────────────────────────────
-// Try GitHub-hosted JSON first (written by local Python script). Instant, no auth.
 async function tryLoadFromGitHub() {
   try {
     const resp = await fetch('data/latest.json?t=' + Date.now(), { cache: 'no-store' });
@@ -600,7 +621,6 @@ async function tryLoadFromGitHub() {
     const data = await resp.json();
     if (!Array.isArray(data.sites) || data.sites.length === 0) return null;
 
-    // Accept data up to 5 days old (covers weekends + holidays)
     const dataDate = new Date(data.date + 'T00:00:00');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -619,12 +639,27 @@ async function tryLoadFromGitHub() {
     return null;
   }
 }
+
+async function tryLoadHistory() {
+  try {
+    const resp = await fetch('data/history.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data || !data.sites) return null;
+    console.log(`Loaded history.json: ${data.site_count} sites, months ${data.months?.join(', ')}`);
+    return data;
+  } catch (e) {
+    console.log('No history.json available:', e.message);
+    return null;
+  }
+}
+
  async function refreshData() {
   if (IS_DEMO) { renderAll(); return; }
   
-  // Try GitHub-hosted JSON first — instant, no Microsoft login needed
   setStatus('loading', 'Checking for today\'s data…');
-  const cached = await tryLoadFromGitHub();
+  const [cached, hist] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory()]);
+  if (hist) HISTORY_DATA = hist;
   if (cached) {
     RAW_DATA = cached;
     renderAll();
@@ -647,7 +682,6 @@ async function tryLoadFromGitHub() {
   setProgress(10);
 
   try {
-    // Find the OneDrive folder
     const folderPath = CONFIG.folder.replace(/^\//, '');
     const rootRes = await graphFetch('https://graph.microsoft.com/v1.0/me/drive/root/children');
     if (!rootRes.ok) throw new Error('Cannot access OneDrive. Check your Microsoft account permissions.');
@@ -655,13 +689,11 @@ async function tryLoadFromGitHub() {
     const folder = (rootData.value||[]).find(f => f.name === folderPath);
     if (!folder) throw new Error(`Folder "${folderPath}" not found in OneDrive.`);
 
-    // List all files
     const listRes = await graphFetch(`https://graph.microsoft.com/v1.0/me/drive/items/${folder.id}/children?$orderby=lastModifiedDateTime desc&$top=100`);
     if (!listRes.ok) throw new Error('Cannot list OneDrive folder contents.');
     const listData = await listRes.json();
     const allFiles = listData.value || [];
 
-    // Try to load pre-processed JSON files first (instant, no Claude API needed)
     const jsonFiles = allFiles.filter(f => f.name.endsWith('.json'));
     const todayJsonFiles = getTodaysFiles(jsonFiles);
 
@@ -696,7 +728,6 @@ async function tryLoadFromGitHub() {
       }
     }
 
-    // Fallback: no JSON files yet — process PDFs with Claude (first-time setup)
     const pdfFiles = allFiles.filter(f => f.name.endsWith('.pdf'));
     if (pdfFiles.length === 0) throw new Error('No reports found in OneDrive. Check Power Automate is running.');
     const todayFiles = getTodaysFiles(pdfFiles);
@@ -871,7 +902,7 @@ Return this exact structure (use null for missing values, numbers not strings fo
   });
 
   if (response.status === 429) {
-    await new Promise(r => setTimeout(r, 30000)); // wait 30s on rate limit
+    await new Promise(r => setTimeout(r, 30000));
     throw new Error('Rate limited by Claude API. Please wait 30 seconds and try again.');
   }
   if (!response.ok) throw new Error('Claude API error: ' + response.status);
@@ -880,7 +911,6 @@ Return this exact structure (use null for missing values, numbers not strings fo
   try { return JSON.parse(text); }
   catch(e) { console.error('Parse error for', filename, text); return null; }
 }
-
 // ─────────────────────────────────────────────
 // DEMO DATA
 // ─────────────────────────────────────────────
@@ -997,6 +1027,7 @@ function renderAll() {
   renderRevenue();
   renderDetails();
   renderArrears();
+  renderTrends();
 }
 
 function applyFiltersNoRender() {
@@ -1076,7 +1107,7 @@ function renderKPIs() {
 function renderOverview() {
   const sites = FILTERED_DATA.map(d => d.site_name.replace('1BOX ',''));
   const actRev = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
-  const budRev = FILTERED_DATA.map(d => (d.revenue?.net_total || 0) * (0.85 + Math.random()*0.2)); // simulated budget
+  const budRev = FILTERED_DATA.map(d => (d.revenue?.net_total || 0) * (0.85 + Math.random()*0.2));
   const actOcc = FILTERED_DATA.map(d => d.occupancy?.surface_pct || 0);
   const budOcc = FILTERED_DATA.map(d => Math.min(100, (d.occupancy?.surface_pct || 0) * (0.9 + Math.random()*0.15)));
   const netRentals = FILTERED_DATA.map(d => d.rentals?.net_month || 0);
@@ -1205,7 +1236,6 @@ function renderOccupancy() {
     mkDonut('ch-donut', donutLabels, donutData, donutColors);
   });
 }
-
 // ─────────────────────────────────────────────
 // RENTALS TAB
 // ─────────────────────────────────────────────
@@ -1313,7 +1343,6 @@ function renderRevenue() {
   const sites = FILTERED_DATA.map(d => d.site_name.replace('1BOX ',''));
   const netRevData = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
   const grossRevData = FILTERED_DATA.map(d => d.revenue?.gross_total || 0);
-  const ratesData = FILTERED_DATA.map(d => d.revenue?.avg_rate_per_sqm || 0);
 
   document.getElementById('panel-revenue').innerHTML = `
     <div class="grid-4" style="margin-bottom:16px">
@@ -1459,6 +1488,161 @@ function renderArrears() {
 }
 
 // ─────────────────────────────────────────────
+// TRENDS TAB
+// ─────────────────────────────────────────────
+function renderTrends() {
+  const panel = document.getElementById('panel-trends');
+  if (!panel) return;
+
+  let scopeLabel;
+  if (CURRENT_SITE !== 'all') {
+    scopeLabel = CURRENT_SITE;
+  } else if (CURRENT_COUNTRY === 'fr') {
+    scopeLabel = 'France';
+  } else if (CURRENT_COUNTRY === 'nl') {
+    scopeLabel = 'Netherlands';
+  } else {
+    scopeLabel = 'Portfolio';
+  }
+
+  if (!HISTORY_DATA || !HISTORY_DATA.sites) {
+    panel.innerHTML = `
+      <div class="trends-header">
+        <div class="trends-scope">${scopeLabel} — YTD</div>
+      </div>
+      <div class="empty-state">
+        <div class="big">📈</div>
+        <p>No historical data available yet.<br>Run <code>backfill_historicals.py</code> to generate <code>data/history.json</code>.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const isAllSites = (CURRENT_SITE === 'all');
+  const filteredSiteEntries = Object.values(HISTORY_DATA.sites).filter(site => {
+    if (site.is_rollup) {
+      if (!isAllSites && site.name === CURRENT_SITE) return true;
+      return false;
+    }
+    if (!isAllSites) {
+      return site.name === CURRENT_SITE;
+    }
+    if (CURRENT_COUNTRY === 'fr') return site.country === 'FR';
+    if (CURRENT_COUNTRY === 'nl') return site.country === 'NL';
+    return true;
+  });
+
+  if (filteredSiteEntries.length === 0) {
+    panel.innerHTML = `
+      <div class="trends-header">
+        <div class="trends-scope">${scopeLabel} — YTD</div>
+      </div>
+      <div class="empty-state">
+        <div class="big">📈</div>
+        <p>No historical data for this selection.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const monthSet = new Set();
+  filteredSiteEntries.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
+  const months = [...monthSet].sort();
+
+  const occSeries = [];
+  const revSeries = [];
+  const netRentalsSeries = [];
+  const avgRateSeries = [];
+
+  months.forEach(m => {
+    let totalRentedSqm = 0, totalSqm = 0;
+    let totalRev = 0;
+    let totalNet = 0;
+    let weightedRateNum = 0, weightedRateDen = 0;
+
+    filteredSiteEntries.forEach(s => {
+      const entry = (s.series || []).find(e => e.month === m);
+      if (!entry) return;
+      const occ = entry.occupancy || {};
+      const rev = entry.revenue || {};
+      const rentals = entry.rentals || {};
+      totalRentedSqm += occ.rented_sqm || 0;
+      totalSqm += occ.total_sqm || 0;
+      totalRev += rev.net_total || 0;
+      totalNet += rentals.net_month || 0;
+      if (rev.avg_rate_per_sqm && occ.rented_sqm) {
+        weightedRateNum += rev.avg_rate_per_sqm * occ.rented_sqm;
+        weightedRateDen += occ.rented_sqm;
+      }
+    });
+
+    occSeries.push(totalSqm > 0 ? (totalRentedSqm / totalSqm * 100) : null);
+    revSeries.push(totalRev);
+    netRentalsSeries.push(totalNet);
+    avgRateSeries.push(weightedRateDen > 0 ? (weightedRateNum / weightedRateDen) : null);
+  });
+
+  const monthLabels = months.map(m => {
+    const [y, mo] = m.split('-');
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[parseInt(mo,10)-1] + ' ' + y;
+  });
+
+  const dataPointCount = months.length;
+  const subLabel = `${dataPointCount} data point${dataPointCount === 1 ? '' : 's'} (monthly)`;
+
+  panel.innerHTML = `
+    <div class="trends-header">
+      <div class="trends-scope">${scopeLabel} — YTD<span class="muted-sub">${subLabel}</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="trend-chart-card">
+        <div class="card-title">Occupancy</div>
+        <div class="trend-chart-inner"><canvas id="ch-trend-occ"></canvas></div>
+      </div>
+      <div class="trend-chart-card">
+        <div class="card-title">Revenue</div>
+        <div class="trend-chart-inner"><canvas id="ch-trend-rev"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="grid-2">
+      <div class="trend-chart-card">
+        <div class="card-title">Net Rentals</div>
+        <div class="trend-chart-inner"><canvas id="ch-trend-net"></canvas></div>
+      </div>
+      <div class="trend-chart-card">
+        <div class="card-title">Avg Rate/m²</div>
+        <div class="trend-chart-inner"><canvas id="ch-trend-rate"></canvas></div>
+      </div>
+    </div>
+  `;
+
+  nextTick(() => {
+    mkLineChart('ch-trend-occ', monthLabels, occSeries, {
+      color: '#22c55e',
+      yFmt: v => v + '%',
+      yMin: 0, yMax: 100,
+      stepSize: 25
+    });
+    mkLineChart('ch-trend-rev', monthLabels, revSeries, {
+      color: '#22c55e',
+      yFmt: v => '€' + (v/1000).toFixed(0) + 'k',
+      yMin: 0
+    });
+    mkLineChart('ch-trend-net', monthLabels, netRentalsSeries, {
+      color: '#f59e0b',
+      yFmt: v => v
+    });
+    mkLineChart('ch-trend-rate', monthLabels, avgRateSeries, {
+      color: '#a855f7',
+      yFmt: v => '€' + Number(v).toFixed(0),
+      yMin: 0
+    });
+  });
+}
+
+// ─────────────────────────────────────────────
 // CHART HELPERS
 // ─────────────────────────────────────────────
 function getGreen() { return 'rgba(34,197,94,0.75)'; }
@@ -1513,6 +1697,77 @@ function mkDonut(id, labels, data, colors) {
   });
 }
 
+function mkLineChart(id, labels, data, opts) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+  opts = opts || {};
+  const color = opts.color || '#22c55e';
+  const yScale = {
+    ticks: {
+      color: '#6b7280',
+      font: { family: 'DM Mono', size: 10 },
+      callback: function(v) { return opts.yFmt ? opts.yFmt(v) : v; }
+    },
+    grid: { color: 'rgba(42,45,53,0.8)', borderDash: [3,3] }
+  };
+  if (opts.yMin !== undefined) yScale.min = opts.yMin;
+  if (opts.yMax !== undefined) yScale.max = opts.yMax;
+  if (opts.stepSize) yScale.ticks.stepSize = opts.stepSize;
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: '',
+        data,
+        borderColor: color,
+        backgroundColor: 'transparent',
+        pointBackgroundColor: '#16181c',
+        pointBorderColor: color,
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2,
+        tension: 0.35,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e2127',
+          borderColor: '#2a2d35',
+          borderWidth: 1,
+          titleColor: '#e8eaf0',
+          bodyColor: '#e8eaf0',
+          titleFont: { family: 'DM Mono', size: 11 },
+          bodyFont: { family: 'DM Mono', size: 11 },
+          padding: 10,
+          callbacks: {
+            label: function(ctx) {
+              const v = ctx.parsed.y;
+              if (v === null || v === undefined) return 'No data';
+              return opts.yFmt ? opts.yFmt(v) : v;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 } },
+          grid: { display: false }
+        },
+        y: yScale
+      }
+    }
+  });
+}
+
 // ─────────────────────────────────────────────
 // TAB SWITCHING
 // ─────────────────────────────────────────────
@@ -1547,8 +1802,8 @@ function nextTick(fn) { setTimeout(fn, 50); }
 // INIT
 // ─────────────────────────────────────────────
 window.addEventListener('load', async () => {
-  // Try GitHub cache first — if today's data is there, skip the login screen entirely
-  const cached = await tryLoadFromGitHub();
+  const [cached, hist] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory()]);
+  if (hist) HISTORY_DATA = hist;
   if (cached) {
     IS_DEMO = false;
     RAW_DATA = cached;
@@ -1574,7 +1829,6 @@ window.addEventListener('load', async () => {
     document.getElementById('cfg-client-id').value = CONFIG.clientId || '';
     document.getElementById('cfg-folder').value = CONFIG.folder || '/1Box MIS Reports';
     document.getElementById('cfg-api-key').value = CONFIG.apiKey || '';
-    // Check for returning OAuth token
     if (window.location.hash.includes('access_token')) {
       document.getElementById('config-modal').classList.add('hidden');
       document.getElementById('app').classList.add('visible');
