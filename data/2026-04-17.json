@@ -1,7 +1,9 @@
 {
   "date": "2026-04-17",
-  "updated_at": "2026-04-17T17:40:13.324376",
-  "site_count": 34,
+  "fetched_at_date": "2026-04-18",
+  "is_stale": true,
+  "updated_at": "2026-04-18T10:35:34.493296",
+  "site_count": 32,
   "files_processed": 34,
   "sites": [
     {
@@ -27,16 +29,24 @@
       "rentals": {
         "move_ins_today": 1,
         "move_ins_week": 7,
-        "move_ins_month": 20,
-        "move_ins_year": 104,
+        "move_ins_month": 19,
+        "move_ins_year": 95,
         "vacates_today": 0,
         "vacates_week": 1,
-        "vacates_month": 11,
-        "vacates_year": 84,
+        "vacates_month": 10,
+        "vacates_year": 73,
         "net_today": 1,
         "net_week": 6,
         "net_month": 9,
-        "net_year": 20
+        "net_year": 22,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 1,
+        "transfers_in_year": 9,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 1,
+        "transfers_out_year": 11
       },
       "revenue": {
         "gross_rent": 48380.65,
@@ -66,7 +76,7 @@
         "pct_insured": 87.5
       },
       "_source_file": "2026-04-17_MIS 1BOX FR-01-Six-Fours-639120693085917479.pdf",
-      "_processed_at": "2026-04-17T17:32:22.206195"
+      "_processed_at": "2026-04-18T10:29:15.447390"
     },
     {
       "site_name": "1BOX Colomiers",
@@ -90,17 +100,25 @@
       },
       "rentals": {
         "move_ins_today": 0,
-        "move_ins_week": 2,
-        "move_ins_month": 10,
-        "move_ins_year": 74,
+        "move_ins_week": 1,
+        "move_ins_month": 9,
+        "move_ins_year": 58,
         "vacates_today": 0,
-        "vacates_week": 3,
-        "vacates_month": 9,
-        "vacates_year": 68,
+        "vacates_week": 2,
+        "vacates_month": 7,
+        "vacates_year": 51,
         "net_today": 0,
         "net_week": -1,
-        "net_month": 1,
-        "net_year": 6
+        "net_month": 2,
+        "net_year": 7,
+        "transfers_in_today": 0,
+        "transfers_in_week": 1,
+        "transfers_in_month": 1,
+        "transfers_in_year": 16,
+        "transfers_out_today": 0,
+        "transfers_out_week": 1,
+        "transfers_out_month": 2,
+        "transfers_out_year": 17
       },
       "revenue": {
         "gross_rent": 29731.31,
@@ -130,7 +148,7 @@
         "pct_insured": 77.9
       },
       "_source_file": "2026-04-17_MIS 1BOX FR-02-Colomiers-639120693093886372.pdf",
-      "_processed_at": "2026-04-17T17:32:36.395861"
+      "_processed_at": "2026-04-18T10:29:26.513386"
     },
     {
       "site_name": "1BOX Mérignac",
@@ -154,17 +172,25 @@
       },
       "rentals": {
         "move_ins_today": 0,
-        "move_ins_week": 2,
-        "move_ins_month": 13,
-        "move_ins_year": 108,
+        "move_ins_week": 1,
+        "move_ins_month": 12,
+        "move_ins_year": 104,
         "vacates_today": 0,
-        "vacates_week": 2,
-        "vacates_month": 8,
-        "vacates_year": 56,
+        "vacates_week": 1,
+        "vacates_month": 7,
+        "vacates_year": 50,
         "net_today": 0,
         "net_week": 0,
         "net_month": 5,
-        "net_year": 52
+        "net_year": 54,
+        "transfers_in_today": 0,
+        "transfers_in_week": 1,
+        "transfers_in_month": 1,
+        "transfers_in_year": 4,
+        "transfers_out_today": 0,
+        "transfers_out_week": 1,
+        "transfers_out_month": 1,
+        "transfers_out_year": 6
       },
       "revenue": {
         "gross_rent": 33191.01,
@@ -185,7 +211,7 @@
         "arrears_30_plus": 1725.66,
         "arrears_count": 17,
         "payment_without_inv": 1520.8,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 271,
@@ -194,71 +220,7 @@
         "pct_insured": 88.0
       },
       "_source_file": "2026-04-17_MIS 1BOX FR-03-Mérignac-639120693097167710.pdf",
-      "_processed_at": "2026-04-17T17:32:51.202329"
-    },
-    {
-      "site_name": "1BOX",
-      "country": "FR",
-      "date": "2026-04-17",
-      "occupancy": {
-        "unit_pct": 61.5,
-        "surface_pct": 64.6,
-        "total_units": 1619,
-        "rented_units": 995,
-        "vacant_units": 597,
-        "total_sqm": 10310.52,
-        "rented_sqm": 6656.98,
-        "vacant_sqm": 3443.65,
-        "locked_units": 42,
-        "terminated_units": 27,
-        "reserved_units": 2,
-        "out_of_order_units": 15,
-        "business_units": 210,
-        "private_units": 785
-      },
-      "rentals": {
-        "move_ins_today": 1,
-        "move_ins_week": 11,
-        "move_ins_month": 43,
-        "move_ins_year": 286,
-        "vacates_today": 0,
-        "vacates_week": 6,
-        "vacates_month": 28,
-        "vacates_year": 208,
-        "net_today": 1,
-        "net_week": 5,
-        "net_month": 15,
-        "net_year": 78
-      },
-      "revenue": {
-        "gross_rent": 111302.97,
-        "discounts": 12215.3,
-        "net_rent": 99087.67,
-        "gross_insurance": 16908.38,
-        "net_insurance": 16908.38,
-        "gross_total": 130876.63,
-        "net_total": 118661.33,
-        "invoiced_in_advance": 152162.74,
-        "current_rent_amount": 97386.6,
-        "max_rent_potential": 177722.76,
-        "avg_rate_per_sqm": 14.63,
-        "max_rate_per_sqm": 17.24
-      },
-      "arrears": {
-        "outstanding_total": 148526.61,
-        "arrears_30_plus": 14223.41,
-        "arrears_count": 155,
-        "payment_without_inv": 2380.97,
-        "doubtful_debtors": 0.0
-      },
-      "insurance": {
-        "policies_count": 838,
-        "insured_value": 4134300.0,
-        "premium_total": 16580.0,
-        "pct_insured": 84.2
-      },
-      "_source_file": "2026-04-17_MIS 1BOX FR-639120693100917690.pdf",
-      "_processed_at": "2026-04-17T17:33:05.336036"
+      "_processed_at": "2026-04-18T10:29:38.321314"
     },
     {
       "site_name": "1BOX Eindhoven Best",
@@ -284,15 +246,23 @@
         "move_ins_today": 0,
         "move_ins_week": 0,
         "move_ins_month": 5,
-        "move_ins_year": 31,
+        "move_ins_year": 29,
         "vacates_today": 0,
         "vacates_week": 4,
         "vacates_month": 11,
-        "vacates_year": 45,
+        "vacates_year": 43,
         "net_today": 0,
         "net_week": -4,
         "net_month": -6,
-        "net_year": -14
+        "net_year": -14,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 2,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 2
       },
       "revenue": {
         "gross_rent": 28816.05,
@@ -313,7 +283,7 @@
         "arrears_30_plus": 694.85,
         "arrears_count": 36,
         "payment_without_inv": 156.0,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 219,
@@ -322,7 +292,7 @@
         "pct_insured": 85.9
       },
       "_source_file": "2026-04-17_MIS 1BOX-01-Eindhoven-Best-639120690092929822.pdf",
-      "_processed_at": "2026-04-17T17:33:19.491814"
+      "_processed_at": "2026-04-18T10:30:02.040251"
     },
     {
       "site_name": "1BOX 's-Hertogenbosch",
@@ -348,15 +318,23 @@
         "move_ins_today": 0,
         "move_ins_week": 3,
         "move_ins_month": 13,
-        "move_ins_year": 70,
+        "move_ins_year": 59,
         "vacates_today": 0,
         "vacates_week": 4,
         "vacates_month": 4,
-        "vacates_year": 73,
+        "vacates_year": 61,
         "net_today": 0,
         "net_week": -1,
         "net_month": 9,
-        "net_year": -3
+        "net_year": -2,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 11,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 12
       },
       "revenue": {
         "gross_rent": 41870.3,
@@ -377,7 +355,7 @@
         "arrears_30_plus": 502.38,
         "arrears_count": 22,
         "payment_without_inv": -332.92,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 315,
@@ -386,7 +364,7 @@
         "pct_insured": 86.1
       },
       "_source_file": "2026-04-17_MIS 1BOX-02-Den Bosch-639120690102773730.pdf",
-      "_processed_at": "2026-04-17T17:33:34.010119"
+      "_processed_at": "2026-04-18T10:30:16.361849"
     },
     {
       "site_name": "1BOX Nijmegen-Wijchen",
@@ -411,16 +389,24 @@
       "rentals": {
         "move_ins_today": 0,
         "move_ins_week": 0,
-        "move_ins_month": 15,
-        "move_ins_year": 44,
+        "move_ins_month": 14,
+        "move_ins_year": 39,
         "vacates_today": 0,
         "vacates_week": 3,
-        "vacates_month": 4,
-        "vacates_year": 40,
+        "vacates_month": 3,
+        "vacates_year": 35,
         "net_today": 0,
         "net_week": -3,
         "net_month": 11,
-        "net_year": 4
+        "net_year": 4,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 1,
+        "transfers_in_year": 5,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 1,
+        "transfers_out_year": 5
       },
       "revenue": {
         "gross_rent": 22726.72,
@@ -441,7 +427,7 @@
         "arrears_30_plus": 2703.77,
         "arrears_count": 32,
         "payment_without_inv": 238.37,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 219,
@@ -450,7 +436,7 @@
         "pct_insured": 91.2
       },
       "_source_file": "2026-04-17_MIS 1BOX-03-Nijmegen-Wijchen-639120690105898764.pdf",
-      "_processed_at": "2026-04-17T17:33:48.342244"
+      "_processed_at": "2026-04-18T10:30:27.133780"
     },
     {
       "site_name": "1BOX Boxtel",
@@ -467,7 +453,7 @@
         "vacant_sqm": 64.84,
         "locked_units": 4,
         "terminated_units": 7,
-        "reserved_units": 0,
+        "reserved_units": 1,
         "out_of_order_units": 1,
         "business_units": 20,
         "private_units": 96
@@ -476,15 +462,23 @@
         "move_ins_today": 0,
         "move_ins_week": 0,
         "move_ins_month": 1,
-        "move_ins_year": 21,
+        "move_ins_year": 20,
         "vacates_today": 0,
         "vacates_week": 2,
         "vacates_month": 4,
-        "vacates_year": 21,
+        "vacates_year": 19,
         "net_today": 0,
         "net_week": -2,
         "net_month": -3,
-        "net_year": 0
+        "net_year": 1,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 1,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 2
       },
       "revenue": {
         "gross_rent": 14312.3,
@@ -496,9 +490,9 @@
         "net_total": 16124.71,
         "invoiced_in_advance": 16100.45,
         "current_rent_amount": 13812.0,
-        "max_rent_potential": 12956.0,
+        "max_rent_potential": 13882.0,
         "avg_rate_per_sqm": 21.83,
-        "max_rate_per_sqm": 18.38
+        "max_rate_per_sqm": 21.94
       },
       "arrears": {
         "outstanding_total": 15189.46,
@@ -514,7 +508,7 @@
         "pct_insured": 82.8
       },
       "_source_file": "2026-04-17_MIS 1BOX-04-Boxtel-639120690108867553.pdf",
-      "_processed_at": "2026-04-17T17:34:04.630675"
+      "_processed_at": "2026-04-18T10:30:37.939121"
     },
     {
       "site_name": "1BOX Rijswijk",
@@ -532,7 +526,7 @@
         "locked_units": 17,
         "terminated_units": 2,
         "reserved_units": 4,
-        "out_of_order_units": 0,
+        "out_of_order_units": 3,
         "business_units": 75,
         "private_units": 505
       },
@@ -540,15 +534,23 @@
         "move_ins_today": 2,
         "move_ins_week": 4,
         "move_ins_month": 13,
-        "move_ins_year": 64,
+        "move_ins_year": 52,
         "vacates_today": 1,
         "vacates_week": 3,
         "vacates_month": 6,
-        "vacates_year": 72,
+        "vacates_year": 59,
         "net_today": 1,
         "net_week": 1,
         "net_month": 7,
-        "net_year": -8
+        "net_year": -7,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 12,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 13
       },
       "revenue": {
         "gross_rent": 61415.53,
@@ -569,7 +571,7 @@
         "arrears_30_plus": 3362.32,
         "arrears_count": 79,
         "payment_without_inv": 217.93,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 417,
@@ -578,7 +580,7 @@
         "pct_insured": 71.9
       },
       "_source_file": "2026-04-17_MIS 1BOX-05-Rijswijk-639120690111992553.pdf",
-      "_processed_at": "2026-04-17T17:34:18.734008"
+      "_processed_at": "2026-04-18T10:30:48.779734"
     },
     {
       "site_name": "1BOX Groningen",
@@ -603,16 +605,24 @@
       "rentals": {
         "move_ins_today": 0,
         "move_ins_week": 0,
-        "move_ins_month": 5,
-        "move_ins_year": 54,
+        "move_ins_month": 4,
+        "move_ins_year": 46,
         "vacates_today": 0,
         "vacates_week": 1,
-        "vacates_month": 7,
-        "vacates_year": 65,
+        "vacates_month": 5,
+        "vacates_year": 54,
         "net_today": 0,
         "net_week": -1,
-        "net_month": -2,
-        "net_year": -11
+        "net_month": -1,
+        "net_year": -8,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 1,
+        "transfers_in_year": 8,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 2,
+        "transfers_out_year": 11
       },
       "revenue": {
         "gross_rent": 28014.35,
@@ -626,7 +636,7 @@
         "current_rent_amount": 27543.25,
         "max_rent_potential": 30603.5,
         "avg_rate_per_sqm": 21.58,
-        "max_rate_per_sqm": 21.85
+        "max_rate_per_sqm": 19.67
       },
       "arrears": {
         "outstanding_total": 30404.44,
@@ -642,7 +652,7 @@
         "pct_insured": 74.6
       },
       "_source_file": "2026-04-17_MIS 1BOX-06-Groningen-639120690114961441.pdf",
-      "_processed_at": "2026-04-17T17:34:33.390355"
+      "_processed_at": "2026-04-18T10:31:00.001487"
     },
     {
       "site_name": "1BOX Venlo",
@@ -660,7 +670,7 @@
         "locked_units": 2,
         "terminated_units": 5,
         "reserved_units": 0,
-        "out_of_order_units": 0,
+        "out_of_order_units": 3,
         "business_units": 25,
         "private_units": 133
       },
@@ -668,15 +678,23 @@
         "move_ins_today": 1,
         "move_ins_week": 2,
         "move_ins_month": 5,
-        "move_ins_year": 30,
+        "move_ins_year": 25,
         "vacates_today": 0,
         "vacates_week": 6,
         "vacates_month": 6,
-        "vacates_year": 35,
+        "vacates_year": 28,
         "net_today": 1,
         "net_week": -4,
         "net_month": -1,
-        "net_year": -5
+        "net_year": -3,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 5,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 7
       },
       "revenue": {
         "gross_rent": 17786.36,
@@ -697,7 +715,7 @@
         "arrears_30_plus": 450.81,
         "arrears_count": 8,
         "payment_without_inv": 442.52,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 134,
@@ -706,7 +724,7 @@
         "pct_insured": 84.8
       },
       "_source_file": "2026-04-17_MIS 1BOX-07-Venlo-639120690118086391.pdf",
-      "_processed_at": "2026-04-17T17:34:47.637059"
+      "_processed_at": "2026-04-18T10:31:10.899560"
     },
     {
       "site_name": "1BOX Roermond",
@@ -723,8 +741,8 @@
         "vacant_sqm": 68.5,
         "locked_units": 2,
         "terminated_units": 9,
-        "reserved_units": 0,
-        "out_of_order_units": 0,
+        "reserved_units": 1,
+        "out_of_order_units": 2,
         "business_units": 15,
         "private_units": 152
       },
@@ -732,15 +750,23 @@
         "move_ins_today": 0,
         "move_ins_week": 1,
         "move_ins_month": 4,
-        "move_ins_year": 33,
+        "move_ins_year": 29,
         "vacates_today": 0,
         "vacates_week": 2,
         "vacates_month": 5,
-        "vacates_year": 30,
+        "vacates_year": 25,
         "net_today": 0,
         "net_week": -1,
         "net_month": -1,
-        "net_year": 3
+        "net_year": 4,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 4,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 5
       },
       "revenue": {
         "gross_rent": 18451.7,
@@ -761,7 +787,7 @@
         "arrears_30_plus": -361.16,
         "arrears_count": 11,
         "payment_without_inv": 74.39,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 149,
@@ -770,7 +796,7 @@
         "pct_insured": 89.2
       },
       "_source_file": "2026-04-17_MIS 1BOX-08-Roermond-639120690120898950.pdf",
-      "_processed_at": "2026-04-17T17:35:01.573483"
+      "_processed_at": "2026-04-18T10:31:22.043325"
     },
     {
       "site_name": "1BOX Sittard",
@@ -796,15 +822,23 @@
         "move_ins_today": 1,
         "move_ins_week": 2,
         "move_ins_month": 6,
-        "move_ins_year": 36,
+        "move_ins_year": 34,
         "vacates_today": 1,
         "vacates_week": 2,
-        "vacates_month": 11,
-        "vacates_year": 37,
+        "vacates_month": 10,
+        "vacates_year": 33,
         "net_today": 0,
         "net_week": 0,
-        "net_month": -5,
-        "net_year": -1
+        "net_month": -4,
+        "net_year": 1,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 2,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 1,
+        "transfers_out_year": 4
       },
       "revenue": {
         "gross_rent": 27591.66,
@@ -825,7 +859,7 @@
         "arrears_30_plus": 4395.62,
         "arrears_count": 37,
         "payment_without_inv": 551.18,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 171,
@@ -834,7 +868,7 @@
         "pct_insured": 84.2
       },
       "_source_file": "2026-04-17_MIS 1BOX-09-Sittard-639120690124024025.pdf",
-      "_processed_at": "2026-04-17T17:35:15.290019"
+      "_processed_at": "2026-04-18T10:31:33.279421"
     },
     {
       "site_name": "1BOX Heerlen",
@@ -859,16 +893,24 @@
       "rentals": {
         "move_ins_today": 0,
         "move_ins_week": 1,
-        "move_ins_month": 8,
-        "move_ins_year": 32,
+        "move_ins_month": 6,
+        "move_ins_year": 26,
         "vacates_today": 1,
         "vacates_week": 1,
-        "vacates_month": 3,
-        "vacates_year": 31,
+        "vacates_month": 1,
+        "vacates_year": 25,
         "net_today": -1,
         "net_week": 0,
         "net_month": 5,
-        "net_year": 1
+        "net_year": 1,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 2,
+        "transfers_in_year": 6,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 2,
+        "transfers_out_year": 6
       },
       "revenue": {
         "gross_rent": 14845.3,
@@ -882,14 +924,14 @@
         "current_rent_amount": 14440.5,
         "max_rent_potential": 14658.5,
         "avg_rate_per_sqm": 14.53,
-        "max_rate_per_sqm": 14.75
+        "max_rate_per_sqm": 12.12
       },
       "arrears": {
         "outstanding_total": 19164.1,
         "arrears_30_plus": 378.18,
         "arrears_count": 18,
         "payment_without_inv": -158.73,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 139,
@@ -898,7 +940,7 @@
         "pct_insured": 93.3
       },
       "_source_file": "2026-04-17_MIS 1BOX-10-Heerlen-639120690126992862.pdf",
-      "_processed_at": "2026-04-17T17:35:32.381179"
+      "_processed_at": "2026-04-18T10:31:44.508668"
     },
     {
       "site_name": "1BOX Bergen op Zoom",
@@ -922,17 +964,25 @@
       },
       "rentals": {
         "move_ins_today": 2,
-        "move_ins_week": 4,
-        "move_ins_month": 8,
-        "move_ins_year": 28,
+        "move_ins_week": 3,
+        "move_ins_month": 6,
+        "move_ins_year": 22,
         "vacates_today": 5,
-        "vacates_week": 8,
-        "vacates_month": 9,
-        "vacates_year": 35,
+        "vacates_week": 7,
+        "vacates_month": 7,
+        "vacates_year": 29,
         "net_today": -3,
         "net_week": -4,
         "net_month": -1,
-        "net_year": -7
+        "net_year": -7,
+        "transfers_in_today": 0,
+        "transfers_in_week": 1,
+        "transfers_in_month": 2,
+        "transfers_in_year": 6,
+        "transfers_out_today": 0,
+        "transfers_out_week": 1,
+        "transfers_out_month": 2,
+        "transfers_out_year": 6
       },
       "revenue": {
         "gross_rent": 19635.47,
@@ -962,7 +1012,7 @@
         "pct_insured": 71.4
       },
       "_source_file": "2026-04-17_MIS 1BOX-11-Bergen op Zoom-639120690130117876.pdf",
-      "_processed_at": "2026-04-17T17:35:46.308697"
+      "_processed_at": "2026-04-18T10:31:56.190699"
     },
     {
       "site_name": "1BOX Goes",
@@ -988,15 +1038,23 @@
         "move_ins_today": 1,
         "move_ins_week": 2,
         "move_ins_month": 7,
-        "move_ins_year": 40,
+        "move_ins_year": 37,
         "vacates_today": 0,
         "vacates_week": 1,
         "vacates_month": 7,
-        "vacates_year": 36,
+        "vacates_year": 33,
         "net_today": 1,
         "net_week": 1,
         "net_month": 0,
-        "net_year": 4
+        "net_year": 4,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 3,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 3
       },
       "revenue": {
         "gross_rent": 27227.23,
@@ -1017,7 +1075,7 @@
         "arrears_30_plus": 1051.22,
         "arrears_count": 16,
         "payment_without_inv": -123.86,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 162,
@@ -1026,7 +1084,7 @@
         "pct_insured": 73.0
       },
       "_source_file": "2026-04-17_MIS 1BOX-12-Goes-639120690133086751.pdf",
-      "_processed_at": "2026-04-17T17:36:00.405448"
+      "_processed_at": "2026-04-18T10:32:07.279323"
     },
     {
       "site_name": "1BOX Hellevoetsluis",
@@ -1051,16 +1109,24 @@
       "rentals": {
         "move_ins_today": 1,
         "move_ins_week": 4,
-        "move_ins_month": 9,
-        "move_ins_year": 47,
+        "move_ins_month": 8,
+        "move_ins_year": 43,
         "vacates_today": 0,
         "vacates_week": 7,
-        "vacates_month": 9,
-        "vacates_year": 45,
+        "vacates_month": 8,
+        "vacates_year": 41,
         "net_today": 1,
         "net_week": -3,
         "net_month": 0,
-        "net_year": 2
+        "net_year": 2,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 1,
+        "transfers_in_year": 4,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 1,
+        "transfers_out_year": 4
       },
       "revenue": {
         "gross_rent": 38936.41,
@@ -1080,8 +1146,8 @@
         "outstanding_total": 42055.02,
         "arrears_30_plus": 569.74,
         "arrears_count": 33,
-        "payment_without_inv": 0.0,
-        "doubtful_debtors": 0.0
+        "payment_without_inv": 0,
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 232,
@@ -1090,7 +1156,7 @@
         "pct_insured": 80.6
       },
       "_source_file": "2026-04-17_MIS 1BOX-13-Hellevoetsluis-639120690136211690.pdf",
-      "_processed_at": "2026-04-17T17:36:14.775213"
+      "_processed_at": "2026-04-18T10:32:18.234470"
     },
     {
       "site_name": "1BOX Tilburg",
@@ -1115,16 +1181,24 @@
       "rentals": {
         "move_ins_today": 0,
         "move_ins_week": 3,
-        "move_ins_month": 13,
-        "move_ins_year": 90,
+        "move_ins_month": 12,
+        "move_ins_year": 82,
         "vacates_today": 0,
         "vacates_week": 3,
-        "vacates_month": 11,
-        "vacates_year": 97,
+        "vacates_month": 9,
+        "vacates_year": 87,
         "net_today": 0,
         "net_week": 0,
-        "net_month": 2,
-        "net_year": -7
+        "net_month": 3,
+        "net_year": -5,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 1,
+        "transfers_in_year": 8,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 2,
+        "transfers_out_year": 10
       },
       "revenue": {
         "gross_rent": 53611.16,
@@ -1154,7 +1228,7 @@
         "pct_insured": 92.6
       },
       "_source_file": "2026-04-17_MIS 1BOX-14-Tilburg-639120690139180481.pdf",
-      "_processed_at": "2026-04-17T17:36:29.061666"
+      "_processed_at": "2026-04-18T10:32:29.497888"
     },
     {
       "site_name": "1BOX Breda",
@@ -1178,17 +1252,25 @@
       },
       "rentals": {
         "move_ins_today": 1,
-        "move_ins_week": 11,
-        "move_ins_month": 21,
-        "move_ins_year": 110,
+        "move_ins_week": 9,
+        "move_ins_month": 17,
+        "move_ins_year": 93,
         "vacates_today": 3,
-        "vacates_week": 8,
-        "vacates_month": 19,
-        "vacates_year": 102,
+        "vacates_week": 6,
+        "vacates_month": 15,
+        "vacates_year": 84,
         "net_today": -2,
         "net_week": 3,
         "net_month": 2,
-        "net_year": 8
+        "net_year": 9,
+        "transfers_in_today": 0,
+        "transfers_in_week": 2,
+        "transfers_in_month": 4,
+        "transfers_in_year": 17,
+        "transfers_out_today": 0,
+        "transfers_out_week": 2,
+        "transfers_out_month": 4,
+        "transfers_out_year": 18
       },
       "revenue": {
         "gross_rent": 35892.1,
@@ -1209,7 +1291,7 @@
         "arrears_30_plus": 1971.39,
         "arrears_count": 76,
         "payment_without_inv": 155.13,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 349,
@@ -1218,7 +1300,7 @@
         "pct_insured": 85.3
       },
       "_source_file": "2026-04-17_MIS 1BOX-15-Breda-639120690142618040.pdf",
-      "_processed_at": "2026-04-17T17:36:42.961206"
+      "_processed_at": "2026-04-18T10:32:41.276278"
     },
     {
       "site_name": "1BOX Den Haag",
@@ -1243,16 +1325,24 @@
       "rentals": {
         "move_ins_today": 1,
         "move_ins_week": 5,
-        "move_ins_month": 19,
-        "move_ins_year": 101,
+        "move_ins_month": 17,
+        "move_ins_year": 82,
         "vacates_today": 0,
         "vacates_week": 7,
-        "vacates_month": 18,
-        "vacates_year": 117,
+        "vacates_month": 16,
+        "vacates_year": 98,
         "net_today": 1,
         "net_week": -2,
         "net_month": 1,
-        "net_year": -16
+        "net_year": -16,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 2,
+        "transfers_in_year": 19,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 2,
+        "transfers_out_year": 19
       },
       "revenue": {
         "gross_rent": 59058.76,
@@ -1273,7 +1363,7 @@
         "arrears_30_plus": 4188.75,
         "arrears_count": 96,
         "payment_without_inv": 945.17,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 569,
@@ -1282,7 +1372,7 @@
         "pct_insured": 93.0
       },
       "_source_file": "2026-04-17_MIS 1BOX-16-Den Haag-639120690145743137.pdf",
-      "_processed_at": "2026-04-17T17:36:57.027853"
+      "_processed_at": "2026-04-18T10:32:53.051864"
     },
     {
       "site_name": "1BOX Utrecht",
@@ -1299,7 +1389,7 @@
         "vacant_sqm": 760.66,
         "locked_units": 15,
         "terminated_units": 12,
-        "reserved_units": 0,
+        "reserved_units": 2,
         "out_of_order_units": 2,
         "business_units": 57,
         "private_units": 347
@@ -1308,15 +1398,23 @@
         "move_ins_today": 3,
         "move_ins_week": 10,
         "move_ins_month": 25,
-        "move_ins_year": 126,
+        "move_ins_year": 117,
         "vacates_today": 0,
         "vacates_week": 5,
         "vacates_month": 5,
-        "vacates_year": 72,
+        "vacates_year": 62,
         "net_today": 3,
         "net_week": 5,
         "net_month": 20,
-        "net_year": 54
+        "net_year": 55,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 9,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 10
       },
       "revenue": {
         "gross_rent": 33389.5,
@@ -1337,7 +1435,7 @@
         "arrears_30_plus": 2572.86,
         "arrears_count": 52,
         "payment_without_inv": 105.52,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 363,
@@ -1346,7 +1444,7 @@
         "pct_insured": 89.9
       },
       "_source_file": "2026-04-17_MIS 1BOX-17-Utrecht-639120690149180710.pdf",
-      "_processed_at": "2026-04-17T17:37:11.054574"
+      "_processed_at": "2026-04-18T10:33:04.212982"
     },
     {
       "site_name": "1BOX Barendrecht",
@@ -1369,18 +1467,26 @@
         "private_units": 392
       },
       "rentals": {
-        "move_ins_today": 2,
-        "move_ins_week": 4,
-        "move_ins_month": 14,
-        "move_ins_year": 93,
-        "vacates_today": 2,
-        "vacates_week": 7,
-        "vacates_month": 11,
-        "vacates_year": 112,
+        "move_ins_today": 1,
+        "move_ins_week": 3,
+        "move_ins_month": 11,
+        "move_ins_year": 72,
+        "vacates_today": 1,
+        "vacates_week": 6,
+        "vacates_month": 7,
+        "vacates_year": 88,
         "net_today": 0,
         "net_week": -3,
-        "net_month": 3,
-        "net_year": -19
+        "net_month": 4,
+        "net_year": -16,
+        "transfers_in_today": 1,
+        "transfers_in_week": 1,
+        "transfers_in_month": 3,
+        "transfers_in_year": 21,
+        "transfers_out_today": 1,
+        "transfers_out_week": 1,
+        "transfers_out_month": 4,
+        "transfers_out_year": 24
       },
       "revenue": {
         "gross_rent": 55206.47,
@@ -1401,7 +1507,7 @@
         "arrears_30_plus": 4177.43,
         "arrears_count": 58,
         "payment_without_inv": 24.3,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 418,
@@ -1410,7 +1516,7 @@
         "pct_insured": 90.1
       },
       "_source_file": "2026-04-17_MIS 1BOX-18-Barendrecht-639120690152305707.pdf",
-      "_processed_at": "2026-04-17T17:37:25.370443"
+      "_processed_at": "2026-04-18T10:33:15.785108"
     },
     {
       "site_name": "1BOX Helmond",
@@ -1435,16 +1541,24 @@
       "rentals": {
         "move_ins_today": 1,
         "move_ins_week": 1,
-        "move_ins_month": 5,
-        "move_ins_year": 26,
+        "move_ins_month": 3,
+        "move_ins_year": 23,
         "vacates_today": 0,
         "vacates_week": 0,
-        "vacates_month": 2,
-        "vacates_year": 35,
+        "vacates_month": 0,
+        "vacates_year": 31,
         "net_today": 1,
         "net_week": 1,
         "net_month": 3,
-        "net_year": -9
+        "net_year": -8,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 2,
+        "transfers_in_year": 3,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 2,
+        "transfers_out_year": 4
       },
       "revenue": {
         "gross_rent": 28590.79,
@@ -1458,14 +1572,14 @@
         "current_rent_amount": 28513.4,
         "max_rent_potential": 30347.0,
         "avg_rate_per_sqm": 19.62,
-        "max_rate_per_sqm": 20.34
+        "max_rate_per_sqm": 17.05
       },
       "arrears": {
         "outstanding_total": 32690.91,
         "arrears_30_plus": 3559.56,
         "arrears_count": 44,
         "payment_without_inv": 140.34,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 136,
@@ -1474,7 +1588,7 @@
         "pct_insured": 59.4
       },
       "_source_file": "2026-04-17_MIS 1BOX-20-Helmond-639120690155899491.pdf",
-      "_processed_at": "2026-04-17T17:37:39.867963"
+      "_processed_at": "2026-04-18T10:33:27.150907"
     },
     {
       "site_name": "1BOX Heerlen-Heerlerbaan",
@@ -1498,17 +1612,25 @@
       },
       "rentals": {
         "move_ins_today": 0,
-        "move_ins_week": 3,
-        "move_ins_month": 8,
-        "move_ins_year": 46,
+        "move_ins_week": 2,
+        "move_ins_month": 7,
+        "move_ins_year": 43,
         "vacates_today": 0,
-        "vacates_week": 3,
-        "vacates_month": 5,
-        "vacates_year": 40,
+        "vacates_week": 2,
+        "vacates_month": 4,
+        "vacates_year": 35,
         "net_today": 0,
         "net_week": 0,
         "net_month": 3,
-        "net_year": 6
+        "net_year": 8,
+        "transfers_in_today": 0,
+        "transfers_in_week": 1,
+        "transfers_in_month": 1,
+        "transfers_in_year": 3,
+        "transfers_out_today": 0,
+        "transfers_out_week": 1,
+        "transfers_out_month": 1,
+        "transfers_out_year": 5
       },
       "revenue": {
         "gross_rent": 17931.96,
@@ -1538,7 +1660,7 @@
         "pct_insured": 89.5
       },
       "_source_file": "2026-04-17_MIS 1BOX-21-Heerlen-Heerlerbaan-639120690158868327.pdf",
-      "_processed_at": "2026-04-17T17:37:53.795461"
+      "_processed_at": "2026-04-18T10:33:39.950599"
     },
     {
       "site_name": "1BOX Rotterdam Centrum",
@@ -1555,24 +1677,32 @@
         "vacant_sqm": 601.97,
         "locked_units": 22,
         "terminated_units": 22,
-        "reserved_units": 4,
+        "reserved_units": 0,
         "out_of_order_units": 4,
         "business_units": 141,
         "private_units": 508
       },
       "rentals": {
         "move_ins_today": 0,
-        "move_ins_week": 6,
-        "move_ins_month": 15,
-        "move_ins_year": 89,
+        "move_ins_week": 5,
+        "move_ins_month": 14,
+        "move_ins_year": 80,
         "vacates_today": 4,
-        "vacates_week": 10,
-        "vacates_month": 13,
-        "vacates_year": 93,
+        "vacates_week": 9,
+        "vacates_month": 12,
+        "vacates_year": 84,
         "net_today": -4,
         "net_week": -4,
         "net_month": 2,
-        "net_year": -4
+        "net_year": -4,
+        "transfers_in_today": 0,
+        "transfers_in_week": 1,
+        "transfers_in_month": 1,
+        "transfers_in_year": 9,
+        "transfers_out_today": 0,
+        "transfers_out_week": 1,
+        "transfers_out_month": 1,
+        "transfers_out_year": 9
       },
       "revenue": {
         "gross_rent": 74956.96,
@@ -1586,7 +1716,7 @@
         "current_rent_amount": 74096.5,
         "max_rent_potential": 75468.0,
         "avg_rate_per_sqm": 25.91,
-        "max_rate_per_sqm": 26.07
+        "max_rate_per_sqm": 21.07
       },
       "arrears": {
         "outstanding_total": 88494.94,
@@ -1602,7 +1732,7 @@
         "pct_insured": 77.0
       },
       "_source_file": "2026-04-17_MIS 1BOX-22-Rotterdam Centrum-639120690162149652.pdf",
-      "_processed_at": "2026-04-17T17:38:07.891489"
+      "_processed_at": "2026-04-18T10:33:50.907847"
     },
     {
       "site_name": "1BOX Schiedam",
@@ -1627,16 +1757,24 @@
       "rentals": {
         "move_ins_today": 0,
         "move_ins_week": 0,
-        "move_ins_month": 11,
-        "move_ins_year": 76,
+        "move_ins_month": 8,
+        "move_ins_year": 63,
         "vacates_today": 0,
-        "vacates_week": 4,
-        "vacates_month": 7,
-        "vacates_year": 69,
+        "vacates_week": 3,
+        "vacates_month": 3,
+        "vacates_year": 50,
         "net_today": 0,
-        "net_week": -4,
-        "net_month": 4,
-        "net_year": 7
+        "net_week": -3,
+        "net_month": 5,
+        "net_year": 13,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 3,
+        "transfers_in_year": 13,
+        "transfers_out_today": 0,
+        "transfers_out_week": 1,
+        "transfers_out_month": 4,
+        "transfers_out_year": 19
       },
       "revenue": {
         "gross_rent": 66723.08,
@@ -1650,14 +1788,14 @@
         "current_rent_amount": 65045.3,
         "max_rent_potential": 66470.8,
         "avg_rate_per_sqm": 24.17,
-        "max_rate_per_sqm": 24.7
+        "max_rate_per_sqm": 19.23
       },
       "arrears": {
         "outstanding_total": 76278.53,
         "arrears_30_plus": 5953.12,
         "arrears_count": 81,
         "payment_without_inv": 261.35,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 383,
@@ -1666,7 +1804,7 @@
         "pct_insured": 81.5
       },
       "_source_file": "2026-04-17_MIS 1BOX-23-Schiedam-639120690165118438.pdf",
-      "_processed_at": "2026-04-17T17:38:21.442884"
+      "_processed_at": "2026-04-18T10:34:02.478947"
     },
     {
       "site_name": "1BOX Rotterdam Zuid",
@@ -1683,7 +1821,7 @@
         "vacant_sqm": 228.1,
         "locked_units": 45,
         "terminated_units": 15,
-        "reserved_units": 0,
+        "reserved_units": 2,
         "out_of_order_units": 1,
         "business_units": 108,
         "private_units": 462
@@ -1691,16 +1829,24 @@
       "rentals": {
         "move_ins_today": 0,
         "move_ins_week": 4,
-        "move_ins_month": 11,
-        "move_ins_year": 91,
+        "move_ins_month": 10,
+        "move_ins_year": 82,
         "vacates_today": 6,
-        "vacates_week": 8,
-        "vacates_month": 10,
-        "vacates_year": 89,
+        "vacates_week": 7,
+        "vacates_month": 8,
+        "vacates_year": 79,
         "net_today": -6,
-        "net_week": -4,
-        "net_month": 1,
-        "net_year": 2
+        "net_week": -3,
+        "net_month": 2,
+        "net_year": 3,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 1,
+        "transfers_in_year": 9,
+        "transfers_out_today": 0,
+        "transfers_out_week": 1,
+        "transfers_out_month": 2,
+        "transfers_out_year": 10
       },
       "revenue": {
         "gross_rent": 72773.07,
@@ -1730,7 +1876,7 @@
         "pct_insured": 84.2
       },
       "_source_file": "2026-04-17_MIS 1BOX-24-Rotterdam Zuid-639120690168399692.pdf",
-      "_processed_at": "2026-04-17T17:38:35.286118"
+      "_processed_at": "2026-04-18T10:34:13.785698"
     },
     {
       "site_name": "1BOX Alphen aan den Rijn",
@@ -1756,15 +1902,23 @@
         "move_ins_today": 2,
         "move_ins_week": 3,
         "move_ins_month": 9,
-        "move_ins_year": 61,
-        "vacates_today": 3,
-        "vacates_week": 9,
-        "vacates_month": 12,
-        "vacates_year": 88,
-        "net_today": -1,
-        "net_week": -6,
-        "net_month": -3,
-        "net_year": -27
+        "move_ins_year": 56,
+        "vacates_today": 2,
+        "vacates_week": 8,
+        "vacates_month": 11,
+        "vacates_year": 82,
+        "net_today": 0,
+        "net_week": -5,
+        "net_month": -2,
+        "net_year": -26,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 5,
+        "transfers_out_today": 1,
+        "transfers_out_week": 1,
+        "transfers_out_month": 1,
+        "transfers_out_year": 6
       },
       "revenue": {
         "gross_rent": 52457.45,
@@ -1785,7 +1939,7 @@
         "arrears_30_plus": 814.9,
         "arrears_count": 25,
         "payment_without_inv": 78.35,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 366,
@@ -1794,7 +1948,7 @@
         "pct_insured": 82.4
       },
       "_source_file": "2026-04-17_MIS 1BOX-25-Alphen aan den Rijn-639120690171368550.pdf",
-      "_processed_at": "2026-04-17T17:38:49.192872"
+      "_processed_at": "2026-04-18T10:34:25.254627"
     },
     {
       "site_name": "1BOX Alkmaar",
@@ -1820,15 +1974,23 @@
         "move_ins_today": 0,
         "move_ins_week": 2,
         "move_ins_month": 7,
-        "move_ins_year": 30,
+        "move_ins_year": 24,
         "vacates_today": 0,
         "vacates_week": 3,
         "vacates_month": 10,
-        "vacates_year": 52,
+        "vacates_year": 44,
         "net_today": 0,
         "net_week": -1,
         "net_month": -3,
-        "net_year": -22
+        "net_year": -20,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 0,
+        "transfers_in_year": 6,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 0,
+        "transfers_out_year": 8
       },
       "revenue": {
         "gross_rent": 29095.56,
@@ -1849,7 +2011,7 @@
         "arrears_30_plus": 1187.21,
         "arrears_count": 30,
         "payment_without_inv": 213.25,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 236,
@@ -1858,7 +2020,7 @@
         "pct_insured": 78.9
       },
       "_source_file": "2026-04-17_MIS 1BOX-26-Alkmaar-639120690174649838.pdf",
-      "_processed_at": "2026-04-17T17:39:03.336129"
+      "_processed_at": "2026-04-18T10:34:36.137128"
     },
     {
       "site_name": "1BOX Amsterdam-Schepenbergweg",
@@ -1876,23 +2038,31 @@
         "locked_units": 16,
         "terminated_units": 14,
         "reserved_units": 8,
-        "out_of_order_units": 0,
+        "out_of_order_units": 2,
         "business_units": 46,
         "private_units": 268
       },
       "rentals": {
-        "move_ins_today": 3,
-        "move_ins_week": 7,
-        "move_ins_month": 15,
-        "move_ins_year": 104,
-        "vacates_today": 1,
-        "vacates_week": 4,
-        "vacates_month": 7,
-        "vacates_year": 77,
+        "move_ins_today": 2,
+        "move_ins_week": 6,
+        "move_ins_month": 13,
+        "move_ins_year": 98,
+        "vacates_today": 0,
+        "vacates_week": 3,
+        "vacates_month": 5,
+        "vacates_year": 71,
         "net_today": 2,
         "net_week": 3,
         "net_month": 8,
-        "net_year": 27
+        "net_year": 27,
+        "transfers_in_today": 1,
+        "transfers_in_week": 1,
+        "transfers_in_month": 2,
+        "transfers_in_year": 6,
+        "transfers_out_today": 1,
+        "transfers_out_week": 1,
+        "transfers_out_month": 2,
+        "transfers_out_year": 6
       },
       "revenue": {
         "gross_rent": 28833.81,
@@ -1922,7 +2092,7 @@
         "pct_insured": 97.5
       },
       "_source_file": "2026-04-17_MIS 1BOX-27-Amsterdam-639120690177618648.pdf",
-      "_processed_at": "2026-04-17T17:39:17.460310"
+      "_processed_at": "2026-04-18T10:34:47.331441"
     },
     {
       "site_name": "1BOX Almere",
@@ -1947,16 +2117,24 @@
       "rentals": {
         "move_ins_today": 1,
         "move_ins_week": 2,
-        "move_ins_month": 5,
-        "move_ins_year": 41,
+        "move_ins_month": 4,
+        "move_ins_year": 38,
         "vacates_today": 0,
         "vacates_week": 0,
-        "vacates_month": 1,
-        "vacates_year": 22,
+        "vacates_month": 0,
+        "vacates_year": 19,
         "net_today": 1,
         "net_week": 2,
         "net_month": 4,
-        "net_year": 19
+        "net_year": 19,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 1,
+        "transfers_in_year": 3,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 1,
+        "transfers_out_year": 3
       },
       "revenue": {
         "gross_rent": 13193.1,
@@ -1977,7 +2155,7 @@
         "arrears_30_plus": 1850.99,
         "arrears_count": 26,
         "payment_without_inv": 10.11,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 153,
@@ -1986,7 +2164,7 @@
         "pct_insured": 90.5
       },
       "_source_file": "2026-04-17_MIS 1BOX-28-Almere-639120690180743705.pdf",
-      "_processed_at": "2026-04-17T17:39:31.594167"
+      "_processed_at": "2026-04-18T10:35:00.082704"
     },
     {
       "site_name": "1BOX Helmond Kanaaldijk",
@@ -2011,16 +2189,24 @@
       "rentals": {
         "move_ins_today": 0,
         "move_ins_week": 5,
-        "move_ins_month": 9,
-        "move_ins_year": 87,
+        "move_ins_month": 8,
+        "move_ins_year": 78,
         "vacates_today": 0,
         "vacates_week": 2,
-        "vacates_month": 3,
-        "vacates_year": 48,
+        "vacates_month": 2,
+        "vacates_year": 35,
         "net_today": 0,
         "net_week": 3,
         "net_month": 6,
-        "net_year": 39
+        "net_year": 43,
+        "transfers_in_today": 0,
+        "transfers_in_week": 0,
+        "transfers_in_month": 1,
+        "transfers_in_year": 9,
+        "transfers_out_today": 0,
+        "transfers_out_week": 0,
+        "transfers_out_month": 1,
+        "transfers_out_year": 13
       },
       "revenue": {
         "gross_rent": 29968.73,
@@ -2041,7 +2227,7 @@
         "arrears_30_plus": 1881.11,
         "arrears_count": 41,
         "payment_without_inv": 106.26,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 211,
@@ -2050,7 +2236,7 @@
         "pct_insured": 92.1
       },
       "_source_file": "2026-04-17_MIS 1BOX-29-Helmond-Kanaaldijk-639120690183868702.pdf",
-      "_processed_at": "2026-04-17T17:39:45.197794"
+      "_processed_at": "2026-04-18T10:35:11.475165"
     },
     {
       "site_name": "1BOX Lelystad",
@@ -2067,24 +2253,32 @@
         "vacant_sqm": 438.55,
         "locked_units": 21,
         "terminated_units": 12,
-        "reserved_units": 0,
+        "reserved_units": 2,
         "out_of_order_units": 1,
         "business_units": 43,
         "private_units": 423
       },
       "rentals": {
         "move_ins_today": 0,
-        "move_ins_week": 5,
-        "move_ins_month": 16,
-        "move_ins_year": 82,
+        "move_ins_week": 3,
+        "move_ins_month": 12,
+        "move_ins_year": 72,
         "vacates_today": 0,
-        "vacates_week": 3,
-        "vacates_month": 14,
-        "vacates_year": 67,
+        "vacates_week": 1,
+        "vacates_month": 10,
+        "vacates_year": 56,
         "net_today": 0,
         "net_week": 2,
         "net_month": 2,
-        "net_year": 15
+        "net_year": 16,
+        "transfers_in_today": 0,
+        "transfers_in_week": 2,
+        "transfers_in_month": 4,
+        "transfers_in_year": 10,
+        "transfers_out_today": 0,
+        "transfers_out_week": 2,
+        "transfers_out_month": 4,
+        "transfers_out_year": 11
       },
       "revenue": {
         "gross_rent": 44446.17,
@@ -2098,14 +2292,14 @@
         "current_rent_amount": 43238.96,
         "max_rent_potential": 47067.5,
         "avg_rate_per_sqm": 15.93,
-        "max_rate_per_sqm": 16.36
+        "max_rate_per_sqm": 14.35
       },
       "arrears": {
         "outstanding_total": 56842.94,
         "arrears_30_plus": 3906.03,
         "arrears_count": 61,
         "payment_without_inv": -289.29,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 409,
@@ -2114,71 +2308,7 @@
         "pct_insured": 87.8
       },
       "_source_file": "2026-04-17_MIS 1BOX-30-Lelystad-639120690187150019.pdf",
-      "_processed_at": "2026-04-17T17:39:59.119589"
-    },
-    {
-      "site_name": null,
-      "country": "NL",
-      "date": "2026-04-17",
-      "occupancy": {
-        "unit_pct": 72.5,
-        "surface_pct": 75.8,
-        "total_units": 13327,
-        "rented_units": 9668,
-        "vacant_units": 3363,
-        "total_sqm": 72825.31,
-        "rented_sqm": 55195.43,
-        "vacant_sqm": 15648.58,
-        "locked_units": 363,
-        "terminated_units": 315,
-        "reserved_units": 87,
-        "out_of_order_units": 26,
-        "business_units": 1482,
-        "private_units": 8186
-      },
-      "rentals": {
-        "move_ins_today": 22,
-        "move_ins_week": 94,
-        "move_ins_month": 302,
-        "move_ins_year": 1783,
-        "vacates_today": 27,
-        "vacates_week": 120,
-        "vacates_month": 234,
-        "vacates_year": 1745,
-        "net_today": -5,
-        "net_week": -26,
-        "net_month": 68,
-        "net_year": 38
-      },
-      "revenue": {
-        "gross_rent": 1057758.05,
-        "discounts": 23103.03,
-        "net_rent": 1034655.02,
-        "gross_insurance": 146792.8,
-        "net_insurance": 146792.8,
-        "gross_total": 1270413.0,
-        "net_total": 1247298.12,
-        "invoiced_in_advance": 1403567.97,
-        "current_rent_amount": 1026747.43,
-        "max_rent_potential": 1272151.35,
-        "avg_rate_per_sqm": 18.6,
-        "max_rate_per_sqm": 17.47
-      },
-      "arrears": {
-        "outstanding_total": 1287136.54,
-        "arrears_30_plus": 74059.7,
-        "arrears_count": 1286,
-        "payment_without_inv": 3348.04,
-        "doubtful_debtors": 0.0
-      },
-      "insurance": {
-        "policies_count": 8136,
-        "insured_value": 29534168.0,
-        "premium_total": 146479.92,
-        "pct_insured": 84.2
-      },
-      "_source_file": "2026-04-17_MIS 1BOX-639120690195900123.pdf",
-      "_processed_at": "2026-04-17T17:40:13.324363"
+      "_processed_at": "2026-04-18T10:35:22.454347"
     }
   ]
 }
