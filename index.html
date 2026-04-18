@@ -728,7 +728,16 @@ async function tryLoadFromGitHub() {
     setTimeout(() => setProgress(0), 500);
     setStatus('success', `Dashboard updated — ${todayFiles.length} sites loaded`);
     setTimeout(() => hideStatus(), 3000);
-    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    (function() {
+      const el = document.getElementById('last-updated');
+      if (window._dashDataDate && window._dashDaysOld > 0) {
+        const d = new Date(window._dashDataDate + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+        el.textContent = 'Data from ' + d + ' (' + window._dashDaysOld + ' day' + (window._dashDaysOld>1?'s':'') + ' old)';
+        el.style.color = window._dashDaysOld >= 3 ? 'var(--amber)' : 'var(--muted)';
+      } else {
+        el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+      }
+    })();
 
   } catch(e) {
     setProgress(0);
@@ -1546,7 +1555,16 @@ window.addEventListener('load', async () => {
     document.getElementById('config-modal').classList.add('hidden');
     document.getElementById('app').classList.add('visible');
     renderAll();
-    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    (function() {
+      const el = document.getElementById('last-updated');
+      if (window._dashDataDate && window._dashDaysOld > 0) {
+        const d = new Date(window._dashDataDate + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+        el.textContent = 'Data from ' + d + ' (' + window._dashDaysOld + ' day' + (window._dashDaysOld>1?'s':'') + ' old)';
+        el.style.color = window._dashDaysOld >= 3 ? 'var(--amber)' : 'var(--muted)';
+      } else {
+        el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+      }
+    })();
     return;
   }
   
