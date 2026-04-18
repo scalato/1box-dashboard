@@ -598,13 +598,21 @@ async function tryLoadFromGitHub() {
     const resp = await fetch('data/latest.json?t=' + Date.now(), { cache: 'no-store' });
     if (!resp.ok) return null;
     const data = await resp.json();
-    const today = new Date().toISOString().slice(0, 10);
-    if (data.date !== today) {
-      console.log(`GitHub data is from ${data.date}, not today`);
+    if (!Array.isArray(data.sites) || data.sites.length === 0) return null;
+
+    // Accept data up to 5 days old (covers weekends + holidays)
+    const dataDate = new Date(data.date + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysOld = Math.floor((today - dataDate) / (1000 * 60 * 60 * 24));
+    if (daysOld > 5) {
+      console.log(`GitHub data is ${daysOld} days old - too stale`);
       return null;
     }
-    if (!Array.isArray(data.sites) || data.sites.length === 0) return null;
-    console.log(`Loaded ${data.sites.length} sites from GitHub JSON`);
+
+    console.log(`Loaded ${data.sites.length} sites from GitHub (data date: ${data.date}, ${daysOld} day(s) old)`);
+    window._dashDataDate = data.date;
+    window._dashDaysOld = daysOld;
     return data.sites;
   } catch (e) {
     console.log('No GitHub data available:', e.message);
@@ -622,7 +630,16 @@ async function tryLoadFromGitHub() {
     renderAll();
     setStatus('success', `Loaded ${cached.length} sites from cache`);
     setTimeout(() => hideStatus(), 2000);
-    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+(function() {
+      const el = document.getElementById('last-updated');
+      if (window._dashDataDate && window._dashDaysOld > 0) {
+        const d = new Date(window._dashDataDate + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+        el.textContent = 'Data from ' + d + ' (' + window._dashDaysOld + ' day' + (window._dashDaysOld>1?'s':'') + ' old)';
+        el.style.color = window._dashDaysOld >= 3 ? 'var(--amber)' : 'var(--muted)';
+      } else {
+        el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+      }
+    })();
     return;
   }
   
@@ -665,7 +682,16 @@ async function tryLoadFromGitHub() {
         setTimeout(() => setProgress(0), 500);
         setStatus('success', `Loaded ${siteDataArr.length} sites — ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`);
         setTimeout(() => hideStatus(), 3000);
-        document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+  (function() {
+      const el = document.getElementById('last-updated');
+      if (window._dashDataDate && window._dashDaysOld > 0) {
+        const d = new Date(window._dashDataDate + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+        el.textContent = 'Data from ' + d + ' (' + window._dashDaysOld + ' day' + (window._dashDaysOld>1?'s':'') + ' old)';
+        el.style.color = window._dashDaysOld >= 3 ? 'var(--amber)' : 'var(--muted)';
+      } else {
+        el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+      }
+    })();
         return;
       }
     }
