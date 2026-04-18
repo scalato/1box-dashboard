@@ -508,7 +508,6 @@
     <button class="tab-btn" onclick="switchTab('rentals')" id="tab-rentals">Rentals</button>
     <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
     <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
-    <button class="tab-btn" onclick="switchTab('arrears')" id="tab-arrears">Arrears</button>
     <button class="tab-btn" onclick="switchTab('trends')" id="tab-trends">Trends</button>
   </div>
 
@@ -518,7 +517,6 @@
     <div id="panel-rentals" class="tab-panel"></div>
     <div id="panel-revenue" class="tab-panel"></div>
     <div id="panel-details" class="tab-panel"></div>
-    <div id="panel-arrears" class="tab-panel"></div>
     <div id="panel-trends" class="tab-panel"></div>
   </main>
 </div>
@@ -1094,7 +1092,6 @@ function renderAll() {
   renderRentals();
   renderRevenue();
   renderDetails();
-  renderArrears();
   renderTrends();
 }
 
@@ -1619,6 +1616,7 @@ function renderRevenue() {
 // DETAILS TAB
 // ─────────────────────────────────────────────
 function renderDetails() {
+  // Top table: all filtered sites, compact row per site
   const rows = FILTERED_DATA.map(d => {
     const o = d.occupancy; const r = d.rentals; const v = d.revenue;
     const pct = (o.surface_pct||0).toFixed(1);
@@ -1637,8 +1635,53 @@ function renderDetails() {
     </tr>`;
   }).join('');
 
+  // Aggregates/info blocks: portfolio totals when "All Sites", single site when picked
+  // AR
+  const arOutstanding = agg('arrears.outstanding_total');
+  const arArrears30 = agg('arrears.arrears_30_plus');
+  const arCount = agg('arrears.arrears_count');
+  const arPaidAdvance = agg('arrears.payment_without_inv');
+  const arDoubtful = agg('arrears.doubtful_debtors');
+
+  // Insurance
+  const policies = agg('insurance.policies_count');
+  const premium = agg('insurance.premium_total');
+  const insuredValue = agg('insurance.insured_value');
+  // Insurance rate: weighted by policies (simple: total policies / total rented units)
+  const totalRented = agg('occupancy.rented_units');
+  const insuranceRate = totalRented > 0 ? (policies / totalRented * 100) : 0;
+  // Coverage rate: weighted avg of pct_insured across sites (weighted by policies)
+  let covNum = 0, covDen = 0;
+  FILTERED_DATA.forEach(d => {
+    const p = d.insurance?.policies_count || 0;
+    const r = d.insurance?.pct_insured || 0;
+    if (p > 0) { covNum += r * p; covDen += p; }
+  });
+  const coverageRate = covDen > 0 ? (covNum / covDen) : 0;
+
+  // Discounts
+  const discounts = agg('revenue.discounts');
+  const totalSqm = agg('occupancy.total_sqm');
+  const rentedSqm = agg('occupancy.rented_sqm');
+  const maxRent = agg('revenue.max_rent_potential');
+  const currentRent = agg('revenue.current_rent_amount');
+  const discountPerSqm = rentedSqm > 0 ? (discounts / rentedSqm) : 0;
+  const discountPctOfMax = maxRent > 0 ? (discounts / maxRent * 100) : 0;
+
+  // Property summary
+  const totalUnits = agg('occupancy.total_units');
+  const avgUnitSize = totalUnits > 0 ? (totalSqm / totalUnits) : 0;
+  const revenueCapture = maxRent > 0 ? (currentRent / maxRent * 100) : 0;
+  const rentGap = maxRent - currentRent;
+
+  // Context label: whether this is a single site or portfolio view
+  const scopeLabel = (CURRENT_SITE !== 'all') ? CURRENT_SITE :
+                     (CURRENT_COUNTRY === 'fr') ? 'France — all sites' :
+                     (CURRENT_COUNTRY === 'nl') ? 'Netherlands — all sites' :
+                     'Portfolio — all sites';
+
   document.getElementById('panel-details').innerHTML = `
-    <div class="card">
+    <div class="card" style="margin-bottom:16px">
       <div class="card-title">Site Details</div>
       <table class="data-table">
         <thead><tr>
@@ -1656,50 +1699,62 @@ function renderDetails() {
         <tbody>${rows}</tbody>
       </table>
     </div>
-  `;
-}
 
-// ─────────────────────────────────────────────
-// ARREARS TAB
-// ─────────────────────────────────────────────
-function renderArrears() {
-  const rows = FILTERED_DATA.map(d => {
-    const a = d.arrears;
-    return `<tr>
-      <td>${d.site_name} <span class="site-pill ${d.country.toLowerCase()}">${d.country}</span></td>
-      <td class="num">${fmt(a.arrears_count)}</td>
-      <td class="num ${a.outstanding_total>0?'amber':''}">${fmtEur(a.outstanding_total)}</td>
-      <td class="num ${a.arrears_30_plus>0?'red':''}">${fmtEur(a.arrears_30_plus)}</td>
-      <td class="num">${fmtEur(a.payment_without_inv)}</td>
-      <td class="num ${a.doubtful_debtors>0?'red':''}">${fmtEur(a.doubtful_debtors)}</td>
-    </tr>`;
-  }).join('');
+    <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--muted);margin:8px 4px 12px">${scopeLabel}</div>
 
-  const totalOut = agg('arrears.outstanding_total');
-  const total30 = agg('arrears.arrears_30_plus');
-  const totalCt = agg('arrears.arrears_count');
-
-  document.getElementById('panel-arrears').innerHTML = `
-    <div class="grid-3" style="margin-bottom:16px">
-      <div class="card" style="text-align:center">
-        <div class="card-title">Total Debtors</div>
-        <div class="kpi-value" style="font-size:20px">${fmt(totalCt)}</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Accounts Receivable</div>
+        <table class="data-table">
+          <thead><tr><th>Category</th><th class="num">Count</th><th class="num">Amount</th></tr></thead>
+          <tbody>
+            <tr><td>Outstanding Invoices</td><td class="num">${fmt(arCount)}</td><td class="num ${arOutstanding>0?'amber':''}">${fmtEur(arOutstanding)}</td></tr>
+            <tr><td>Arrears &gt;30 Days</td><td class="num">—</td><td class="num ${arArrears30>0?'red':''}">${fmtEur(arArrears30)}</td></tr>
+            <tr><td>Paid in Advance</td><td class="num">—</td><td class="num">${fmtEur(arPaidAdvance)}</td></tr>
+            <tr><td>Doubtful Debtors</td><td class="num">—</td><td class="num ${arDoubtful>0?'red':''}">${fmtEur(arDoubtful)}</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="card" style="text-align:center">
-        <div class="card-title">Outstanding Total</div>
-        <div class="kpi-value" style="font-size:20px;color:var(--amber)">${fmtEur(totalOut)}</div>
-      </div>
-      <div class="card" style="text-align:center">
-        <div class="card-title">Arrears &gt;30 Days</div>
-        <div class="kpi-value" style="font-size:20px;color:var(--red)">${fmtEur(total30)}</div>
+      <div class="card">
+        <div class="card-title">Insurance Details</div>
+        <table class="data-table">
+          <tbody>
+            <tr><td>Active Policies</td><td class="num">${fmt(policies)}</td></tr>
+            <tr><td>Monthly Premium</td><td class="num">${fmtEur(premium)}</td></tr>
+            <tr><td>Total Insured Value</td><td class="num">${fmtEur(insuredValue)}</td></tr>
+            <tr><td>Insurance Rate</td><td class="num">${insuranceRate.toFixed(1)}%</td></tr>
+            <tr><td>Coverage Rate</td><td class="num">${coverageRate.toFixed(1)}%</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Accounts Receivable by Site</div>
-      <table class="data-table">
-        <thead><tr><th>Site</th><th class="num">Count</th><th class="num">Outstanding</th><th class="num">Arrears &gt;30d</th><th class="num">Payment w/o Inv</th><th class="num">Doubtful</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
+
+    <div class="section-gap"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Current Discounts &amp; Liabilities</div>
+        <table class="data-table">
+          <tbody>
+            <tr><td>Total Discounts</td><td class="num">${fmtEur(discounts)}</td><td class="num" style="color:var(--muted)">€${discountPerSqm.toFixed(2)}/m²</td></tr>
+            <tr><td>Discount % of Max Rent</td><td class="num" colspan="2">${discountPctOfMax.toFixed(1)}%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Property Summary</div>
+        <table class="data-table">
+          <tbody>
+            <tr><td>Total Units</td><td class="num">${fmt(totalUnits)}</td></tr>
+            <tr><td>Total Surface</td><td class="num">${fmt(totalSqm)} m²</td></tr>
+            <tr><td>Avg Unit Size</td><td class="num">${avgUnitSize.toFixed(1)} m²</td></tr>
+            <tr><td>Max Monthly Rent</td><td class="num">${fmtEur(maxRent)}</td></tr>
+            <tr><td>Current Monthly Rent</td><td class="num">${fmtEur(currentRent)}</td></tr>
+            <tr><td>Revenue Capture Rate</td><td class="num">${revenueCapture.toFixed(1)}%</td></tr>
+            <tr><td>Potential Rent Gap</td><td class="num ${rentGap>0?'amber':''}">${fmtEur(rentGap)}</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   `;
 }
