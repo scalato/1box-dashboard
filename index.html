@@ -220,8 +220,10 @@
     transition: all 0.15s;
     display: flex; align-items: center; gap: 5px;
   }
-    .site-filter-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; max-height: 120px; overflow-y: auto; }
-    .site-filter-bar .filter-btn { font-size: 0.65rem; padding: 4px 10px; white-space: nowrap; }
+    .site-filter-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 0; max-height: 160px; overflow-y: auto; }
+    .site-filter-bar .filter-btn { font-size: 0.8rem; padding: 7px 14px; white-space: nowrap; color: var(--text); border-color: var(--border); }
+    .site-filter-bar .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .site-filter-bar .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
   .filter-btn:hover { border-color: var(--text); color: var(--text); }
   .filter-btn.active {
     background: var(--accent);
@@ -527,6 +529,7 @@
 let CONFIG = {};
 let RAW_DATA = []; // array of site data objects (latest snapshot)
 let HISTORY_DATA = null; // monthly history.json
+let BUDGET_DATA = null; // per-site per-month budgets
 let FILTERED_DATA = [];
 let CURRENT_COUNTRY = 'all';
 let CURRENT_SITE = 'all';
@@ -654,12 +657,77 @@ async function tryLoadHistory() {
   }
 }
 
+async function tryLoadBudgets() {
+  try {
+    const resp = await fetch('data/budgets.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data || !data.sites) return null;
+    console.log('Loaded budgets.json');
+    return data;
+  } catch (e) {
+    console.log('No budgets.json available:', e.message);
+    return null;
+  }
+}
+
+function getCurrentMonthKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+// Parse site_name like "1BOX Six-Fours" back to a site key like "FR-01-Six-Fours"
+// by looking it up in HISTORY_DATA (which has the mapping)
+function siteKeyFromName(name) {
+  if (!BUDGET_DATA || !HISTORY_DATA) return null;
+  for (const [key, siteObj] of Object.entries(HISTORY_DATA.sites)) {
+    if (siteObj.name === name) return key;
+  }
+  return null;
+}
+
+// Sum budget across filtered sites for the current month
+function getBudgetTotals() {
+  const monthKey = getCurrentMonthKey();
+  if (!BUDGET_DATA) return { revenue: null, occupancy_pct: null, hasData: false };
+
+  let totalRev = 0, totalRentedSqm = 0, totalSqm = 0;
+  let anyNonNull = false;
+
+  FILTERED_DATA.forEach(d => {
+    const siteKey = siteKeyFromName(d.site_name);
+    if (!siteKey) return;
+    const siteBudgets = BUDGET_DATA.sites[siteKey];
+    if (!siteBudgets) return;
+    const monthBudget = siteBudgets[monthKey];
+    if (!monthBudget) return;
+
+    if (monthBudget.revenue !== null && monthBudget.revenue !== undefined) {
+      totalRev += monthBudget.revenue;
+      anyNonNull = true;
+    }
+    if (monthBudget.occupancy_pct !== null && monthBudget.occupancy_pct !== undefined) {
+      // occupancy_pct budget is a target %. Weight by site's total_sqm to get portfolio weighted avg.
+      const sqm = d.occupancy?.total_sqm || 0;
+      totalSqm += sqm;
+      totalRentedSqm += (monthBudget.occupancy_pct / 100) * sqm;
+      anyNonNull = true;
+    }
+  });
+
+  return {
+    revenue: anyNonNull && totalRev > 0 ? totalRev : null,
+    occupancy_pct: totalSqm > 0 ? (totalRentedSqm / totalSqm * 100) : null,
+    hasData: anyNonNull
+  };
+}
  async function refreshData() {
   if (IS_DEMO) { renderAll(); return; }
   
   setStatus('loading', 'Checking for today\'s data…');
-  const [cached, hist] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory()]);
+ const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
   if (hist) HISTORY_DATA = hist;
+  if (budgets) BUDGET_DATA = budgets;
   if (cached) {
     RAW_DATA = cached;
     renderAll();
@@ -1104,50 +1172,199 @@ function renderKPIs() {
 // ─────────────────────────────────────────────
 // OVERVIEW TAB
 // ─────────────────────────────────────────────
+
+
+// ─────────────────────────────────────────────
+// OCCUPANCY TAB
+// ─────────────────────────────────────────────
 function renderOverview() {
-  const sites = FILTERED_DATA.map(d => d.site_name.replace('1BOX ',''));
-  const actRev = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
-  const budRev = FILTERED_DATA.map(d => (d.revenue?.net_total || 0) * (0.85 + Math.random()*0.2));
-  const actOcc = FILTERED_DATA.map(d => d.occupancy?.surface_pct || 0);
-  const budOcc = FILTERED_DATA.map(d => Math.min(100, (d.occupancy?.surface_pct || 0) * (0.9 + Math.random()*0.15)));
-  const netRentals = FILTERED_DATA.map(d => d.rentals?.net_month || 0);
-  const avgRates = FILTERED_DATA.map(d => d.revenue?.avg_rate_per_sqm || 0);
+  // Aggregates for filtered sites
+  const actualRev = agg('revenue.net_total');
+  const actualOcc = aggPct('occupancy.rented_sqm', 'occupancy.total_sqm');
+
+  const budgetTotals = getBudgetTotals();
+  const budgetRev = budgetTotals.revenue;
+  const budgetOcc = budgetTotals.occupancy_pct;
+
+  // Variances (null if no budget)
+  const revVariance = (budgetRev !== null) ? (actualRev - budgetRev) : null;
+  const occVariance = (budgetOcc !== null) ? (actualOcc - budgetOcc) : null;
+
+  // Rate metrics (portfolio)
+  const rentedSqm = agg('occupancy.rented_sqm');
+  const currRent = agg('revenue.current_rent_amount');
+  const avgRate = rentedSqm > 0 ? (currRent / rentedSqm) : 0;
+  const maxPotential = agg('revenue.max_rent_potential');
+  const potentialRate = rentedSqm > 0 ? (maxPotential / rentedSqm) : 0;
+  const maxRate = Math.max(...FILTERED_DATA.map(d => d.revenue?.max_rate_per_sqm || 0), 0);
+
+  // Rental activity (Today/Week/Month/Year)
+  const periods = ['Today', 'Week', 'Month', 'Year'];
+  const miVals = ['move_ins_today','move_ins_week','move_ins_month','move_ins_year'].map(k => agg('rentals.'+k));
+  const vaVals = ['vacates_today','vacates_week','vacates_month','vacates_year'].map(k => agg('rentals.'+k));
+  const netVals = miVals.map((v,i) => v - vaVals[i]);
+
+  // Rent Breakdown
+  const maxRentAmount = agg('revenue.max_rent_potential');
+
+  // Month name for labels
+  const monthName = new Date().toLocaleDateString('en-GB', { month: 'long' });
+
+  // Variance formatters
+  const fmtVarEur = v => {
+    if (v === null) return '<span style="color:var(--muted)">Budget not set</span>';
+    const sign = v >= 0 ? '+' : '';
+    const color = v >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<span style="color:${color}">Variance: ${sign}${fmtEur(v)}</span>`;
+  };
+  const fmtVarPp = v => {
+    if (v === null) return '<span style="color:var(--muted)">Budget not set</span>';
+    const sign = v >= 0 ? '+' : '';
+    const color = v >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<span style="color:${color}">Variance: ${sign}${v.toFixed(1)} pp</span>`;
+  };
 
   document.getElementById('panel-overview').innerHTML = `
     <div class="grid-2">
       <div class="card">
-        <div class="card-title">Revenue vs Budget (MTD)</div>
+        <div class="card-title">Revenue vs Budget (${monthName})</div>
         <div class="chart-wrap"><canvas id="ch-rev-budget"></canvas></div>
+        <div style="text-align:center;margin-top:10px;font-size:11px">${fmtVarEur(revVariance)}</div>
       </div>
       <div class="card">
-        <div class="card-title">Occupancy vs Budget</div>
+        <div class="card-title">Occupancy vs Budget (${monthName})</div>
         <div class="chart-wrap"><canvas id="ch-occ-budget"></canvas></div>
+        <div style="text-align:center;margin-top:10px;font-size:11px">${fmtVarPp(occVariance)}</div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="card">
+      <div class="card-title">Average Rate per m² Rented</div>
+      <div style="display:flex;align-items:baseline;gap:20px;flex-wrap:wrap">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:36px;color:var(--purple);line-height:1">
+          €${avgRate.toFixed(2)}<span style="font-size:16px;color:var(--muted);font-weight:400">/m²</span>
+        </div>
+        <div style="color:var(--muted);font-size:12px;line-height:1.7">
+          Potential: €${potentialRate.toFixed(2)}/m²<br>
+          Max: €${maxRate.toFixed(2)}/m²
+        </div>
       </div>
     </div>
     <div class="section-gap"></div>
     <div class="grid-2">
       <div class="card">
-        <div class="card-title">Net Rentals MTD by Site</div>
-        <div class="chart-wrap"><canvas id="ch-net-rentals"></canvas></div>
+        <div class="card-title">Rental Activity</div>
+        <div class="chart-wrap"><canvas id="ch-rental-activity-ov"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">Average Rate per m² Rented</div>
-        <div class="chart-wrap"><canvas id="ch-avg-rate"></canvas></div>
+        <div class="card-title">Rent Breakdown</div>
+        <div class="chart-wrap"><canvas id="ch-rent-breakdown"></canvas></div>
       </div>
     </div>
   `;
 
   nextTick(() => {
-    mkBarChart('ch-rev-budget', sites, [{label:'Actual', data:actRev, color:getGreen()},{label:'Budget', data:budRev, color:getMuted()}], true);
-    mkBarChart('ch-occ-budget', sites, [{label:'Actual', data:actOcc, color:getGreen()},{label:'Budget', data:budOcc, color:getMuted()}], false);
-    mkBarChart('ch-net-rentals', sites, [{label:'Net Rentals', data:netRentals, color:getGreen()}], false);
-    mkBarChart('ch-avg-rate', sites, [{label:'€/m²', data:avgRates, color:'rgba(168,85,247,0.7)'}], false);
+    // Revenue vs Budget - horizontal bar, 2 rows
+    mkBarChart('ch-rev-budget', ['Actual', 'Budget'], [{
+      label: '',
+      data: [actualRev, budgetRev || 0],
+      color: ['rgba(34,197,94,0.8)', 'rgba(107,114,128,0.4)']
+    }], true);
+
+    // Occupancy vs Budget - horizontal bar, 2 rows, x 0-100
+    const canvas = document.getElementById('ch-occ-budget');
+    if (canvas) {
+      if (CHARTS['ch-occ-budget']) CHARTS['ch-occ-budget'].destroy();
+      CHARTS['ch-occ-budget'] = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: ['Actual', 'Budget'],
+          datasets: [{
+            label: '',
+            data: [actualOcc, budgetOcc || 0],
+            backgroundColor: ['rgba(34,197,94,0.8)', 'rgba(107,114,128,0.4)'],
+            borderRadius: 3, borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { min: 0, max: 100,
+                 ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 }, callback: v => v + '%' },
+                 grid: { color: 'rgba(42,45,53,0.8)' } },
+            y: { ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // Rental Activity - grouped bars, move-ins / vacates / net
+    const cActivity = document.getElementById('ch-rental-activity-ov');
+    if (cActivity) {
+      if (CHARTS['ch-rental-activity-ov']) CHARTS['ch-rental-activity-ov'].destroy();
+      CHARTS['ch-rental-activity-ov'] = new Chart(cActivity, {
+        type: 'bar',
+        data: {
+          labels: periods,
+          datasets: [
+            { label: 'Move-ins', data: miVals, backgroundColor: 'rgba(34,197,94,0.8)', borderRadius: 3 },
+            { label: 'Vacates',  data: vaVals, backgroundColor: 'rgba(249,115,22,0.85)', borderRadius: 3 },
+            { label: 'Net',      data: netVals, backgroundColor: 'rgba(55,65,81,0.9)', borderRadius: 3 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#6b7280', font: { family: 'DM Mono', size: 10 }, boxWidth: 10 } } },
+          scales: {
+            x: { ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 } }, grid: { color: 'rgba(42,45,53,0.8)' } }
+          }
+        }
+      });
+    }
+
+    // Rent Breakdown - horizontal bars for Current / Potential / Max
+    const cBreakdown = document.getElementById('ch-rent-breakdown');
+    if (cBreakdown) {
+      if (CHARTS['ch-rent-breakdown']) CHARTS['ch-rent-breakdown'].destroy();
+      CHARTS['ch-rent-breakdown'] = new Chart(cBreakdown, {
+        type: 'bar',
+        data: {
+          labels: ['Current Rent', 'Potential Rent', 'Max Rent'],
+          datasets: [{
+            label: '',
+            data: [currRent, maxPotential, maxRentAmount],
+            backgroundColor: [
+              'rgba(34,197,94,0.85)',
+              'rgba(168,85,247,0.85)',
+              'rgba(120,120,130,0.5)'
+            ],
+            borderRadius: 3, borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: ctx => '€' + Number(ctx.parsed.x).toLocaleString('en-GB', {maximumFractionDigits:0}) }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 },
+                          callback: v => '€' + (v/1000).toFixed(0) + 'k' },
+                 grid: { color: 'rgba(42,45,53,0.8)' } },
+            y: { ticks: { color: '#6b7280', font: { family: 'DM Mono', size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
   });
 }
 
-// ─────────────────────────────────────────────
-// OCCUPANCY TAB
-// ─────────────────────────────────────────────
 function renderOccupancy() {
   const unitOcc = aggPct('occupancy.rented_units','occupancy.total_units').toFixed(1);
   const surfOcc = aggPct('occupancy.rented_sqm','occupancy.total_sqm').toFixed(1);
@@ -1802,7 +2019,9 @@ function nextTick(fn) { setTimeout(fn, 50); }
 // INIT
 // ─────────────────────────────────────────────
 window.addEventListener('load', async () => {
-  const [cached, hist] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory()]);
+ const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
+  if (hist) HISTORY_DATA = hist;
+  if (budgets) BUDGET_DATA = budgets;
   if (hist) HISTORY_DATA = hist;
   if (cached) {
     IS_DEMO = false;
