@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>1BOX Portfolio Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
@@ -25,12 +25,75 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
+ body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Keep monospace for tabular numbers */
+  .num, .data-table .num, .kpi-value, .ms-val { font-variant-numeric: tabular-nums; }
+
+  /* Details tab refinements */
+  .details-section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 14px 4px 12px;
+    letter-spacing: 0.02em;
+  }
+  .details-kv {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .details-kv td {
+    padding: 13px 4px;
+    border-bottom: 1px solid rgba(42,45,53,0.5);
+    font-size: 13px;
+  }
+  .details-kv tr:last-child td { border-bottom: none; }
+  .details-kv td.label { color: var(--text); }
+  .details-kv td.value {
+    text-align: right;
+    color: var(--text);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .details-kv td.value .sub {
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 8px;
+    font-size: 12px;
+  }
+  .details-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+  .details-card .card-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .coverage-bar {
+    height: 6px;
+    background: rgba(34,197,94,0.15);
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .coverage-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+    transition: width 0.6s ease;
   }
 
   /* ── CONFIG MODAL ── */
@@ -1072,11 +1135,17 @@ function aggPct(num, den) {
 }
 function fmt(n, dec=0) {
   if (n === null || n === undefined) return '—';
-  return Number(n).toLocaleString('en-GB', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+  // EU format: space as thousands separator, comma decimal
+  return Number(n).toLocaleString('fr-FR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
 }
 function fmtEur(n) {
   if (n === null || n === undefined) return '—';
-  return '€' + fmt(Math.round(n));
+  // EU format: "5 764,00 €" - trailing currency, space thousands, comma decimal
+  return Number(n).toLocaleString('fr-FR', {minimumFractionDigits:0, maximumFractionDigits:0, useGrouping:true}) + ' €';
+}
+function fmtEurDec(n) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
 }
 
 // ─────────────────────────────────────────────
@@ -1616,7 +1685,6 @@ function renderRevenue() {
 // DETAILS TAB
 // ─────────────────────────────────────────────
 function renderDetails() {
-  // Top table: all filtered sites, compact row per site
   const rows = FILTERED_DATA.map(d => {
     const o = d.occupancy; const r = d.rentals; const v = d.revenue;
     const pct = (o.surface_pct||0).toFixed(1);
@@ -1635,7 +1703,6 @@ function renderDetails() {
     </tr>`;
   }).join('');
 
-  // Aggregates/info blocks: portfolio totals when "All Sites", single site when picked
   // AR
   const arOutstanding = agg('arrears.outstanding_total');
   const arArrears30 = agg('arrears.arrears_30_plus');
@@ -1647,10 +1714,8 @@ function renderDetails() {
   const policies = agg('insurance.policies_count');
   const premium = agg('insurance.premium_total');
   const insuredValue = agg('insurance.insured_value');
-  // Insurance rate: weighted by policies (simple: total policies / total rented units)
   const totalRented = agg('occupancy.rented_units');
   const insuranceRate = totalRented > 0 ? (policies / totalRented * 100) : 0;
-  // Coverage rate: weighted avg of pct_insured across sites (weighted by policies)
   let covNum = 0, covDen = 0;
   FILTERED_DATA.forEach(d => {
     const p = d.insurance?.policies_count || 0;
@@ -1668,13 +1733,12 @@ function renderDetails() {
   const discountPerSqm = rentedSqm > 0 ? (discounts / rentedSqm) : 0;
   const discountPctOfMax = maxRent > 0 ? (discounts / maxRent * 100) : 0;
 
-  // Property summary
+  // Property
   const totalUnits = agg('occupancy.total_units');
   const avgUnitSize = totalUnits > 0 ? (totalSqm / totalUnits) : 0;
   const revenueCapture = maxRent > 0 ? (currentRent / maxRent * 100) : 0;
   const rentGap = maxRent - currentRent;
 
-  // Context label: whether this is a single site or portfolio view
   const scopeLabel = (CURRENT_SITE !== 'all') ? CURRENT_SITE :
                      (CURRENT_COUNTRY === 'fr') ? 'France — all sites' :
                      (CURRENT_COUNTRY === 'nl') ? 'Netherlands — all sites' :
@@ -1700,58 +1764,65 @@ function renderDetails() {
       </table>
     </div>
 
-    <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--muted);margin:8px 4px 12px">${scopeLabel}</div>
+    <div class="details-section-label">${scopeLabel}</div>
 
     <div class="grid-2">
-      <div class="card">
+      <div class="details-card">
         <div class="card-title">Accounts Receivable</div>
-        <table class="data-table">
-          <thead><tr><th>Category</th><th class="num">Count</th><th class="num">Amount</th></tr></thead>
+        <table class="details-kv">
+          <thead>
+            <tr>
+              <td class="label" style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);padding-bottom:6px">Category</td>
+              <td class="value" style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);padding-bottom:6px">Count</td>
+              <td class="value" style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);padding-bottom:6px">Amount</td>
+            </tr>
+          </thead>
           <tbody>
-            <tr><td>Outstanding Invoices</td><td class="num">${fmt(arCount)}</td><td class="num ${arOutstanding>0?'amber':''}">${fmtEur(arOutstanding)}</td></tr>
-            <tr><td>Arrears &gt;30 Days</td><td class="num">—</td><td class="num ${arArrears30>0?'red':''}">${fmtEur(arArrears30)}</td></tr>
-            <tr><td>Paid in Advance</td><td class="num">—</td><td class="num">${fmtEur(arPaidAdvance)}</td></tr>
-            <tr><td>Doubtful Debtors</td><td class="num">—</td><td class="num ${arDoubtful>0?'red':''}">${fmtEur(arDoubtful)}</td></tr>
+            <tr><td class="label">Outstanding Invoices</td><td class="value">${fmt(arCount)}</td><td class="value">${fmtEur(arOutstanding)}</td></tr>
+            <tr><td class="label">Arrears &gt;30 Days</td><td class="value">—</td><td class="value" style="color:${arArrears30>0?'var(--red)':'var(--text)'}">${fmtEur(arArrears30)}</td></tr>
+            <tr><td class="label">Paid in Advance</td><td class="value">—</td><td class="value">${fmtEur(arPaidAdvance)}</td></tr>
+            <tr><td class="label">Doubtful Debtors</td><td class="value">—</td><td class="value" style="color:${arDoubtful>0?'var(--red)':'var(--text)'}">${fmtEur(arDoubtful)}</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="card">
+      <div class="details-card">
         <div class="card-title">Insurance Details</div>
-        <table class="data-table">
+        <table class="details-kv">
           <tbody>
-            <tr><td>Active Policies</td><td class="num">${fmt(policies)}</td></tr>
-            <tr><td>Monthly Premium</td><td class="num">${fmtEur(premium)}</td></tr>
-            <tr><td>Total Insured Value</td><td class="num">${fmtEur(insuredValue)}</td></tr>
-            <tr><td>Insurance Rate</td><td class="num">${insuranceRate.toFixed(1)}%</td></tr>
-            <tr><td>Coverage Rate</td><td class="num">${coverageRate.toFixed(1)}%</td></tr>
+            <tr><td class="label">Active Policies</td><td class="value">${fmt(policies)}</td></tr>
+            <tr><td class="label">Monthly Premium</td><td class="value">${fmtEurDec(premium)}</td></tr>
+            <tr><td class="label">Total Insured Value</td><td class="value">${fmtEur(insuredValue)}</td></tr>
+            <tr><td class="label">Insurance Rate</td><td class="value">${insuranceRate.toFixed(1)} %</td></tr>
+            <tr><td class="label">Coverage Rate</td><td class="value">${coverageRate.toFixed(1)} %</td></tr>
           </tbody>
         </table>
+        <div class="coverage-bar"><div class="coverage-bar-fill" style="width:${Math.min(100,coverageRate).toFixed(1)}%"></div></div>
       </div>
     </div>
 
     <div class="section-gap"></div>
 
     <div class="grid-2">
-      <div class="card">
+      <div class="details-card">
         <div class="card-title">Current Discounts &amp; Liabilities</div>
-        <table class="data-table">
+        <table class="details-kv">
           <tbody>
-            <tr><td>Total Discounts</td><td class="num">${fmtEur(discounts)}</td><td class="num" style="color:var(--muted)">€${discountPerSqm.toFixed(2)}/m²</td></tr>
-            <tr><td>Discount % of Max Rent</td><td class="num" colspan="2">${discountPctOfMax.toFixed(1)}%</td></tr>
+            <tr><td class="label">Total Discounts</td><td class="value">${fmtEurDec(discounts)}<span class="sub">€${discountPerSqm.toFixed(2).replace('.',',')}/m²</span></td></tr>
+            <tr><td class="label">Discount % of Max Rent</td><td class="value">${discountPctOfMax.toFixed(1).replace('.',',')} %</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="card">
+      <div class="details-card">
         <div class="card-title">Property Summary</div>
-        <table class="data-table">
+        <table class="details-kv">
           <tbody>
-            <tr><td>Total Units</td><td class="num">${fmt(totalUnits)}</td></tr>
-            <tr><td>Total Surface</td><td class="num">${fmt(totalSqm)} m²</td></tr>
-            <tr><td>Avg Unit Size</td><td class="num">${avgUnitSize.toFixed(1)} m²</td></tr>
-            <tr><td>Max Monthly Rent</td><td class="num">${fmtEur(maxRent)}</td></tr>
-            <tr><td>Current Monthly Rent</td><td class="num">${fmtEur(currentRent)}</td></tr>
-            <tr><td>Revenue Capture Rate</td><td class="num">${revenueCapture.toFixed(1)}%</td></tr>
-            <tr><td>Potential Rent Gap</td><td class="num ${rentGap>0?'amber':''}">${fmtEur(rentGap)}</td></tr>
+            <tr><td class="label">Total Units</td><td class="value">${fmt(totalUnits)}</td></tr>
+            <tr><td class="label">Total Surface</td><td class="value">${fmt(totalSqm)} m²</td></tr>
+            <tr><td class="label">Avg Unit Size</td><td class="value">${avgUnitSize.toFixed(1).replace('.',',')} m²</td></tr>
+            <tr><td class="label">Max Monthly Rent</td><td class="value">${fmtEur(maxRent)}</td></tr>
+            <tr><td class="label">Current Monthly Rent</td><td class="value">${fmtEur(currentRent)}</td></tr>
+            <tr><td class="label">Revenue Capture Rate</td><td class="value">${revenueCapture.toFixed(1).replace('.',',')} %</td></tr>
+            <tr><td class="label">Potential Rent Gap</td><td class="value" style="color:${rentGap>0?'var(--amber)':'var(--text)'}">${fmtEur(rentGap)}</td></tr>
           </tbody>
         </table>
       </div>
