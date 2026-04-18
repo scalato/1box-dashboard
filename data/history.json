@@ -10,8 +10,8 @@
   "failure_count": 0,
   "failures": [],
   "sites": {
-    "NL-FR-01-Six-Fours": {
-      "site_key": "NL-FR-01-Six-Fours",
+    "FR-01-Six-Fours": {
+      "site_key": "FR-01-Six-Fours",
       "name": "1BOX Six-Fours",
       "country": "FR",
       "is_rollup": false,
@@ -204,8 +204,8 @@
         }
       ]
     },
-    "NL-FR-02-Colomiers": {
-      "site_key": "NL-FR-02-Colomiers",
+    "FR-02-Colomiers": {
+      "site_key": "FR-02-Colomiers",
       "name": "1BOX Colomiers",
       "country": "FR",
       "is_rollup": false,
@@ -398,8 +398,8 @@
         }
       ]
     },
-    "NL-FR-03-Mérignac": {
-      "site_key": "NL-FR-03-Mérignac",
+    "FR-03-Mérignac": {
+      "site_key": "FR-03-Mérignac",
       "name": "1BOX Mérignac",
       "country": "FR",
       "is_rollup": false,
@@ -592,11 +592,11 @@
         }
       ]
     },
-    "NL-FR": {
-      "site_key": "NL-FR",
-      "name": "1BOX",
+    "FR-ROLLUP": {
+      "site_key": "FR-ROLLUP",
+      "name": "1BOX France",
       "country": "FR",
-      "is_rollup": false,
+      "is_rollup": true,
       "series": [
         {
           "month": "2026-01",
