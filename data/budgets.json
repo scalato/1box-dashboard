@@ -1,0 +1,1454 @@
+{
+  "sites": {
+    "NL-01-Eindhoven-Best": {
+      "2026-01": {
+        "revenue": 30718,
+        "occupancy_pct": 86.9
+      },
+      "2026-02": {
+        "revenue": 30946,
+        "occupancy_pct": 87.1
+      },
+      "2026-03": {
+        "revenue": 31174,
+        "occupancy_pct": 87.3
+      },
+      "2026-04": {
+        "revenue": 31404,
+        "occupancy_pct": 87.6
+      },
+      "2026-05": {
+        "revenue": 31634,
+        "occupancy_pct": 87.8
+      },
+      "2026-06": {
+        "revenue": 31864,
+        "occupancy_pct": 88.0
+      },
+      "2026-07": {
+        "revenue": 32096,
+        "occupancy_pct": 88.2
+      },
+      "2026-08": {
+        "revenue": 32328,
+        "occupancy_pct": 88.5
+      },
+      "2026-09": {
+        "revenue": 32561,
+        "occupancy_pct": 88.7
+      },
+      "2026-10": {
+        "revenue": 32794,
+        "occupancy_pct": 88.9
+      },
+      "2026-11": {
+        "revenue": 33029,
+        "occupancy_pct": 89.1
+      },
+      "2026-12": {
+        "revenue": 33264,
+        "occupancy_pct": 89.4
+      }
+    },
+    "NL-02-Den Bosch": {
+      "2026-01": {
+        "revenue": 51155,
+        "occupancy_pct": 83.6
+      },
+      "2026-02": {
+        "revenue": 51694,
+        "occupancy_pct": 84.1
+      },
+      "2026-03": {
+        "revenue": 52237,
+        "occupancy_pct": 84.6
+      },
+      "2026-04": {
+        "revenue": 52782,
+        "occupancy_pct": 85.1
+      },
+      "2026-05": {
+        "revenue": 53330,
+        "occupancy_pct": 85.6
+      },
+      "2026-06": {
+        "revenue": 53574,
+        "occupancy_pct": 85.6
+      },
+      "2026-07": {
+        "revenue": 53818,
+        "occupancy_pct": 85.6
+      },
+      "2026-08": {
+        "revenue": 54062,
+        "occupancy_pct": 85.6
+      },
+      "2026-09": {
+        "revenue": 57273,
+        "occupancy_pct": 85.6
+      },
+      "2026-10": {
+        "revenue": 57549,
+        "occupancy_pct": 85.6
+      },
+      "2026-11": {
+        "revenue": 56492,
+        "occupancy_pct": 85.6
+      },
+      "2026-12": {
+        "revenue": 57726,
+        "occupancy_pct": 45.8
+      }
+    },
+    "NL-03-Nijmegen-Wijchen": {
+      "2026-01": {
+        "revenue": 26229,
+        "occupancy_pct": 84.1
+      },
+      "2026-02": {
+        "revenue": 26315,
+        "occupancy_pct": 84.0
+      },
+      "2026-03": {
+        "revenue": 26405,
+        "occupancy_pct": 83.9
+      },
+      "2026-04": {
+        "revenue": 26503,
+        "occupancy_pct": 83.8
+      },
+      "2026-05": {
+        "revenue": 26589,
+        "occupancy_pct": 83.7
+      },
+      "2026-06": {
+        "revenue": 26682,
+        "occupancy_pct": 83.6
+      },
+      "2026-07": {
+        "revenue": 26767,
+        "occupancy_pct": 83.5
+      },
+      "2026-08": {
+        "revenue": 26852,
+        "occupancy_pct": 83.4
+      },
+      "2026-09": {
+        "revenue": 26937,
+        "occupancy_pct": 83.3
+      },
+      "2026-10": {
+        "revenue": 27025,
+        "occupancy_pct": 83.2
+      },
+      "2026-11": {
+        "revenue": 27114,
+        "occupancy_pct": 83.1
+      },
+      "2026-12": {
+        "revenue": 27209,
+        "occupancy_pct": 83.0
+      }
+    },
+    "NL-04-Boxtel": {
+      "2026-01": {
+        "revenue": 14950,
+        "occupancy_pct": 85.8
+      },
+      "2026-02": {
+        "revenue": 15052,
+        "occupancy_pct": 86.0
+      },
+      "2026-03": {
+        "revenue": 15154,
+        "occupancy_pct": 86.1
+      },
+      "2026-04": {
+        "revenue": 15256,
+        "occupancy_pct": 86.3
+      },
+      "2026-05": {
+        "revenue": 15358,
+        "occupancy_pct": 86.5
+      },
+      "2026-06": {
+        "revenue": 15461,
+        "occupancy_pct": 86.6
+      },
+      "2026-07": {
+        "revenue": 15564,
+        "occupancy_pct": 86.8
+      },
+      "2026-08": {
+        "revenue": 15667,
+        "occupancy_pct": 87.0
+      },
+      "2026-09": {
+        "revenue": 15770,
+        "occupancy_pct": 87.1
+      },
+      "2026-10": {
+        "revenue": 15874,
+        "occupancy_pct": 87.3
+      },
+      "2026-11": {
+        "revenue": 15978,
+        "occupancy_pct": 87.5
+      },
+      "2026-12": {
+        "revenue": 16082,
+        "occupancy_pct": 87.6
+      }
+    },
+    "NL-05-Rijswijk": {
+      "2026-01": {
+        "revenue": 66358,
+        "occupancy_pct": 83.7
+      },
+      "2026-02": {
+        "revenue": 66994,
+        "occupancy_pct": 84.1
+      },
+      "2026-03": {
+        "revenue": 67632,
+        "occupancy_pct": 84.4
+      },
+      "2026-04": {
+        "revenue": 68272,
+        "occupancy_pct": 84.8
+      },
+      "2026-05": {
+        "revenue": 68916,
+        "occupancy_pct": 85.2
+      },
+      "2026-06": {
+        "revenue": 69562,
+        "occupancy_pct": 85.6
+      },
+      "2026-07": {
+        "revenue": 70212,
+        "occupancy_pct": 86.0
+      },
+      "2026-08": {
+        "revenue": 70864,
+        "occupancy_pct": 86.3
+      },
+      "2026-09": {
+        "revenue": 71518,
+        "occupancy_pct": 86.7
+      },
+      "2026-10": {
+        "revenue": 72176,
+        "occupancy_pct": 87.1
+      },
+      "2026-11": {
+        "revenue": 72836,
+        "occupancy_pct": 87.5
+      },
+      "2026-12": {
+        "revenue": 73500,
+        "occupancy_pct": 87.9
+      }
+    },
+    "NL-06-Groningen": {
+      "2026-01": {
+        "revenue": 32141,
+        "occupancy_pct": 80.7
+      },
+      "2026-02": {
+        "revenue": 32515,
+        "occupancy_pct": 81.2
+      },
+      "2026-03": {
+        "revenue": 32891,
+        "occupancy_pct": 81.7
+      },
+      "2026-04": {
+        "revenue": 33268,
+        "occupancy_pct": 82.2
+      },
+      "2026-05": {
+        "revenue": 33648,
+        "occupancy_pct": 82.8
+      },
+      "2026-06": {
+        "revenue": 34029,
+        "occupancy_pct": 83.3
+      },
+      "2026-07": {
+        "revenue": 34413,
+        "occupancy_pct": 83.8
+      },
+      "2026-08": {
+        "revenue": 34798,
+        "occupancy_pct": 84.4
+      },
+      "2026-09": {
+        "revenue": 35185,
+        "occupancy_pct": 84.9
+      },
+      "2026-10": {
+        "revenue": 35575,
+        "occupancy_pct": 85.4
+      },
+      "2026-11": {
+        "revenue": 35966,
+        "occupancy_pct": 86.0
+      },
+      "2026-12": {
+        "revenue": 36359,
+        "occupancy_pct": 86.5
+      }
+    },
+    "NL-07-Venlo": {
+      "2026-01": {
+        "revenue": 20933,
+        "occupancy_pct": 75.9
+      },
+      "2026-02": {
+        "revenue": 21254,
+        "occupancy_pct": 76.8
+      },
+      "2026-03": {
+        "revenue": 21576,
+        "occupancy_pct": 77.7
+      },
+      "2026-04": {
+        "revenue": 21900,
+        "occupancy_pct": 78.6
+      },
+      "2026-05": {
+        "revenue": 22225,
+        "occupancy_pct": 79.5
+      },
+      "2026-06": {
+        "revenue": 22552,
+        "occupancy_pct": 80.4
+      },
+      "2026-07": {
+        "revenue": 22881,
+        "occupancy_pct": 81.3
+      },
+      "2026-08": {
+        "revenue": 23211,
+        "occupancy_pct": 82.2
+      },
+      "2026-09": {
+        "revenue": 23543,
+        "occupancy_pct": 83.1
+      },
+      "2026-10": {
+        "revenue": 23890,
+        "occupancy_pct": 84.0
+      },
+      "2026-11": {
+        "revenue": 24225,
+        "occupancy_pct": 85.0
+      },
+      "2026-12": {
+        "revenue": 24561,
+        "occupancy_pct": 85.9
+      }
+    },
+    "NL-08-Roermond": {
+      "2026-01": {
+        "revenue": 22577,
+        "occupancy_pct": 87.1
+      },
+      "2026-02": {
+        "revenue": 22795,
+        "occupancy_pct": 87.5
+      },
+      "2026-03": {
+        "revenue": 23014,
+        "occupancy_pct": 88.0
+      },
+      "2026-04": {
+        "revenue": 23235,
+        "occupancy_pct": 88.5
+      },
+      "2026-05": {
+        "revenue": 23456,
+        "occupancy_pct": 88.9
+      },
+      "2026-06": {
+        "revenue": 23678,
+        "occupancy_pct": 89.4
+      },
+      "2026-07": {
+        "revenue": 23902,
+        "occupancy_pct": 89.9
+      },
+      "2026-08": {
+        "revenue": 24143,
+        "occupancy_pct": 90.4
+      },
+      "2026-09": {
+        "revenue": 24368,
+        "occupancy_pct": 90.8
+      },
+      "2026-10": {
+        "revenue": 24595,
+        "occupancy_pct": 91.3
+      },
+      "2026-11": {
+        "revenue": 24823,
+        "occupancy_pct": 91.8
+      },
+      "2026-12": {
+        "revenue": 25052,
+        "occupancy_pct": 92.2
+      }
+    },
+    "NL-09-Sittard": {
+      "2026-01": {
+        "revenue": 31557,
+        "occupancy_pct": 64.6
+      },
+      "2026-02": {
+        "revenue": 32243,
+        "occupancy_pct": 65.9
+      },
+      "2026-03": {
+        "revenue": 32935,
+        "occupancy_pct": 67.2
+      },
+      "2026-04": {
+        "revenue": 33631,
+        "occupancy_pct": 68.4
+      },
+      "2026-05": {
+        "revenue": 34332,
+        "occupancy_pct": 69.7
+      },
+      "2026-06": {
+        "revenue": 35038,
+        "occupancy_pct": 71.0
+      },
+      "2026-07": {
+        "revenue": 35749,
+        "occupancy_pct": 72.2
+      },
+      "2026-08": {
+        "revenue": 36465,
+        "occupancy_pct": 73.5
+      },
+      "2026-09": {
+        "revenue": 37186,
+        "occupancy_pct": 74.8
+      },
+      "2026-10": {
+        "revenue": 37912,
+        "occupancy_pct": 76.0
+      },
+      "2026-11": {
+        "revenue": 38642,
+        "occupancy_pct": 77.3
+      },
+      "2026-12": {
+        "revenue": 39378,
+        "occupancy_pct": 78.6
+      }
+    },
+    "NL-10-Heerlen": {
+      "2026-01": {
+        "revenue": 18409,
+        "occupancy_pct": 83.1
+      },
+      "2026-02": {
+        "revenue": 18637,
+        "occupancy_pct": 83.6
+      },
+      "2026-03": {
+        "revenue": 18866,
+        "occupancy_pct": 84.2
+      },
+      "2026-04": {
+        "revenue": 19097,
+        "occupancy_pct": 84.7
+      },
+      "2026-05": {
+        "revenue": 19329,
+        "occupancy_pct": 85.3
+      },
+      "2026-06": {
+        "revenue": 19562,
+        "occupancy_pct": 85.8
+      },
+      "2026-07": {
+        "revenue": 19797,
+        "occupancy_pct": 86.4
+      },
+      "2026-08": {
+        "revenue": 20033,
+        "occupancy_pct": 86.9
+      },
+      "2026-09": {
+        "revenue": 20271,
+        "occupancy_pct": 87.5
+      },
+      "2026-10": {
+        "revenue": 20510,
+        "occupancy_pct": 88.0
+      },
+      "2026-11": {
+        "revenue": 20750,
+        "occupancy_pct": 88.6
+      },
+      "2026-12": {
+        "revenue": 20992,
+        "occupancy_pct": 89.1
+      }
+    },
+    "NL-11-Bergen op Zoom": {
+      "2026-01": {
+        "revenue": 22566,
+        "occupancy_pct": 65.2
+      },
+      "2026-02": {
+        "revenue": 22845,
+        "occupancy_pct": 65.9
+      },
+      "2026-03": {
+        "revenue": 23125,
+        "occupancy_pct": 66.6
+      },
+      "2026-04": {
+        "revenue": 23406,
+        "occupancy_pct": 67.3
+      },
+      "2026-05": {
+        "revenue": 23688,
+        "occupancy_pct": 68.0
+      },
+      "2026-06": {
+        "revenue": 23971,
+        "occupancy_pct": 68.7
+      },
+      "2026-07": {
+        "revenue": 24254,
+        "occupancy_pct": 69.5
+      },
+      "2026-08": {
+        "revenue": 24538,
+        "occupancy_pct": 70.2
+      },
+      "2026-09": {
+        "revenue": 24822,
+        "occupancy_pct": 70.9
+      },
+      "2026-10": {
+        "revenue": 25108,
+        "occupancy_pct": 71.6
+      },
+      "2026-11": {
+        "revenue": 25394,
+        "occupancy_pct": 72.3
+      },
+      "2026-12": {
+        "revenue": 25681,
+        "occupancy_pct": 73.0
+      }
+    },
+    "NL-12-Goes": {
+      "2026-01": {
+        "revenue": 28778,
+        "occupancy_pct": 71.5
+      },
+      "2026-02": {
+        "revenue": 29040,
+        "occupancy_pct": 71.8
+      },
+      "2026-03": {
+        "revenue": 29303,
+        "occupancy_pct": 72.1
+      },
+      "2026-04": {
+        "revenue": 29567,
+        "occupancy_pct": 72.5
+      },
+      "2026-05": {
+        "revenue": 29832,
+        "occupancy_pct": 72.8
+      },
+      "2026-06": {
+        "revenue": 30098,
+        "occupancy_pct": 73.1
+      },
+      "2026-07": {
+        "revenue": 30366,
+        "occupancy_pct": 73.4
+      },
+      "2026-08": {
+        "revenue": 30634,
+        "occupancy_pct": 73.7
+      },
+      "2026-09": {
+        "revenue": 30904,
+        "occupancy_pct": 74.1
+      },
+      "2026-10": {
+        "revenue": 31175,
+        "occupancy_pct": 74.4
+      },
+      "2026-11": {
+        "revenue": 31446,
+        "occupancy_pct": 74.7
+      },
+      "2026-12": {
+        "revenue": 31719,
+        "occupancy_pct": 75.0
+      }
+    },
+    "NL-13-Hellevoetsluis": {
+      "2026-01": {
+        "revenue": 43220,
+        "occupancy_pct": 88.7
+      },
+      "2026-02": {
+        "revenue": 43478,
+        "occupancy_pct": 88.8
+      },
+      "2026-03": {
+        "revenue": 43737,
+        "occupancy_pct": 88.9
+      },
+      "2026-04": {
+        "revenue": 43997,
+        "occupancy_pct": 89.0
+      },
+      "2026-05": {
+        "revenue": 44257,
+        "occupancy_pct": 89.1
+      },
+      "2026-06": {
+        "revenue": 44517,
+        "occupancy_pct": 89.2
+      },
+      "2026-07": {
+        "revenue": 44778,
+        "occupancy_pct": 89.3
+      },
+      "2026-08": {
+        "revenue": 45039,
+        "occupancy_pct": 89.4
+      },
+      "2026-09": {
+        "revenue": 45301,
+        "occupancy_pct": 89.5
+      },
+      "2026-10": {
+        "revenue": 45563,
+        "occupancy_pct": 89.6
+      },
+      "2026-11": {
+        "revenue": 45826,
+        "occupancy_pct": 89.7
+      },
+      "2026-12": {
+        "revenue": 46089,
+        "occupancy_pct": 89.8
+      }
+    },
+    "NL-14-Tilburg": {
+      "2026-01": {
+        "revenue": 67031,
+        "occupancy_pct": 78.9
+      },
+      "2026-02": {
+        "revenue": 67795,
+        "occupancy_pct": 79.5
+      },
+      "2026-03": {
+        "revenue": 68592,
+        "occupancy_pct": 80.1
+      },
+      "2026-04": {
+        "revenue": 68400,
+        "occupancy_pct": 80.8
+      },
+      "2026-05": {
+        "revenue": 69256,
+        "occupancy_pct": 81.4
+      },
+      "2026-06": {
+        "revenue": 70038,
+        "occupancy_pct": 82.0
+      },
+      "2026-07": {
+        "revenue": 73074,
+        "occupancy_pct": 82.6
+      },
+      "2026-08": {
+        "revenue": 73864,
+        "occupancy_pct": 83.3
+      },
+      "2026-09": {
+        "revenue": 74658,
+        "occupancy_pct": 83.9
+      },
+      "2026-10": {
+        "revenue": 75457,
+        "occupancy_pct": 84.5
+      },
+      "2026-11": {
+        "revenue": 76261,
+        "occupancy_pct": 85.2
+      },
+      "2026-12": {
+        "revenue": 77068,
+        "occupancy_pct": 85.8
+      }
+    },
+    "NL-15-Breda": {
+      "2026-01": {
+        "revenue": 46993,
+        "occupancy_pct": 54.3
+      },
+      "2026-02": {
+        "revenue": 47668,
+        "occupancy_pct": 54.9
+      },
+      "2026-03": {
+        "revenue": 48348,
+        "occupancy_pct": 55.4
+      },
+      "2026-04": {
+        "revenue": 48995,
+        "occupancy_pct": 56.0
+      },
+      "2026-05": {
+        "revenue": 49645,
+        "occupancy_pct": 56.6
+      },
+      "2026-06": {
+        "revenue": 50334,
+        "occupancy_pct": 57.1
+      },
+      "2026-07": {
+        "revenue": 50992,
+        "occupancy_pct": 57.7
+      },
+      "2026-08": {
+        "revenue": 51654,
+        "occupancy_pct": 58.3
+      },
+      "2026-09": {
+        "revenue": 52319,
+        "occupancy_pct": 58.8
+      },
+      "2026-10": {
+        "revenue": 52989,
+        "occupancy_pct": 59.4
+      },
+      "2026-11": {
+        "revenue": 53662,
+        "occupancy_pct": 60.0
+      },
+      "2026-12": {
+        "revenue": 54339,
+        "occupancy_pct": 60.5
+      }
+    },
+    "NL-16-Den Haag": {
+      "2026-01": {
+        "revenue": 73136,
+        "occupancy_pct": 84.7
+      },
+      "2026-02": {
+        "revenue": 73868,
+        "occupancy_pct": 84.8
+      },
+      "2026-03": {
+        "revenue": 74603,
+        "occupancy_pct": 84.9
+      },
+      "2026-04": {
+        "revenue": 75339,
+        "occupancy_pct": 85.1
+      },
+      "2026-05": {
+        "revenue": 76077,
+        "occupancy_pct": 85.2
+      },
+      "2026-06": {
+        "revenue": 76853,
+        "occupancy_pct": 85.3
+      },
+      "2026-07": {
+        "revenue": 77595,
+        "occupancy_pct": 85.5
+      },
+      "2026-08": {
+        "revenue": 78338,
+        "occupancy_pct": 85.6
+      },
+      "2026-09": {
+        "revenue": 79083,
+        "occupancy_pct": 85.7
+      },
+      "2026-10": {
+        "revenue": 79830,
+        "occupancy_pct": 85.8
+      },
+      "2026-11": {
+        "revenue": 80578,
+        "occupancy_pct": 86.0
+      },
+      "2026-12": {
+        "revenue": 81329,
+        "occupancy_pct": 86.1
+      }
+    },
+    "NL-17-Utrecht": {
+      "2026-01": {
+        "revenue": 32284,
+        "occupancy_pct": 59.3
+      },
+      "2026-02": {
+        "revenue": 32894,
+        "occupancy_pct": 60.2
+      },
+      "2026-03": {
+        "revenue": 33508,
+        "occupancy_pct": 61.0
+      },
+      "2026-04": {
+        "revenue": 34126,
+        "occupancy_pct": 61.9
+      },
+      "2026-05": {
+        "revenue": 34748,
+        "occupancy_pct": 62.8
+      },
+      "2026-06": {
+        "revenue": 35374,
+        "occupancy_pct": 63.7
+      },
+      "2026-07": {
+        "revenue": 36003,
+        "occupancy_pct": 64.5
+      },
+      "2026-08": {
+        "revenue": 36637,
+        "occupancy_pct": 65.4
+      },
+      "2026-09": {
+        "revenue": 37274,
+        "occupancy_pct": 66.3
+      },
+      "2026-10": {
+        "revenue": 37916,
+        "occupancy_pct": 67.2
+      },
+      "2026-11": {
+        "revenue": 38561,
+        "occupancy_pct": 68.0
+      },
+      "2026-12": {
+        "revenue": 39210,
+        "occupancy_pct": 68.9
+      }
+    },
+    "NL-18-Barendrecht": {
+      "2026-01": {
+        "revenue": 61418,
+        "occupancy_pct": 79.3
+      },
+      "2026-02": {
+        "revenue": 62302,
+        "occupancy_pct": 79.7
+      },
+      "2026-03": {
+        "revenue": 63192,
+        "occupancy_pct": 80.1
+      },
+      "2026-04": {
+        "revenue": 64087,
+        "occupancy_pct": 80.5
+      },
+      "2026-05": {
+        "revenue": 64988,
+        "occupancy_pct": 80.9
+      },
+      "2026-06": {
+        "revenue": 65894,
+        "occupancy_pct": 81.4
+      },
+      "2026-07": {
+        "revenue": 66806,
+        "occupancy_pct": 81.8
+      },
+      "2026-08": {
+        "revenue": 67723,
+        "occupancy_pct": 82.2
+      },
+      "2026-09": {
+        "revenue": 68646,
+        "occupancy_pct": 82.6
+      },
+      "2026-10": {
+        "revenue": 69574,
+        "occupancy_pct": 83.0
+      },
+      "2026-11": {
+        "revenue": 70508,
+        "occupancy_pct": 83.4
+      },
+      "2026-12": {
+        "revenue": 71447,
+        "occupancy_pct": 83.8
+      }
+    },
+    "NL-20-Helmond": {
+      "2026-01": {
+        "revenue": 32060,
+        "occupancy_pct": 83.0
+      },
+      "2026-02": {
+        "revenue": 32400,
+        "occupancy_pct": 83.5
+      },
+      "2026-03": {
+        "revenue": 32742,
+        "occupancy_pct": 83.9
+      },
+      "2026-04": {
+        "revenue": 33085,
+        "occupancy_pct": 84.4
+      },
+      "2026-05": {
+        "revenue": 33430,
+        "occupancy_pct": 84.8
+      },
+      "2026-06": {
+        "revenue": 33777,
+        "occupancy_pct": 85.3
+      },
+      "2026-07": {
+        "revenue": 34125,
+        "occupancy_pct": 85.7
+      },
+      "2026-08": {
+        "revenue": 34476,
+        "occupancy_pct": 86.2
+      },
+      "2026-09": {
+        "revenue": 34827,
+        "occupancy_pct": 86.6
+      },
+      "2026-10": {
+        "revenue": 35181,
+        "occupancy_pct": 87.1
+      },
+      "2026-11": {
+        "revenue": 35536,
+        "occupancy_pct": 87.5
+      },
+      "2026-12": {
+        "revenue": 35893,
+        "occupancy_pct": 88.0
+      }
+    },
+    "NL-21-Heerlen-Heerlerbaan": {
+      "2026-01": {
+        "revenue": 19761,
+        "occupancy_pct": 49.3
+      },
+      "2026-02": {
+        "revenue": 20132,
+        "occupancy_pct": 50.1
+      },
+      "2026-03": {
+        "revenue": 20505,
+        "occupancy_pct": 50.9
+      },
+      "2026-04": {
+        "revenue": 20881,
+        "occupancy_pct": 51.8
+      },
+      "2026-05": {
+        "revenue": 21258,
+        "occupancy_pct": 52.6
+      },
+      "2026-06": {
+        "revenue": 21638,
+        "occupancy_pct": 53.4
+      },
+      "2026-07": {
+        "revenue": 22020,
+        "occupancy_pct": 54.3
+      },
+      "2026-08": {
+        "revenue": 22404,
+        "occupancy_pct": 55.1
+      },
+      "2026-09": {
+        "revenue": 22790,
+        "occupancy_pct": 56.0
+      },
+      "2026-10": {
+        "revenue": 23179,
+        "occupancy_pct": 56.8
+      },
+      "2026-11": {
+        "revenue": 23569,
+        "occupancy_pct": 57.6
+      },
+      "2026-12": {
+        "revenue": 23962,
+        "occupancy_pct": 58.5
+      }
+    },
+    "NL-22-Rotterdam Centrum": {
+      "2026-01": {
+        "revenue": 91854,
+        "occupancy_pct": 66.8
+      },
+      "2026-02": {
+        "revenue": 91074,
+        "occupancy_pct": 67.1
+      },
+      "2026-03": {
+        "revenue": 91797,
+        "occupancy_pct": 67.4
+      },
+      "2026-04": {
+        "revenue": 92523,
+        "occupancy_pct": 67.6
+      },
+      "2026-05": {
+        "revenue": 93300,
+        "occupancy_pct": 67.9
+      },
+      "2026-06": {
+        "revenue": 94031,
+        "occupancy_pct": 68.2
+      },
+      "2026-07": {
+        "revenue": 94765,
+        "occupancy_pct": 68.4
+      },
+      "2026-08": {
+        "revenue": 95502,
+        "occupancy_pct": 68.7
+      },
+      "2026-09": {
+        "revenue": 96241,
+        "occupancy_pct": 69.0
+      },
+      "2026-10": {
+        "revenue": 96984,
+        "occupancy_pct": 69.3
+      },
+      "2026-11": {
+        "revenue": 97729,
+        "occupancy_pct": 69.5
+      },
+      "2026-12": {
+        "revenue": 98477,
+        "occupancy_pct": 69.8
+      }
+    },
+    "NL-23-Schiedam": {
+      "2026-01": {
+        "revenue": 76778,
+        "occupancy_pct": 81.5
+      },
+      "2026-02": {
+        "revenue": 77712,
+        "occupancy_pct": 82.1
+      },
+      "2026-03": {
+        "revenue": 78651,
+        "occupancy_pct": 82.8
+      },
+      "2026-04": {
+        "revenue": 79596,
+        "occupancy_pct": 83.4
+      },
+      "2026-05": {
+        "revenue": 80546,
+        "occupancy_pct": 84.1
+      },
+      "2026-06": {
+        "revenue": 81501,
+        "occupancy_pct": 84.7
+      },
+      "2026-07": {
+        "revenue": 82462,
+        "occupancy_pct": 85.3
+      },
+      "2026-08": {
+        "revenue": 83429,
+        "occupancy_pct": 86.0
+      },
+      "2026-09": {
+        "revenue": 84400,
+        "occupancy_pct": 86.6
+      },
+      "2026-10": {
+        "revenue": 85378,
+        "occupancy_pct": 87.3
+      },
+      "2026-11": {
+        "revenue": 86360,
+        "occupancy_pct": 87.9
+      },
+      "2026-12": {
+        "revenue": 87348,
+        "occupancy_pct": 88.5
+      }
+    },
+    "NL-24-Rotterdam Zuid": {
+      "2026-01": {
+        "revenue": 83983,
+        "occupancy_pct": 85.1
+      },
+      "2026-02": {
+        "revenue": 84914,
+        "occupancy_pct": 85.5
+      },
+      "2026-03": {
+        "revenue": 85850,
+        "occupancy_pct": 85.9
+      },
+      "2026-04": {
+        "revenue": 86792,
+        "occupancy_pct": 86.4
+      },
+      "2026-05": {
+        "revenue": 87738,
+        "occupancy_pct": 86.8
+      },
+      "2026-06": {
+        "revenue": 88689,
+        "occupancy_pct": 87.2
+      },
+      "2026-07": {
+        "revenue": 89645,
+        "occupancy_pct": 87.6
+      },
+      "2026-08": {
+        "revenue": 90606,
+        "occupancy_pct": 88.0
+      },
+      "2026-09": {
+        "revenue": 91572,
+        "occupancy_pct": 88.5
+      },
+      "2026-10": {
+        "revenue": 92543,
+        "occupancy_pct": 88.9
+      },
+      "2026-11": {
+        "revenue": 93519,
+        "occupancy_pct": 89.3
+      },
+      "2026-12": {
+        "revenue": 94500,
+        "occupancy_pct": 89.7
+      }
+    },
+    "NL-25-Alphen aan den Rijn": {
+      "2026-01": {
+        "revenue": 58381,
+        "occupancy_pct": 91.3
+      },
+      "2026-02": {
+        "revenue": 58840,
+        "occupancy_pct": 91.4
+      },
+      "2026-03": {
+        "revenue": 59299,
+        "occupancy_pct": 91.6
+      },
+      "2026-04": {
+        "revenue": 59759,
+        "occupancy_pct": 91.7
+      },
+      "2026-05": {
+        "revenue": 60221,
+        "occupancy_pct": 91.8
+      },
+      "2026-06": {
+        "revenue": 60683,
+        "occupancy_pct": 91.9
+      },
+      "2026-07": {
+        "revenue": 61147,
+        "occupancy_pct": 92.1
+      },
+      "2026-08": {
+        "revenue": 61611,
+        "occupancy_pct": 92.2
+      },
+      "2026-09": {
+        "revenue": 62077,
+        "occupancy_pct": 92.3
+      },
+      "2026-10": {
+        "revenue": 62543,
+        "occupancy_pct": 92.4
+      },
+      "2026-11": {
+        "revenue": 63010,
+        "occupancy_pct": 92.6
+      },
+      "2026-12": {
+        "revenue": 63479,
+        "occupancy_pct": 92.7
+      }
+    },
+    "NL-26-Alkmaar": {
+      "2026-01": {
+        "revenue": 48603,
+        "occupancy_pct": 88.0
+      },
+      "2026-02": {
+        "revenue": 48802,
+        "occupancy_pct": 88.1
+      },
+      "2026-03": {
+        "revenue": 49001,
+        "occupancy_pct": 88.3
+      },
+      "2026-04": {
+        "revenue": 49582,
+        "occupancy_pct": 88.4
+      },
+      "2026-05": {
+        "revenue": 49782,
+        "occupancy_pct": 88.5
+      },
+      "2026-06": {
+        "revenue": 49982,
+        "occupancy_pct": 88.6
+      },
+      "2026-07": {
+        "revenue": 50183,
+        "occupancy_pct": 88.7
+      },
+      "2026-08": {
+        "revenue": 50384,
+        "occupancy_pct": 88.8
+      },
+      "2026-09": {
+        "revenue": 50585,
+        "occupancy_pct": 88.9
+      },
+      "2026-10": {
+        "revenue": 50787,
+        "occupancy_pct": 89.0
+      },
+      "2026-11": {
+        "revenue": 50989,
+        "occupancy_pct": 89.1
+      },
+      "2026-12": {
+        "revenue": 51191,
+        "occupancy_pct": 89.3
+      }
+    },
+    "NL-27-Amsterdam": {
+      "2026-01": {
+        "revenue": 28654,
+        "occupancy_pct": 40.6
+      },
+      "2026-02": {
+        "revenue": 30173,
+        "occupancy_pct": 42.3
+      },
+      "2026-03": {
+        "revenue": 31703,
+        "occupancy_pct": 44.0
+      },
+      "2026-04": {
+        "revenue": 33245,
+        "occupancy_pct": 45.8
+      },
+      "2026-05": {
+        "revenue": 34798,
+        "occupancy_pct": 47.5
+      },
+      "2026-06": {
+        "revenue": 36363,
+        "occupancy_pct": 49.2
+      },
+      "2026-07": {
+        "revenue": 37938,
+        "occupancy_pct": 50.9
+      },
+      "2026-08": {
+        "revenue": 39526,
+        "occupancy_pct": 52.7
+      },
+      "2026-09": {
+        "revenue": 41124,
+        "occupancy_pct": 54.4
+      },
+      "2026-10": {
+        "revenue": 42734,
+        "occupancy_pct": 56.1
+      },
+      "2026-11": {
+        "revenue": 44356,
+        "occupancy_pct": 57.8
+      },
+      "2026-12": {
+        "revenue": 45989,
+        "occupancy_pct": 59.6
+      }
+    },
+    "NL-28-Almere": {
+      "2026-01": {
+        "revenue": 15382,
+        "occupancy_pct": 44.6
+      },
+      "2026-02": {
+        "revenue": 15621,
+        "occupancy_pct": 45.2
+      },
+      "2026-03": {
+        "revenue": 15861,
+        "occupancy_pct": 45.8
+      },
+      "2026-04": {
+        "revenue": 16102,
+        "occupancy_pct": 46.4
+      },
+      "2026-05": {
+        "revenue": 16344,
+        "occupancy_pct": 47.0
+      },
+      "2026-06": {
+        "revenue": 16588,
+        "occupancy_pct": 47.6
+      },
+      "2026-07": {
+        "revenue": 16833,
+        "occupancy_pct": 48.1
+      },
+      "2026-08": {
+        "revenue": 17079,
+        "occupancy_pct": 48.7
+      },
+      "2026-09": {
+        "revenue": 17326,
+        "occupancy_pct": 49.3
+      },
+      "2026-10": {
+        "revenue": 17575,
+        "occupancy_pct": 49.9
+      },
+      "2026-11": {
+        "revenue": 17825,
+        "occupancy_pct": 50.5
+      },
+      "2026-12": {
+        "revenue": 18076,
+        "occupancy_pct": 51.1
+      }
+    },
+    "NL-29-Helmond-Kanaaldijk": {
+      "2026-01": {
+        "revenue": 29893,
+        "occupancy_pct": 32.5
+      },
+      "2026-02": {
+        "revenue": 30414,
+        "occupancy_pct": 33.2
+      },
+      "2026-03": {
+        "revenue": 30938,
+        "occupancy_pct": 33.8
+      },
+      "2026-04": {
+        "revenue": 31463,
+        "occupancy_pct": 34.4
+      },
+      "2026-05": {
+        "revenue": 31991,
+        "occupancy_pct": 35.1
+      },
+      "2026-06": {
+        "revenue": 32522,
+        "occupancy_pct": 35.7
+      },
+      "2026-07": {
+        "revenue": 33055,
+        "occupancy_pct": 36.3
+      },
+      "2026-08": {
+        "revenue": 33590,
+        "occupancy_pct": 37.0
+      },
+      "2026-09": {
+        "revenue": 34127,
+        "occupancy_pct": 37.6
+      },
+      "2026-10": {
+        "revenue": 34667,
+        "occupancy_pct": 38.3
+      },
+      "2026-11": {
+        "revenue": 35209,
+        "occupancy_pct": 38.9
+      },
+      "2026-12": {
+        "revenue": 35754,
+        "occupancy_pct": 39.5
+      }
+    },
+    "NL-30-Lelystad": {
+      "2026-01": {
+        "revenue": 50092,
+        "occupancy_pct": 78.4
+      },
+      "2026-02": {
+        "revenue": 50956,
+        "occupancy_pct": 79.4
+      },
+      "2026-03": {
+        "revenue": 51824,
+        "occupancy_pct": 80.4
+      },
+      "2026-04": {
+        "revenue": 52699,
+        "occupancy_pct": 81.3
+      },
+      "2026-05": {
+        "revenue": 53579,
+        "occupancy_pct": 82.3
+      },
+      "2026-06": {
+        "revenue": 54464,
+        "occupancy_pct": 83.3
+      },
+      "2026-07": {
+        "revenue": 55355,
+        "occupancy_pct": 84.2
+      },
+      "2026-08": {
+        "revenue": 56252,
+        "occupancy_pct": 85.2
+      },
+      "2026-09": {
+        "revenue": 57154,
+        "occupancy_pct": 86.2
+      },
+      "2026-10": {
+        "revenue": 58062,
+        "occupancy_pct": 87.1
+      },
+      "2026-11": {
+        "revenue": 58976,
+        "occupancy_pct": 88.1
+      },
+      "2026-12": {
+        "revenue": 59895,
+        "occupancy_pct": 89.0
+      }
+    }
+  }
+}
