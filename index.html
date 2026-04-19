@@ -1868,6 +1868,15 @@ function renderTrends() {
 
   const monthSet = new Set();
   filteredSiteEntries.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
+
+  // Add current month from latest.json as a provisional MTD data point,
+  // but only if history.json doesn't already have an entry for it
+  const currentMonth = getCurrentMonthKey();
+  const currentMonthInHistory = monthSet.has(currentMonth);
+  if (!currentMonthInHistory && RAW_DATA.length > 0) {
+    monthSet.add(currentMonth);
+  }
+
   const months = [...monthSet].sort();
   const monthLabels = months.map(m => {
     const [y, mo] = m.split('-');
@@ -1875,9 +1884,13 @@ function renderTrends() {
     return names[parseInt(mo,10)-1] + ' ' + y;
   });
 
+  // Which months are MTD (incomplete)? Only the current month when pulled from live data.
+  const mtdMonths = new Set();
+  if (!currentMonthInHistory) mtdMonths.add(currentMonth);
+
   panel.innerHTML = `
     <div class="trends-header">
-      <div class="trends-scope">${scopeLabel} — ${months.length} data point${months.length === 1 ? '' : 's'} (monthly)</div>
+      <div class="trends-scope">${scopeLabel} — ${months.length} data point${months.length === 1 ? '' : 's'} (monthly${mtdMonths.size > 0 ? ', current MTD' : ''})</div>
       <div class="toggle-group">
         <button class="toggle-btn ${TRENDS_VIEW === 'portfolio' ? 'active' : ''}" onclick="setTrendsView('portfolio')">Portfolio</button>
         <button class="toggle-btn ${TRENDS_VIEW === 'bystore' ? 'active' : ''}" onclick="setTrendsView('bystore')">By Store</button>
@@ -1911,6 +1924,25 @@ function renderTrends() {
       // Aggregated series
       const occSeries = [], revSeries = [], netSeries = [], rateSeries = [];
       months.forEach(m => {
+        // For the current month (MTD), pull from live FILTERED_DATA
+        if (m === currentMonth && !currentMonthInHistory) {
+          let rSqm = 0, tSqm = 0, rev = 0, net = 0, rateNum = 0, rateDen = 0;
+          FILTERED_DATA.forEach(d => {
+            rSqm += d.occupancy?.rented_sqm || 0;
+            tSqm += d.occupancy?.total_sqm || 0;
+            rev += d.revenue?.net_total || 0;
+            net += d.rentals?.net_month || 0;
+            const rate = d.revenue?.avg_rate_per_sqm || 0;
+            const sqm = d.occupancy?.rented_sqm || 0;
+            if (rate && sqm) { rateNum += rate * sqm; rateDen += sqm; }
+          });
+          occSeries.push(tSqm > 0 ? (rSqm/tSqm*100) : null);
+          revSeries.push(rev);
+          netSeries.push(net);
+          rateSeries.push(rateDen > 0 ? (rateNum/rateDen) : null);
+          return;
+        }
+
         let rSqm = 0, tSqm = 0, rev = 0, net = 0, rateNum = 0, rateDen = 0;
         filteredSiteEntries.forEach(s => {
           const e = (s.series || []).find(x => x.month === m);
@@ -1931,13 +1963,13 @@ function renderTrends() {
       });
 
       mkLineChart('ch-trend-occ', monthLabels, [{ label: scopeLabel, data: occSeries, color: '#16a34a' }],
-        { yFmt: v => v + '%', yMin: 0, yMax: 100, stepSize: 25 });
+        { yFmt: v => v + '%', yMin: 0, yMax: 100, stepSize: 25, mtdMonths, months });
       mkLineChart('ch-trend-rev', monthLabels, [{ label: scopeLabel, data: revSeries, color: '#16a34a' }],
-        { yFmt: v => '€' + (v/1000).toFixed(0) + 'k', yMin: 0 });
+        { yFmt: v => '€' + (v/1000).toFixed(0) + 'k', yMin: 0, mtdMonths, months });
       mkLineChart('ch-trend-net', monthLabels, [{ label: scopeLabel, data: netSeries, color: '#f97316' }],
-        { yFmt: v => v });
+        { yFmt: v => v, mtdMonths, months });
       mkLineChart('ch-trend-rate', monthLabels, [{ label: scopeLabel, data: rateSeries, color: '#8b5cf6' }],
-        { yFmt: v => '€' + fmt(v, 0), yMin: 0 });
+        { yFmt: v => '€' + fmt(v, 0), yMin: 0, mtdMonths, months });
     } else {
       // By Store: one line per site
       const palette = ['#16a34a', '#f97316', '#8b5cf6', '#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6'];
@@ -1945,21 +1977,34 @@ function renderTrends() {
 
       filteredSiteEntries.forEach((s, i) => {
         const color = palette[i % palette.length];
+
+        // For current month, find matching live site data
+        const liveSite = !currentMonthInHistory
+          ? FILTERED_DATA.find(d => d.site_name === s.name)
+          : null;
+
         const occData = months.map(m => {
+          if (m === currentMonth && liveSite) {
+            const ts = liveSite.occupancy?.total_sqm || 0;
+            return ts > 0 ? ((liveSite.occupancy.rented_sqm / ts) * 100) : null;
+          }
           const e = (s.series || []).find(x => x.month === m);
           if (!e || !e.occupancy) return null;
           const ts = e.occupancy.total_sqm || 0;
           return ts > 0 ? ((e.occupancy.rented_sqm / ts) * 100) : null;
         });
         const revData = months.map(m => {
+          if (m === currentMonth && liveSite) return liveSite.revenue?.net_total || null;
           const e = (s.series || []).find(x => x.month === m);
           return e?.revenue?.net_total || null;
         });
         const netData = months.map(m => {
+          if (m === currentMonth && liveSite) return liveSite.rentals?.net_month || null;
           const e = (s.series || []).find(x => x.month === m);
           return e?.rentals?.net_month || null;
         });
         const rateData = months.map(m => {
+          if (m === currentMonth && liveSite) return liveSite.revenue?.avg_rate_per_sqm || null;
           const e = (s.series || []).find(x => x.month === m);
           return e?.revenue?.avg_rate_per_sqm || null;
         });
@@ -1970,10 +2015,10 @@ function renderTrends() {
         rateDatasets.push({ label: siteShort(s.name), data: rateData, color });
       });
 
-      mkLineChart('ch-trend-occ', monthLabels, occDatasets, { yFmt: v => v + '%', yMin: 0, yMax: 100, stepSize: 25 });
-      mkLineChart('ch-trend-rev', monthLabels, revDatasets, { yFmt: v => '€' + (v/1000).toFixed(0) + 'k', yMin: 0 });
-      mkLineChart('ch-trend-net', monthLabels, netDatasets, { yFmt: v => v });
-      mkLineChart('ch-trend-rate', monthLabels, rateDatasets, { yFmt: v => '€' + fmt(v, 0), yMin: 0 });
+      mkLineChart('ch-trend-occ', monthLabels, occDatasets, { yFmt: v => v + '%', yMin: 0, yMax: 100, stepSize: 25, mtdMonths, months });
+      mkLineChart('ch-trend-rev', monthLabels, revDatasets, { yFmt: v => '€' + (v/1000).toFixed(0) + 'k', yMin: 0, mtdMonths, months });
+      mkLineChart('ch-trend-net', monthLabels, netDatasets, { yFmt: v => v, mtdMonths, months });
+      mkLineChart('ch-trend-rate', monthLabels, rateDatasets, { yFmt: v => '€' + fmt(v, 0), yMin: 0, mtdMonths, months });
     }
   });
 }
@@ -2136,19 +2181,33 @@ function mkLineChart(id, labels, datasets, opts) {
   if (opts.yMax !== undefined) yScale.max = opts.yMax;
   if (opts.stepSize) yScale.ticks.stepSize = opts.stepSize;
 
+  const mtdMonths = opts.mtdMonths;
+  const months = opts.months || [];
+
+  // Helper: is the data point at this index MTD (current incomplete month)?
+  const isMTDIndex = (i) => mtdMonths && months[i] && mtdMonths.has(months[i]);
+
   const chartDatasets = datasets.map(d => ({
     label: d.label,
     data: d.data,
     borderColor: d.color,
     backgroundColor: 'transparent',
-    pointBackgroundColor: '#fff',
-    pointBorderColor: d.color,
-    pointBorderWidth: 2,
-    pointRadius: 3,
-    pointHoverRadius: 5,
+    pointBackgroundColor: (ctx) => isMTDIndex(ctx.dataIndex) ? '#fff' : '#fff',
+    pointBorderColor: (ctx) => isMTDIndex(ctx.dataIndex) ? d.color : d.color,
+    pointBorderWidth: (ctx) => isMTDIndex(ctx.dataIndex) ? 2 : 2,
+    pointRadius: (ctx) => isMTDIndex(ctx.dataIndex) ? 5 : 3,
+    pointStyle: (ctx) => isMTDIndex(ctx.dataIndex) ? 'rectRot' : 'circle',
+    pointHoverRadius: 6,
     borderWidth: 2,
     tension: 0.35,
-    spanGaps: true
+    spanGaps: true,
+    segment: {
+      borderDash: (ctx) => {
+        // Dash the segment going INTO the MTD point
+        if (isMTDIndex(ctx.p1DataIndex)) return [4, 4];
+        return undefined;
+      }
+    }
   }));
 
   CHARTS[id] = new Chart(canvas, {
@@ -2171,7 +2230,15 @@ function mkLineChart(id, labels, datasets, opts) {
           bodyColor: '#1a1a1a',
           titleFont: { family: 'Inter', size: 11, weight: '600' },
           bodyFont: { family: 'Inter', size: 11 },
-          padding: 10
+          padding: 10,
+          callbacks: {
+            title: (items) => {
+              if (!items.length) return '';
+              const label = items[0].label;
+              if (isMTDIndex(items[0].dataIndex)) return label + ' (MTD, incomplete)';
+              return label;
+            }
+          }
         }
       },
       scales: {
