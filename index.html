@@ -1278,7 +1278,7 @@ function renderOverview() {
 
   const revBudgetHTML = revBudgetEmpty
     ? budgetEmptyHTML
-    : `<div class="chart-wrap"><canvas id="ch-rev-budget"></canvas></div>`;
+    : `<div class="chart-wrap-lg"><canvas id="ch-rev-budget"></canvas></div>`;
   const occBudgetHTML = occBudgetEmpty
     ? budgetEmptyHTML
     : `<div class="chart-wrap"><canvas id="ch-occ-budget"></canvas></div>`;
@@ -1287,7 +1287,7 @@ function renderOverview() {
   // Show portfolio-total variance for Portfolio view too (not just single-site)
   if (!revBudgetEmpty) {
     const revVar = actualRev - budgetTotals.revenue;
-    revVarText = `<div class="variance-text ${revVar >= 0 ? 'pos' : 'neg'}">Total Variance: ${revVar >= 0 ? '+' : ''}${fmtEur(revVar)}</div>`;
+    revVarText = `<div class="variance-text ${revVar >= 0 ? 'pos' : 'neg'}">April Variance: ${revVar >= 0 ? '+' : ''}${fmtEur(revVar)}</div>`;
   }
   if (!occBudgetEmpty) {
     const occVar = actualOcc - budgetTotals.occupancy_pct;
@@ -1373,21 +1373,57 @@ function renderOverview() {
 
   nextTick(() => {
     if (isAllSites && FILTERED_DATA.length > 1) {
-      // Total Revenue Actual vs Budget — single comparison (2 bars)
+      // Revenue vs Budget — Jan/Feb/Mar/Apr/YTD grouped bars (Actual + Budget)
       if (!revBudgetEmpty) {
-        const siteRevActual = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
-        const siteRevBudget = FILTERED_DATA.map(d => {
-          if (!BUDGET_DATA) return 0;
-          const key = siteKeyFromName(d.site_name);
-          const mk = getCurrentMonthKey();
-          return BUDGET_DATA.sites[key]?.[mk]?.revenue || 0;
-        });
-        const totalActual = siteRevActual.reduce((a,b)=>a+b,0);
-        const totalBudget = siteRevBudget.reduce((a,b)=>a+b,0);
+        const revActualByMonth = {};
+        const revBudgetByMonth = {};
+        const monthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
 
-        mkHBarChart('ch-rev-budget', ['Actual', 'Budget'], [{
-          label: '', data: [totalActual, totalBudget], color: ['#16a34a', '#d1d5db']
-        }], v => fmt(v/1000, 0) + 'k');
+        // Historical actuals (Jan/Feb/Mar) from history.json
+        if (HISTORY_DATA && HISTORY_DATA.sites) {
+          const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+            if (s.is_rollup) return false;
+            if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+            if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+            return true;
+          });
+          monthKeys.slice(0, 3).forEach(mk => {
+            let sum = 0;
+            histSites.forEach(s => {
+              const e = (s.series || []).find(x => x.month === mk);
+              if (e?.revenue?.net_total) sum += e.revenue.net_total;
+            });
+            revActualByMonth[mk] = sum;
+          });
+        }
+
+        // April Actual from live FILTERED_DATA
+        revActualByMonth['2026-04'] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.net_total || 0), 0);
+
+        // Budgets for all 4 months from budgets.json
+        monthKeys.forEach(mk => {
+          let sum = 0;
+          FILTERED_DATA.forEach(d => {
+            const key = siteKeyFromName(d.site_name);
+            if (!key || !BUDGET_DATA) return;
+            const mb = BUDGET_DATA.sites[key]?.[mk];
+            if (mb?.revenue) sum += mb.revenue;
+          });
+          revBudgetByMonth[mk] = sum;
+        });
+
+        // YTD totals
+        const ytdActual = monthKeys.reduce((s, mk) => s + (revActualByMonth[mk] || 0), 0);
+        const ytdBudget = monthKeys.reduce((s, mk) => s + (revBudgetByMonth[mk] || 0), 0);
+
+        const labels = ['Jan', 'Feb', 'Mar', 'Apr MTD', 'YTD'];
+        const actualData = [...monthKeys.map(mk => revActualByMonth[mk] || 0), ytdActual];
+        const budgetData = [...monthKeys.map(mk => revBudgetByMonth[mk] || 0), ytdBudget];
+
+        mkVBarChart('ch-rev-budget', labels, [
+          { label: 'Actual', data: actualData, color: '#16a34a' },
+          { label: 'Budget', data: budgetData, color: '#d1d5db' }
+        ], { yFmt: v => '€' + fmt(v/1000, 0) + 'k' });
       }
 
       // Total Occupancy Actual vs Budget — single comparison (2 bars, weighted average)
@@ -2137,10 +2173,17 @@ function mkHBarChart(id, labels, datasets, fmtFn, maxVal) {
   });
 }
 
-function mkVBarChart(id, labels, datasets) {
+function mkVBarChart(id, labels, datasets, opts) {
   const canvas = document.getElementById(id);
   if (!canvas) return;
   if (CHARTS[id]) CHARTS[id].destroy();
+  opts = opts || {};
+
+  const yTicks = {
+    color: '#9ca3af',
+    font: { family: 'Inter', size: 10 }
+  };
+  if (opts.yFmt) yTicks.callback = v => opts.yFmt(v);
 
   CHARTS[id] = new Chart(canvas, {
     type: 'bar',
@@ -2162,7 +2205,10 @@ function mkVBarChart(id, labels, datasets) {
           display: datasets.length > 1,
           position: 'bottom',
           labels: { color: '#6b7280', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 8 }
-        }
+        },
+        tooltip: opts.yFmt ? {
+          callbacks: { label: ctx => (ctx.dataset.label ? ctx.dataset.label + ': ' : '') + opts.yFmt(ctx.parsed.y) }
+        } : {}
       },
       scales: {
         x: {
@@ -2170,7 +2216,7 @@ function mkVBarChart(id, labels, datasets) {
           grid: { display: false }
         },
         y: {
-          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } },
+          ticks: yTicks,
           grid: { color: '#f3f4f6', drawBorder: false }
         }
       }
