@@ -1294,14 +1294,10 @@ function renderOverview() {
     occVarText = `<div class="variance-text ${occVar >= 0 ? 'pos' : 'neg'}">Total Variance: ${occVar >= 0 ? '+' : ''}${fmt(occVar, 1)} pp</div>`;
   }
 
-  // Move-Ins vs Move-Outs + Transfers (Portfolio view)
-  // MI/MO: 4-month line chart with real historicals + Apr MTD dashed
-  // Transfers: 2-bar MTD-only (no historicals exist in history.json)
+  // Move-Ins vs Move-Outs + Net Rentals (Portfolio view)
+  // Both are 4-month line charts: Jan-Mar historicals + Apr MTD dashed
   const totalMI = agg('rentals.move_ins_month');
   const totalMO = agg('rentals.vacates_month');
-  const totalTI = agg('rentals.transfers_in_month');
-  const totalTO = agg('rentals.transfers_out_month');
-  const hasTransferData = totalTI > 0 || totalTO > 0;
 
   let activityHTML = '';
   if (isAllSites && FILTERED_DATA.length > 1) {
@@ -1312,15 +1308,8 @@ function renderOverview() {
           <div class="chart-wrap-sm"><canvas id="ch-mi-mo"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-title">MTD Transfers In vs Out</div>
-          ${hasTransferData
-            ? `<div class="chart-wrap-sm"><canvas id="ch-ti-to"></canvas></div>
-               <div style="text-align:center;margin-top:6px;font-size:10px;color:var(--muted-2)">April MTD — historical transfer data not yet available</div>`
-            : `<div style="height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px;text-align:center">
-                 <div style="font-size:24px;margin-bottom:8px;opacity:0.4">—</div>
-                 <div>Transfer data pending</div>
-               </div>`
-          }
+          <div class="card-title">Net Rentals (YTD)</div>
+          <div class="chart-wrap-sm"><canvas id="ch-net-rentals-ov"></canvas></div>
         </div>
       </div>
       <div class="section-gap"></div>
@@ -1426,15 +1415,15 @@ function renderOverview() {
         }], v => v + '%', 100);
       }
 
-      // Move-Ins vs Move-Outs — 4-month line chart with MTD dashed treatment on April
+      // Move-Ins vs Move-Outs + Net Rentals — both 4-month line charts
       // Pull Jan/Feb/Mar from history.json; April from live FILTERED_DATA
       const miMoMonths = [];
       const miSeries = [];
       const moSeries = [];
+      const netSeries = [];
       const currentMonth = getCurrentMonthKey();
 
       if (HISTORY_DATA && HISTORY_DATA.sites) {
-        // Filter history sites by current country
         const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
           if (s.is_rollup) return false;
           if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
@@ -1442,36 +1431,37 @@ function renderOverview() {
           return true;
         });
 
-        // Collect unique month keys
         const monthSet = new Set();
         histSites.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
         const histMonths = [...monthSet].sort();
 
         histMonths.forEach(m => {
-          let miSum = 0, moSum = 0;
+          let miSum = 0, moSum = 0, netSum = 0;
           histSites.forEach(s => {
             const e = (s.series || []).find(x => x.month === m);
             if (e?.rentals) {
               miSum += e.rentals.move_ins_month || 0;
               moSum += e.rentals.vacates_month || 0;
+              netSum += e.rentals.net_month || 0;
             }
           });
           miMoMonths.push(m);
           miSeries.push(miSum);
           moSeries.push(moSum);
+          netSeries.push(netSum);
         });
 
-        // Append current month MTD from FILTERED_DATA if not already in history
         if (!miMoMonths.includes(currentMonth)) {
           miMoMonths.push(currentMonth);
           miSeries.push(totalMI);
           moSeries.push(totalMO);
+          netSeries.push(totalMI - totalMO);
         }
       } else {
-        // No history — show MTD only
         miMoMonths.push(currentMonth);
         miSeries.push(totalMI);
         moSeries.push(totalMO);
+        netSeries.push(totalMI - totalMO);
       }
 
       const miMoLabels = miMoMonths.map(m => {
@@ -1487,12 +1477,9 @@ function renderOverview() {
         { label: 'Move-Outs', data: moSeries, color: '#f97316' }
       ], { yFmt: v => v, yMin: 0, mtdMonths: mtdMonthsSet, months: miMoMonths });
 
-      // MTD Transfers In vs Out — 2-bar chart (no historicals available)
-      if (hasTransferData) {
-        mkVBarChart('ch-ti-to', ['Transfers In', 'Transfers Out'], [
-          { label: '', data: [totalTI, totalTO], color: ['#16a34a', '#f97316'] }
-        ]);
-      }
+      mkLineChart('ch-net-rentals-ov', miMoLabels, [
+        { label: 'Net Rentals', data: netSeries, color: '#f97316' }
+      ], { yFmt: v => v, mtdMonths: mtdMonthsSet, months: miMoMonths });
     } else {
       // Single site view
       if (!revBudgetEmpty) {
