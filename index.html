@@ -1284,11 +1284,7 @@ function renderOverview() {
     : `<div class="chart-wrap"><canvas id="ch-occ-budget"></canvas></div>`;
 
   let revVarText = '', occVarText = '';
-  // Show portfolio-total variance for Portfolio view too (not just single-site)
-  if (!revBudgetEmpty) {
-    const revVar = actualRev - budgetTotals.revenue;
-    revVarText = `<div class="variance-text ${revVar >= 0 ? 'pos' : 'neg'}">April Variance: ${revVar >= 0 ? '+' : ''}${fmtEur(revVar)}</div>`;
-  }
+  // Revenue variance now shown per-month under each bar group in the chart itself
   if (!occBudgetEmpty) {
     const occVar = actualOcc - budgetTotals.occupancy_pct;
     occVarText = `<div class="variance-text ${occVar >= 0 ? 'pos' : 'neg'}">Total Variance: ${occVar >= 0 ? '+' : ''}${fmt(occVar, 1)} pp</div>`;
@@ -1374,12 +1370,12 @@ function renderOverview() {
   nextTick(() => {
     if (isAllSites && FILTERED_DATA.length > 1) {
       // Revenue vs Budget — Jan/Feb/Mar/Apr/YTD grouped bars (Actual + Budget)
+      // with per-month variance shown under each bar group
       if (!revBudgetEmpty) {
         const revActualByMonth = {};
         const revBudgetByMonth = {};
         const monthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
 
-        // Historical actuals (Jan/Feb/Mar) from history.json
         if (HISTORY_DATA && HISTORY_DATA.sites) {
           const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
             if (s.is_rollup) return false;
@@ -1397,10 +1393,8 @@ function renderOverview() {
           });
         }
 
-        // April Actual from live FILTERED_DATA
         revActualByMonth['2026-04'] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.net_total || 0), 0);
 
-        // Budgets for all 4 months from budgets.json
         monthKeys.forEach(mk => {
           let sum = 0;
           FILTERED_DATA.forEach(d => {
@@ -1412,18 +1406,29 @@ function renderOverview() {
           revBudgetByMonth[mk] = sum;
         });
 
-        // YTD totals
         const ytdActual = monthKeys.reduce((s, mk) => s + (revActualByMonth[mk] || 0), 0);
         const ytdBudget = monthKeys.reduce((s, mk) => s + (revBudgetByMonth[mk] || 0), 0);
 
-        const labels = ['Jan', 'Feb', 'Mar', 'Apr MTD', 'YTD'];
+        // Build multi-line x-axis labels: month name + variance string
+        const fmtVar = (actual, budget) => {
+          if (!budget) return '';
+          const v = actual - budget;
+          const sign = v >= 0 ? '+' : '−';
+          const absVal = Math.abs(v);
+          if (absVal >= 1000) return sign + '€' + fmt(absVal/1000, 0) + 'k';
+          return sign + '€' + fmt(absVal, 0);
+        };
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
+        const labels = [
+          ...monthKeys.map((mk, i) => [monthNames[i], fmtVar(revActualByMonth[mk] || 0, revBudgetByMonth[mk] || 0)]),
+          ['YTD', fmtVar(ytdActual, ytdBudget)]
+        ];
+
         const actualData = [...monthKeys.map(mk => revActualByMonth[mk] || 0), ytdActual];
         const budgetData = [...monthKeys.map(mk => revBudgetByMonth[mk] || 0), ytdBudget];
 
-        mkVBarChart('ch-rev-budget', labels, [
-          { label: 'Actual', data: actualData, color: '#16a34a' },
-          { label: 'Budget', data: budgetData, color: '#d1d5db' }
-        ], { yFmt: v => '€' + fmt(v/1000, 0) + 'k' });
+        mkRevVarChart('ch-rev-budget', labels, actualData, budgetData);
       }
 
       // Total Occupancy Actual vs Budget — single comparison (2 bars, weighted average)
