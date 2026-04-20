@@ -1294,7 +1294,9 @@ function renderOverview() {
     occVarText = `<div class="variance-text ${occVar >= 0 ? 'pos' : 'neg'}">Total Variance: ${occVar >= 0 ? '+' : ''}${fmt(occVar, 1)} pp</div>`;
   }
 
-  // Move-Ins vs Move-Outs + Transfers (Portfolio view, MTD totals)
+  // Move-Ins vs Move-Outs + Transfers (Portfolio view)
+  // MI/MO: 4-month line chart with real historicals + Apr MTD dashed
+  // Transfers: 2-bar MTD-only (no historicals exist in history.json)
   const totalMI = agg('rentals.move_ins_month');
   const totalMO = agg('rentals.vacates_month');
   const totalTI = agg('rentals.transfers_in_month');
@@ -1306,17 +1308,17 @@ function renderOverview() {
     activityHTML = `
       <div class="grid-2">
         <div class="card">
-          <div class="card-title">MTD Move-Ins vs Move-Outs</div>
+          <div class="card-title">Move-Ins vs Move-Outs (YTD)</div>
           <div class="chart-wrap-sm"><canvas id="ch-mi-mo"></canvas></div>
         </div>
         <div class="card">
           <div class="card-title">MTD Transfers In vs Out</div>
           ${hasTransferData
-            ? `<div class="chart-wrap-sm"><canvas id="ch-ti-to"></canvas></div>`
+            ? `<div class="chart-wrap-sm"><canvas id="ch-ti-to"></canvas></div>
+               <div style="text-align:center;margin-top:6px;font-size:10px;color:var(--muted-2)">April MTD — historical transfer data not yet available</div>`
             : `<div style="height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px;text-align:center">
                  <div style="font-size:24px;margin-bottom:8px;opacity:0.4">—</div>
                  <div>Transfer data pending</div>
-                 <div style="font-size:10px;margin-top:4px;opacity:0.7">Will populate once pipeline extracts transfers</div>
                </div>`
           }
         </div>
@@ -1382,9 +1384,7 @@ function renderOverview() {
 
   nextTick(() => {
     if (isAllSites && FILTERED_DATA.length > 1) {
-      const siteLabels = FILTERED_DATA.map(d => siteShort(d.site_name));
-
-      // Build per-site values + a TOTAL row at the top
+      // Total Revenue Actual vs Budget — single comparison (2 bars)
       if (!revBudgetEmpty) {
         const siteRevActual = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
         const siteRevBudget = FILTERED_DATA.map(d => {
@@ -1393,20 +1393,16 @@ function renderOverview() {
           const mk = getCurrentMonthKey();
           return BUDGET_DATA.sites[key]?.[mk]?.revenue || 0;
         });
-        // Prepend TOTAL row
-        const revLabels = ['TOTAL', ...siteLabels];
-        const revActualWithTotal = [siteRevActual.reduce((a,b)=>a+b,0), ...siteRevActual];
-        const revBudgetWithTotal = [siteRevBudget.reduce((a,b)=>a+b,0), ...siteRevBudget];
+        const totalActual = siteRevActual.reduce((a,b)=>a+b,0);
+        const totalBudget = siteRevBudget.reduce((a,b)=>a+b,0);
 
-        mkHBarChart('ch-rev-budget', revLabels, [
-          { label: 'Actual', data: revActualWithTotal, color: '#16a34a' },
-          { label: 'Budget', data: revBudgetWithTotal, color: '#d1d5db' }
-        ], v => fmt(v/1000, 0) + 'k');
+        mkHBarChart('ch-rev-budget', ['Actual', 'Budget'], [{
+          label: '', data: [totalActual, totalBudget], color: ['#16a34a', '#d1d5db']
+        }], v => fmt(v/1000, 0) + 'k');
       }
 
+      // Total Occupancy Actual vs Budget — single comparison (2 bars, weighted average)
       if (!occBudgetEmpty) {
-        // Weighted average for TOTAL (by rented_sqm + total_sqm)
-        const siteOccActual = FILTERED_DATA.map(d => d.occupancy?.surface_pct || 0);
         const siteOccBudget = FILTERED_DATA.map(d => {
           if (!BUDGET_DATA) return 0;
           const key = siteKeyFromName(d.site_name);
@@ -1414,12 +1410,10 @@ function renderOverview() {
           return BUDGET_DATA.sites[key]?.[mk]?.occupancy_pct || 0;
         });
 
-        // Weighted avg for actual: rented_sqm / total_sqm across all
         const totalRentedSqm = FILTERED_DATA.reduce((s,d) => s + (d.occupancy?.rented_sqm || 0), 0);
         const totalSqm = FILTERED_DATA.reduce((s,d) => s + (d.occupancy?.total_sqm || 0), 0);
         const totalActualOcc = totalSqm > 0 ? (totalRentedSqm / totalSqm * 100) : 0;
 
-        // Weighted avg for budget: target_sqm / total_sqm, where target_sqm = budget_pct/100 * total_sqm
         let totalBudgetRentedSqm = 0;
         FILTERED_DATA.forEach((d, i) => {
           const sqm = d.occupancy?.total_sqm || 0;
@@ -1427,22 +1421,73 @@ function renderOverview() {
         });
         const totalBudgetOcc = totalSqm > 0 ? (totalBudgetRentedSqm / totalSqm * 100) : 0;
 
-        const occLabels = ['TOTAL', ...siteLabels];
-        const occActualWithTotal = [totalActualOcc, ...siteOccActual];
-        const occBudgetWithTotal = [totalBudgetOcc, ...siteOccBudget];
-
-        mkHBarChart('ch-occ-budget', occLabels, [
-          { label: 'Actual', data: occActualWithTotal, color: '#16a34a' },
-          { label: 'Budget', data: occBudgetWithTotal, color: '#d1d5db' }
-        ], v => v + '%', 100);
+        mkHBarChart('ch-occ-budget', ['Actual', 'Budget'], [{
+          label: '', data: [totalActualOcc, totalBudgetOcc], color: ['#16a34a', '#d1d5db']
+        }], v => v + '%', 100);
       }
 
-      // MTD Move-Ins vs Move-Outs
-      mkVBarChart('ch-mi-mo', ['Move-Ins', 'Move-Outs'], [
-        { label: '', data: [totalMI, totalMO], color: ['#16a34a', '#f97316'] }
-      ]);
+      // Move-Ins vs Move-Outs — 4-month line chart with MTD dashed treatment on April
+      // Pull Jan/Feb/Mar from history.json; April from live FILTERED_DATA
+      const miMoMonths = [];
+      const miSeries = [];
+      const moSeries = [];
+      const currentMonth = getCurrentMonthKey();
 
-      // MTD Transfers In vs Out (only render if data exists)
+      if (HISTORY_DATA && HISTORY_DATA.sites) {
+        // Filter history sites by current country
+        const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+          if (s.is_rollup) return false;
+          if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+          if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+          return true;
+        });
+
+        // Collect unique month keys
+        const monthSet = new Set();
+        histSites.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
+        const histMonths = [...monthSet].sort();
+
+        histMonths.forEach(m => {
+          let miSum = 0, moSum = 0;
+          histSites.forEach(s => {
+            const e = (s.series || []).find(x => x.month === m);
+            if (e?.rentals) {
+              miSum += e.rentals.move_ins_month || 0;
+              moSum += e.rentals.vacates_month || 0;
+            }
+          });
+          miMoMonths.push(m);
+          miSeries.push(miSum);
+          moSeries.push(moSum);
+        });
+
+        // Append current month MTD from FILTERED_DATA if not already in history
+        if (!miMoMonths.includes(currentMonth)) {
+          miMoMonths.push(currentMonth);
+          miSeries.push(totalMI);
+          moSeries.push(totalMO);
+        }
+      } else {
+        // No history — show MTD only
+        miMoMonths.push(currentMonth);
+        miSeries.push(totalMI);
+        moSeries.push(totalMO);
+      }
+
+      const miMoLabels = miMoMonths.map(m => {
+        const [y, mo] = m.split('-');
+        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return names[parseInt(mo,10)-1] + ' ' + y;
+      });
+
+      const mtdMonthsSet = new Set([currentMonth]);
+
+      mkLineChart('ch-mi-mo', miMoLabels, [
+        { label: 'Move-Ins', data: miSeries, color: '#16a34a' },
+        { label: 'Move-Outs', data: moSeries, color: '#f97316' }
+      ], { yFmt: v => v, yMin: 0, mtdMonths: mtdMonthsSet, months: miMoMonths });
+
+      // MTD Transfers In vs Out — 2-bar chart (no historicals available)
       if (hasTransferData) {
         mkVBarChart('ch-ti-to', ['Transfers In', 'Transfers Out'], [
           { label: '', data: [totalTI, totalTO], color: ['#16a34a', '#f97316'] }
