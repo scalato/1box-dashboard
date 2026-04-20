@@ -1000,7 +1000,7 @@ async function extractWithClaude(pdfBase64, filename) {
   "country": "${country}",
   "date": "YYYY-MM-DD",
   "occupancy": { "unit_pct": 0, "surface_pct": 0, "total_units": 0, "rented_units": 0, "vacant_units": 0, "total_sqm": 0, "rented_sqm": 0, "vacant_sqm": 0, "locked_units": 0, "terminated_units": 0, "reserved_units": 0, "out_of_order_units": 0, "business_units": 0, "private_units": 0 },
-  "rentals": { "move_ins_today": 0, "move_ins_week": 0, "move_ins_month": 0, "move_ins_year": 0, "vacates_today": 0, "vacates_week": 0, "vacates_month": 0, "vacates_year": 0, "net_today": 0, "net_week": 0, "net_month": 0, "net_year": 0 },
+  "rentals": { "move_ins_today": 0, "move_ins_week": 0, "move_ins_month": 0, "move_ins_year": 0, "vacates_today": 0, "vacates_week": 0, "vacates_month": 0, "vacates_year": 0, "net_today": 0, "net_week": 0, "net_month": 0, "net_year": 0, "transfers_in_today": 0, "transfers_in_week": 0, "transfers_in_month": 0, "transfers_in_year": 0, "transfers_out_today": 0, "transfers_out_week": 0, "transfers_out_month": 0, "transfers_out_year": 0 },
   "revenue": { "gross_rent": 0, "discounts": 0, "net_rent": 0, "gross_insurance": 0, "net_insurance": 0, "gross_total": 0, "net_total": 0, "invoiced_in_advance": 0, "current_rent_amount": 0, "max_rent_potential": 0, "avg_rate_per_sqm": 0, "max_rate_per_sqm": 0 },
   "arrears": { "outstanding_total": 0, "arrears_30_plus": 0, "arrears_count": 0, "payment_without_inv": 0, "doubtful_debtors": 0 },
   "insurance": { "policies_count": 0, "insured_value": 0, "premium_total": 0, "pct_insured": 0 }
@@ -1284,47 +1284,50 @@ function renderOverview() {
     : `<div class="chart-wrap"><canvas id="ch-occ-budget"></canvas></div>`;
 
   let revVarText = '', occVarText = '';
-  if (!revBudgetEmpty && !isAllSites) {
+  // Show portfolio-total variance for Portfolio view too (not just single-site)
+  if (!revBudgetEmpty) {
     const revVar = actualRev - budgetTotals.revenue;
-    revVarText = `<div class="variance-text ${revVar >= 0 ? 'pos' : 'neg'}">Variance: ${revVar >= 0 ? '+' : ''}${fmtEur(revVar)}</div>`;
+    revVarText = `<div class="variance-text ${revVar >= 0 ? 'pos' : 'neg'}">Total Variance: ${revVar >= 0 ? '+' : ''}${fmtEur(revVar)}</div>`;
   }
-  if (!occBudgetEmpty && !isAllSites) {
+  if (!occBudgetEmpty) {
     const occVar = actualOcc - budgetTotals.occupancy_pct;
-    occVarText = `<div class="variance-text ${occVar >= 0 ? 'pos' : 'neg'}">Variance: ${occVar >= 0 ? '+' : ''}${fmt(occVar, 1)} pp</div>`;
+    occVarText = `<div class="variance-text ${occVar >= 0 ? 'pos' : 'neg'}">Total Variance: ${occVar >= 0 ? '+' : ''}${fmt(occVar, 1)} pp</div>`;
   }
 
-  // Top 5 / Bottom 5 Net Rentals MTD (only show if more than 1 site)
-  const sortedByNet = [...FILTERED_DATA].sort((a,b) => (b.rentals?.net_month||0) - (a.rentals?.net_month||0));
-  const top5 = sortedByNet.slice(0, 5);
-  const bottom5 = sortedByNet.slice(-5).reverse();
+  // Move-Ins vs Move-Outs + Transfers (Portfolio view, MTD totals)
+  const totalMI = agg('rentals.move_ins_month');
+  const totalMO = agg('rentals.vacates_month');
+  const totalTI = agg('rentals.transfers_in_month');
+  const totalTO = agg('rentals.transfers_out_month');
+  const hasTransferData = totalTI > 0 || totalTO > 0;
 
-  let topBottomHTML = '';
+  let activityHTML = '';
   if (isAllSites && FILTERED_DATA.length > 1) {
-    topBottomHTML = `
+    activityHTML = `
       <div class="grid-2">
         <div class="card">
-          <div class="card-title">Top 5 Net Rentals (MTD)</div>
-          <div class="chart-wrap-sm"><canvas id="ch-top5"></canvas></div>
+          <div class="card-title">MTD Move-Ins vs Move-Outs</div>
+          <div class="chart-wrap-sm"><canvas id="ch-mi-mo"></canvas></div>
         </div>
         <div class="card">
-          <div class="card-title">Bottom 5 Net Rentals (MTD)</div>
-          <div class="chart-wrap-sm"><canvas id="ch-bottom5"></canvas></div>
+          <div class="card-title">MTD Transfers In vs Out</div>
+          ${hasTransferData
+            ? `<div class="chart-wrap-sm"><canvas id="ch-ti-to"></canvas></div>`
+            : `<div style="height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px;text-align:center">
+                 <div style="font-size:24px;margin-bottom:8px;opacity:0.4">—</div>
+                 <div>Transfer data pending</div>
+                 <div style="font-size:10px;margin-top:4px;opacity:0.7">Will populate once pipeline extracts transfers</div>
+               </div>`
+          }
         </div>
       </div>
       <div class="section-gap"></div>
     `;
   }
 
-  // Average Rate per m²
-  let avgRateHTML;
-  if (isAllSites && FILTERED_DATA.length > 1) {
-    avgRateHTML = `
-      <div class="card">
-        <div class="card-title">Average Rate per m² Rented</div>
-        <div class="chart-wrap"><canvas id="ch-avg-rate"></canvas></div>
-      </div>
-    `;
-  } else {
+  // Single-site view (unchanged)
+  let singleSiteHTML = '';
+  if (!(isAllSites && FILTERED_DATA.length > 1)) {
     const rentedSqm = agg('occupancy.rented_sqm');
     const currRent = agg('revenue.current_rent_amount');
     const maxPotential = agg('revenue.max_rent_potential');
@@ -1332,7 +1335,7 @@ function renderOverview() {
     const potentialRate = rentedSqm ? (maxPotential / rentedSqm) : 0;
     const maxRate = Math.max(0, ...FILTERED_DATA.map(d => d.revenue?.max_rate_per_sqm || 0));
 
-    avgRateHTML = `
+    singleSiteHTML = `
       <div class="card">
         <div class="card-title">Average Rate per m² Rented</div>
         <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap">
@@ -1373,15 +1376,15 @@ function renderOverview() {
       </div>
     </div>
     <div class="section-gap"></div>
-    ${topBottomHTML}
-    ${avgRateHTML}
+    ${activityHTML}
+    ${singleSiteHTML}
   `;
 
   nextTick(() => {
     if (isAllSites && FILTERED_DATA.length > 1) {
       const siteLabels = FILTERED_DATA.map(d => siteShort(d.site_name));
 
-      // Only render budget charts if real budgets exist
+      // Build per-site values + a TOTAL row at the top
       if (!revBudgetEmpty) {
         const siteRevActual = FILTERED_DATA.map(d => d.revenue?.net_total || 0);
         const siteRevBudget = FILTERED_DATA.map(d => {
@@ -1390,13 +1393,19 @@ function renderOverview() {
           const mk = getCurrentMonthKey();
           return BUDGET_DATA.sites[key]?.[mk]?.revenue || 0;
         });
-        mkHBarChart('ch-rev-budget', siteLabels, [
-          { label: 'Actual', data: siteRevActual, color: '#16a34a' },
-          { label: 'Budget', data: siteRevBudget, color: '#d1d5db' }
+        // Prepend TOTAL row
+        const revLabels = ['TOTAL', ...siteLabels];
+        const revActualWithTotal = [siteRevActual.reduce((a,b)=>a+b,0), ...siteRevActual];
+        const revBudgetWithTotal = [siteRevBudget.reduce((a,b)=>a+b,0), ...siteRevBudget];
+
+        mkHBarChart('ch-rev-budget', revLabels, [
+          { label: 'Actual', data: revActualWithTotal, color: '#16a34a' },
+          { label: 'Budget', data: revBudgetWithTotal, color: '#d1d5db' }
         ], v => fmt(v/1000, 0) + 'k');
       }
 
       if (!occBudgetEmpty) {
+        // Weighted average for TOTAL (by rented_sqm + total_sqm)
         const siteOccActual = FILTERED_DATA.map(d => d.occupancy?.surface_pct || 0);
         const siteOccBudget = FILTERED_DATA.map(d => {
           if (!BUDGET_DATA) return 0;
@@ -1404,30 +1413,41 @@ function renderOverview() {
           const mk = getCurrentMonthKey();
           return BUDGET_DATA.sites[key]?.[mk]?.occupancy_pct || 0;
         });
-        mkHBarChart('ch-occ-budget', siteLabels, [
-          { label: 'Actual', data: siteOccActual, color: '#16a34a' },
-          { label: 'Budget', data: siteOccBudget, color: '#d1d5db' }
+
+        // Weighted avg for actual: rented_sqm / total_sqm across all
+        const totalRentedSqm = FILTERED_DATA.reduce((s,d) => s + (d.occupancy?.rented_sqm || 0), 0);
+        const totalSqm = FILTERED_DATA.reduce((s,d) => s + (d.occupancy?.total_sqm || 0), 0);
+        const totalActualOcc = totalSqm > 0 ? (totalRentedSqm / totalSqm * 100) : 0;
+
+        // Weighted avg for budget: target_sqm / total_sqm, where target_sqm = budget_pct/100 * total_sqm
+        let totalBudgetRentedSqm = 0;
+        FILTERED_DATA.forEach((d, i) => {
+          const sqm = d.occupancy?.total_sqm || 0;
+          totalBudgetRentedSqm += (siteOccBudget[i] / 100) * sqm;
+        });
+        const totalBudgetOcc = totalSqm > 0 ? (totalBudgetRentedSqm / totalSqm * 100) : 0;
+
+        const occLabels = ['TOTAL', ...siteLabels];
+        const occActualWithTotal = [totalActualOcc, ...siteOccActual];
+        const occBudgetWithTotal = [totalBudgetOcc, ...siteOccBudget];
+
+        mkHBarChart('ch-occ-budget', occLabels, [
+          { label: 'Actual', data: occActualWithTotal, color: '#16a34a' },
+          { label: 'Budget', data: occBudgetWithTotal, color: '#d1d5db' }
         ], v => v + '%', 100);
       }
 
-      // Top 5 / Bottom 5
-      mkHBarChart('ch-top5',
-        top5.map(d => siteShort(d.site_name)),
-        [{ label: '', data: top5.map(d => d.rentals?.net_month || 0), color: '#16a34a' }],
-        v => v
-      );
-      mkHBarChart('ch-bottom5',
-        bottom5.map(d => siteShort(d.site_name)),
-        [{ label: '', data: bottom5.map(d => d.rentals?.net_month || 0), color: '#16a34a' }],
-        v => v
-      );
+      // MTD Move-Ins vs Move-Outs
+      mkVBarChart('ch-mi-mo', ['Move-Ins', 'Move-Outs'], [
+        { label: '', data: [totalMI, totalMO], color: ['#16a34a', '#f97316'] }
+      ]);
 
-      // Average rate per m²
-      mkHBarChart('ch-avg-rate',
-        siteLabels,
-        [{ label: '', data: FILTERED_DATA.map(d => d.revenue?.avg_rate_per_sqm || 0), color: '#8b5cf6' }],
-        v => '€' + v
-      );
+      // MTD Transfers In vs Out (only render if data exists)
+      if (hasTransferData) {
+        mkVBarChart('ch-ti-to', ['Transfers In', 'Transfers Out'], [
+          { label: '', data: [totalTI, totalTO], color: ['#16a34a', '#f97316'] }
+        ]);
+      }
     } else {
       // Single site view
       if (!revBudgetEmpty) {
@@ -1441,7 +1461,6 @@ function renderOverview() {
         }], v => v + '%', 100);
       }
 
-      // Rental activity
       const periods = ['Today', 'Week', 'Month', 'Year'];
       const miVals = ['move_ins_today','move_ins_week','move_ins_month','move_ins_year'].map(k => agg('rentals.'+k));
       const vaVals = ['vacates_today','vacates_week','vacates_month','vacates_year'].map(k => agg('rentals.'+k));
