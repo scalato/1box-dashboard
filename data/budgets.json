@@ -1449,6 +1449,156 @@
         "revenue": 59895,
         "occupancy_pct": 89.0
       }
+    },
+    "FR-01-Six-Fours": {
+      "2026-01": {
+        "revenue": 47184,
+        "occupancy_pct": 86.88
+      },
+      "2026-02": {
+        "revenue": 47428,
+        "occupancy_pct": 86.77
+      },
+      "2026-03": {
+        "revenue": 49962,
+        "occupancy_pct": 89.83
+      },
+      "2026-04": {
+        "revenue": 51301,
+        "occupancy_pct": 90.92
+      },
+      "2026-05": {
+        "revenue": 53248,
+        "occupancy_pct": 93.93
+      },
+      "2026-06": {
+        "revenue": 53820,
+        "occupancy_pct": 93.35
+      },
+      "2026-07": {
+        "revenue": 54304,
+        "occupancy_pct": 93.1
+      },
+      "2026-08": {
+        "revenue": 54752,
+        "occupancy_pct": 92.83
+      },
+      "2026-09": {
+        "revenue": 55228,
+        "occupancy_pct": 92.08
+      },
+      "2026-10": {
+        "revenue": 56149,
+        "occupancy_pct": 92.92
+      },
+      "2026-11": {
+        "revenue": 56086,
+        "occupancy_pct": 91.75
+      },
+      "2026-12": {
+        "revenue": 56340,
+        "occupancy_pct": 91.26
+      }
+    },
+    "FR-02-Colomiers": {
+      "2026-01": {
+        "revenue": 30880,
+        "occupancy_pct": 64.17
+      },
+      "2026-02": {
+        "revenue": 31726,
+        "occupancy_pct": 63.9
+      },
+      "2026-03": {
+        "revenue": 34098,
+        "occupancy_pct": 66.36
+      },
+      "2026-04": {
+        "revenue": 36453,
+        "occupancy_pct": 68.75
+      },
+      "2026-05": {
+        "revenue": 39395,
+        "occupancy_pct": 71.83
+      },
+      "2026-06": {
+        "revenue": 41948,
+        "occupancy_pct": 74.1
+      },
+      "2026-07": {
+        "revenue": 43694,
+        "occupancy_pct": 74.82
+      },
+      "2026-08": {
+        "revenue": 44679,
+        "occupancy_pct": 74.61
+      },
+      "2026-09": {
+        "revenue": 47596,
+        "occupancy_pct": 76.67
+      },
+      "2026-10": {
+        "revenue": 49657,
+        "occupancy_pct": 77.97
+      },
+      "2026-11": {
+        "revenue": 50496,
+        "occupancy_pct": 77.44
+      },
+      "2026-12": {
+        "revenue": 51756,
+        "occupancy_pct": 77.41
+      }
+    },
+    "FR-03-M\u00e9rignac": {
+      "2026-01": {
+        "revenue": 31366,
+        "occupancy_pct": 49.76
+      },
+      "2026-02": {
+        "revenue": 34288,
+        "occupancy_pct": 52.26
+      },
+      "2026-03": {
+        "revenue": 36864,
+        "occupancy_pct": 54.47
+      },
+      "2026-04": {
+        "revenue": 39242,
+        "occupancy_pct": 56.7
+      },
+      "2026-05": {
+        "revenue": 41503,
+        "occupancy_pct": 57.9
+      },
+      "2026-06": {
+        "revenue": 44706,
+        "occupancy_pct": 59.8
+      },
+      "2026-07": {
+        "revenue": 48233,
+        "occupancy_pct": 62.87
+      },
+      "2026-08": {
+        "revenue": 52167,
+        "occupancy_pct": 65.92
+      },
+      "2026-09": {
+        "revenue": 55221,
+        "occupancy_pct": 67.43
+      },
+      "2026-10": {
+        "revenue": 56420,
+        "occupancy_pct": 67.44
+      },
+      "2026-11": {
+        "revenue": 56347,
+        "occupancy_pct": 67.45
+      },
+      "2026-12": {
+        "revenue": 56895,
+        "occupancy_pct": 67.73
+      }
     }
   }
 }
