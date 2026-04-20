@@ -2178,6 +2178,82 @@ function mkHBarChart(id, labels, datasets, fmtFn, maxVal) {
   });
 }
 
+function mkRevVarChart(id, labels, actualData, budgetData) {
+  // Revenue vs Budget bar chart with 2-line x-axis tick labels.
+  // labels is an array of [monthName, varianceString] pairs.
+  // Variance is colored green (positive) or red (negative).
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  const monthLabels = labels.map(l => l[0]);
+  const varLabels = labels.map(l => l[1]);
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'Actual', data: actualData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
+        { label: 'Budget', data: budgetData, backgroundColor: '#d1d5db', borderRadius: 2, borderWidth: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { bottom: 20 } },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#6b7280', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 8 }
+        },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': €' + fmt(ctx.parsed.y/1000, 0) + 'k' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#6b7280',
+            font: { family: 'Inter', size: 11 }
+          },
+          grid: { display: false }
+        },
+        y: {
+          ticks: {
+            color: '#9ca3af',
+            font: { family: 'Inter', size: 10 },
+            callback: v => '€' + fmt(v/1000, 0) + 'k'
+          },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'varianceLabels',
+      afterDraw(chart) {
+        const x = chart.scales.x;
+        if (!x) return;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = '600 11px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        x.ticks.forEach((tick, i) => {
+          const varStr = varLabels[i];
+          if (!varStr) return;
+          const isPos = varStr.startsWith('+');
+          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
+          const px = x.getPixelForTick(i);
+          const py = x.bottom + 4;
+          ctx.fillText(varStr, px, py);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+
 function mkVBarChart(id, labels, datasets, opts) {
   const canvas = document.getElementById(id);
   if (!canvas) return;
