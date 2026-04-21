@@ -1281,14 +1281,10 @@ function renderOverview() {
     : `<div class="chart-wrap-lg"><canvas id="ch-rev-budget"></canvas></div>`;
   const occBudgetHTML = occBudgetEmpty
     ? budgetEmptyHTML
-    : `<div class="chart-wrap"><canvas id="ch-occ-budget"></canvas></div>`;
+    : `<div class="chart-wrap-lg"><canvas id="ch-occ-budget"></canvas></div>`;
 
   let revVarText = '', occVarText = '';
-  // Revenue variance now shown per-month under each bar group in the chart itself
-  if (!occBudgetEmpty) {
-    const occVar = actualOcc - budgetTotals.occupancy_pct;
-    occVarText = `<div class="variance-text ${occVar >= 0 ? 'pos' : 'neg'}">Total Variance: ${occVar >= 0 ? '+' : ''}${fmt(occVar, 1)} pp</div>`;
-  }
+  // Variance now shown per-month inline (Revenue + Occupancy charts)
 
   // Move-Ins vs Move-Outs + Net Rentals (Portfolio view)
   // Both are 4-month line charts: Jan-Mar historicals + Apr MTD dashed
@@ -1349,6 +1345,18 @@ function renderOverview() {
     `;
   }
 
+  // Rate per m² trend — 4-month line chart for Portfolio view
+  let ratePerSqmHTML = '';
+  if (isAllSites && FILTERED_DATA.length > 1) {
+    ratePerSqmHTML = `
+      <div class="card">
+        <div class="card-title">Average Rate per m² — YTD</div>
+        <div class="chart-wrap-sm"><canvas id="ch-rate-sqm-ov"></canvas></div>
+      </div>
+      <div class="section-gap"></div>
+    `;
+  }
+
   document.getElementById('panel-overview').innerHTML = `
     <div class="grid-2">
       <div class="card">
@@ -1363,13 +1371,20 @@ function renderOverview() {
         ${revVarText}
       </div>
       <div class="card">
-        <div class="card-title">Occupancy vs Budget (${monthName})</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="card-title" style="margin-bottom:0">Occupancy vs Budget (${monthName})</div>
+          <div style="display:flex;gap:12px;font-size:11px;color:var(--muted-2)">
+            <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>Actual</span>
+            <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#d1d5db;border-radius:2px"></span>Budget</span>
+          </div>
+        </div>
         ${occBudgetHTML}
         ${occVarText}
       </div>
     </div>
     <div class="section-gap"></div>
     ${activityHTML}
+    ${ratePerSqmHTML}
     ${singleSiteHTML}
   `;
 
@@ -1437,29 +1452,73 @@ function renderOverview() {
         mkRevVarChart('ch-rev-budget', labels, actualData, budgetData);
       }
 
-      // Total Occupancy Actual vs Budget — single comparison (2 bars, weighted average)
+      // Total Occupancy Actual vs Budget — 4-month grouped bars (Jan/Feb/Mar/Apr MTD)
+      // No YTD column since occupancy is a point-in-time metric that doesn't aggregate
       if (!occBudgetEmpty) {
-        const siteOccBudget = FILTERED_DATA.map(d => {
-          if (!BUDGET_DATA) return 0;
-          const key = siteKeyFromName(d.site_name);
-          const mk = getCurrentMonthKey();
-          return BUDGET_DATA.sites[key]?.[mk]?.occupancy_pct || 0;
+        const occActualByMonth = {};
+        const occBudgetByMonth = {};
+        const occMonthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
+
+        // Historical actuals (Jan/Feb/Mar) from history.json — weighted average
+        if (HISTORY_DATA && HISTORY_DATA.sites) {
+          const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+            if (s.is_rollup) return false;
+            if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+            if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+            return true;
+          });
+          occMonthKeys.slice(0, 3).forEach(mk => {
+            let rSqm = 0, tSqm = 0;
+            histSites.forEach(s => {
+              const e = (s.series || []).find(x => x.month === mk);
+              if (e?.occupancy) {
+                rSqm += e.occupancy.rented_sqm || 0;
+                tSqm += e.occupancy.total_sqm || 0;
+              }
+            });
+            occActualByMonth[mk] = tSqm > 0 ? (rSqm / tSqm * 100) : 0;
+          });
+        }
+
+        // April Actual from live FILTERED_DATA — weighted average
+        const aprRentedSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.rented_sqm || 0), 0);
+        const aprTotalSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.total_sqm || 0), 0);
+        occActualByMonth['2026-04'] = aprTotalSqm > 0 ? (aprRentedSqm / aprTotalSqm * 100) : 0;
+
+        // Budgets: weight each site's budget % by its total_sqm to get portfolio-weighted budget
+        occMonthKeys.forEach(mk => {
+          let weightedSqm = 0, totalSqm = 0;
+          FILTERED_DATA.forEach(d => {
+            const key = siteKeyFromName(d.site_name);
+            if (!key || !BUDGET_DATA) return;
+            const mb = BUDGET_DATA.sites[key]?.[mk];
+            if (mb?.occupancy_pct !== null && mb?.occupancy_pct !== undefined) {
+              const sqm = d.occupancy?.total_sqm || 0;
+              weightedSqm += (mb.occupancy_pct / 100) * sqm;
+              totalSqm += sqm;
+            }
+          });
+          occBudgetByMonth[mk] = totalSqm > 0 ? (weightedSqm / totalSqm * 100) : 0;
         });
 
-        const totalRentedSqm = FILTERED_DATA.reduce((s,d) => s + (d.occupancy?.rented_sqm || 0), 0);
-        const totalSqm = FILTERED_DATA.reduce((s,d) => s + (d.occupancy?.total_sqm || 0), 0);
-        const totalActualOcc = totalSqm > 0 ? (totalRentedSqm / totalSqm * 100) : 0;
+        // Build variance labels (percentage points, not euros)
+        const fmtOccVar = (actual, budget) => {
+          if (!budget) return '';
+          const v = actual - budget;
+          const sign = v >= 0 ? '+' : '−';
+          return sign + fmt(Math.abs(v), 1) + ' pp';
+        };
 
-        let totalBudgetRentedSqm = 0;
-        FILTERED_DATA.forEach((d, i) => {
-          const sqm = d.occupancy?.total_sqm || 0;
-          totalBudgetRentedSqm += (siteOccBudget[i] / 100) * sqm;
-        });
-        const totalBudgetOcc = totalSqm > 0 ? (totalBudgetRentedSqm / totalSqm * 100) : 0;
+        const occMonthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
+        const occLabels = occMonthKeys.map((mk, i) => [
+          occMonthNames[i],
+          fmtOccVar(occActualByMonth[mk] || 0, occBudgetByMonth[mk] || 0)
+        ]);
 
-        mkHBarChart('ch-occ-budget', ['Actual', 'Budget'], [{
-          label: '', data: [totalActualOcc, totalBudgetOcc], color: ['#16a34a', '#d1d5db']
-        }], v => v + '%', 100);
+        const occActualData = occMonthKeys.map(mk => occActualByMonth[mk] || 0);
+        const occBudgetData = occMonthKeys.map(mk => occBudgetByMonth[mk] || 0);
+
+        mkPctVarChart('ch-occ-budget', occLabels, occActualData, occBudgetData);
       }
 
       // Move-Ins vs Move-Outs + Net Rentals — both 4-month line charts
@@ -1527,6 +1586,67 @@ function renderOverview() {
       mkLineChart('ch-net-rentals-ov', miMoLabels, [
         { label: 'Net Rentals', data: netSeries, color: '#f97316' }
       ], { yFmt: v => v, mtdMonths: mtdMonthsSet, months: miMoMonths });
+
+      // Rate per m² trend — 4-month portfolio weighted average line
+      const rateMonths = [];
+      const rateSeries = [];
+
+      if (HISTORY_DATA && HISTORY_DATA.sites) {
+        const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+          if (s.is_rollup) return false;
+          if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+          if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+          return true;
+        });
+        const monthSet = new Set();
+        histSites.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
+        const histMonths = [...monthSet].sort();
+
+        histMonths.forEach(m => {
+          let rateNum = 0, rateDen = 0;
+          histSites.forEach(s => {
+            const e = (s.series || []).find(x => x.month === m);
+            if (e?.revenue?.avg_rate_per_sqm && e?.occupancy?.rented_sqm) {
+              rateNum += e.revenue.avg_rate_per_sqm * e.occupancy.rented_sqm;
+              rateDen += e.occupancy.rented_sqm;
+            }
+          });
+          rateMonths.push(m);
+          rateSeries.push(rateDen > 0 ? (rateNum / rateDen) : null);
+        });
+
+        if (!rateMonths.includes(currentMonth)) {
+          // Portfolio weighted avg for live data
+          let num = 0, den = 0;
+          FILTERED_DATA.forEach(d => {
+            const rate = d.revenue?.avg_rate_per_sqm || 0;
+            const sqm = d.occupancy?.rented_sqm || 0;
+            if (rate && sqm) { num += rate * sqm; den += sqm; }
+          });
+          rateMonths.push(currentMonth);
+          rateSeries.push(den > 0 ? (num / den) : null);
+        }
+      } else {
+        // Live-only fallback
+        let num = 0, den = 0;
+        FILTERED_DATA.forEach(d => {
+          const rate = d.revenue?.avg_rate_per_sqm || 0;
+          const sqm = d.occupancy?.rented_sqm || 0;
+          if (rate && sqm) { num += rate * sqm; den += sqm; }
+        });
+        rateMonths.push(currentMonth);
+        rateSeries.push(den > 0 ? (num / den) : null);
+      }
+
+      const rateLabels = rateMonths.map(m => {
+        const [y, mo] = m.split('-');
+        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return names[parseInt(mo,10)-1] + ' ' + y;
+      });
+
+      mkLineChart('ch-rate-sqm-ov', rateLabels, [
+        { label: 'Avg Rate/m²', data: rateSeries, color: '#8b5cf6' }
+      ], { yFmt: v => '€' + fmt(v, 2), yMin: 0, mtdMonths: mtdMonthsSet, months: rateMonths });
     } else {
       // Single site view
       if (!revBudgetEmpty) {
@@ -2132,6 +2252,76 @@ function setTrendsView(v) {
 function siteShort(name) {
   if (!name) return '';
   return name.replace(/^1BOX\s+/i, '').replace(/^1Box\s+/i, '');
+}
+
+function mkPctVarChart(id, labels, actualData, budgetData) {
+  // Occupancy % grouped bars with inline per-month variance (in pp).
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  const monthLabels = labels.map(l => l[0]);
+  const varLabels = labels.map(l => l[1]);
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'Actual', data: actualData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
+        { label: 'Budget', data: budgetData, backgroundColor: '#d1d5db', borderRadius: 2, borderWidth: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { bottom: 20 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.y, 1) + '%' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          ticks: {
+            color: '#9ca3af',
+            font: { family: 'Inter', size: 10 },
+            callback: v => v + '%'
+          },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'varianceLabelsPct',
+      afterDraw(chart) {
+        const x = chart.scales.x;
+        if (!x) return;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = '600 11px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        x.ticks.forEach((tick, i) => {
+          const varStr = varLabels[i];
+          if (!varStr) return;
+          const isPos = varStr.startsWith('+');
+          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
+          const px = x.getPixelForTick(i);
+          const py = x.bottom + 4;
+          ctx.fillText(varStr, px, py);
+        });
+        ctx.restore();
+      }
+    }]
+  });
 }
 
 function mkRevVarChart(id, labels, actualData, budgetData) {
