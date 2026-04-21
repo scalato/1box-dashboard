@@ -2,7 +2,7 @@
   "date": "2026-04-20",
   "fetched_at_date": "2026-04-20",
   "is_stale": false,
-  "updated_at": "2026-04-20T20:11:46.544767",
+  "updated_at": "2026-04-20T20:39:23.099767",
   "site_count": 32,
   "files_processed": 34,
   "sites": [
@@ -67,7 +67,7 @@
         "arrears_30_plus": 5546.6,
         "arrears_count": 43,
         "payment_without_inv": 249.31,
-        "doubtful_debtors": 0
+        "doubtful_debtors": 0.0
       },
       "insurance": {
         "policies_count": 289,
@@ -76,7 +76,7 @@
         "pct_insured": 87.6
       },
       "_source_file": "2026-04-20_MIS 1BOX FR-01-Six-Fours-639123285087955451.pdf",
-      "_processed_at": "2026-04-20T20:05:31.118216"
+      "_processed_at": "2026-04-20T20:33:05.999816"
     },
     {
       "site_name": "1BOX Colomiers",
@@ -148,7 +148,7 @@
         "pct_insured": 78.3
       },
       "_source_file": "2026-04-20_MIS 1BOX FR-02-Colomiers-639123285096236896.pdf",
-      "_processed_at": "2026-04-20T20:05:42.643038"
+      "_processed_at": "2026-04-20T20:33:17.112746"
     },
     {
       "site_name": "1BOX Mérignac",
@@ -220,7 +220,7 @@
         "pct_insured": 88.6
       },
       "_source_file": "2026-04-20_MIS 1BOX FR-03-Mérignac-639123285099830759.pdf",
-      "_processed_at": "2026-04-20T20:05:54.170654"
+      "_processed_at": "2026-04-20T20:33:28.802824"
     },
     {
       "site_name": "1BOX Eindhoven Best",
@@ -292,7 +292,7 @@
         "pct_insured": 85.8
       },
       "_source_file": "2026-04-20_MIS 1BOX-01-Eindhoven-Best-639123282091544285.pdf",
-      "_processed_at": "2026-04-20T20:06:16.568089"
+      "_processed_at": "2026-04-20T20:33:51.932839"
     },
     {
       "site_name": "1BOX 's-Hertogenbosch",
@@ -355,7 +355,7 @@
         "arrears_30_plus": -49.23,
         "arrears_count": 26,
         "payment_without_inv": -332.92,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 314,
@@ -364,7 +364,7 @@
         "pct_insured": 86.5
       },
       "_source_file": "2026-04-20_MIS 1BOX-02-Den Bosch-639123282101075699.pdf",
-      "_processed_at": "2026-04-20T20:06:28.003187"
+      "_processed_at": "2026-04-20T20:34:03.798536"
     },
     {
       "site_name": "1BOX Nijmegen-Wijchen",
@@ -436,7 +436,7 @@
         "pct_insured": 92.1
       },
       "_source_file": "2026-04-20_MIS 1BOX-03-Nijmegen-Wijchen-639123282104200788.pdf",
-      "_processed_at": "2026-04-20T20:06:39.785113"
+      "_processed_at": "2026-04-20T20:34:14.920602"
     },
     {
       "site_name": "1BOX Boxtel",
@@ -453,7 +453,7 @@
         "vacant_sqm": 69.24,
         "locked_units": 4,
         "terminated_units": 7,
-        "reserved_units": 0,
+        "reserved_units": 1,
         "out_of_order_units": 1,
         "business_units": 20,
         "private_units": 95
@@ -508,7 +508,7 @@
         "pct_insured": 82.6
       },
       "_source_file": "2026-04-20_MIS 1BOX-04-Boxtel-639123282107013319.pdf",
-      "_processed_at": "2026-04-20T20:06:50.974848"
+      "_processed_at": "2026-04-20T20:34:25.815868"
     },
     {
       "site_name": "1BOX Rijswijk",
@@ -571,7 +571,7 @@
         "arrears_30_plus": 3323.84,
         "arrears_count": 87,
         "payment_without_inv": 217.93,
-        "doubtful_debtors": 0
+        "doubtful_debtors": 0.0
       },
       "insurance": {
         "policies_count": 416,
@@ -580,7 +580,7 @@
         "pct_insured": 71.8
       },
       "_source_file": "2026-04-20_MIS 1BOX-05-Rijswijk-639123282110294608.pdf",
-      "_processed_at": "2026-04-20T20:07:02.636415"
+      "_processed_at": "2026-04-20T20:34:37.078328"
     },
     {
       "site_name": "1BOX Groningen",
@@ -652,7 +652,7 @@
         "pct_insured": 74.6
       },
       "_source_file": "2026-04-20_MIS 1BOX-06-Groningen-639123282113107153.pdf",
-      "_processed_at": "2026-04-20T20:07:13.973134"
+      "_processed_at": "2026-04-20T20:34:48.547700"
     },
     {
       "site_name": "1BOX Venlo",
@@ -724,7 +724,7 @@
         "pct_insured": 84.9
       },
       "_source_file": "2026-04-20_MIS 1BOX-07-Venlo-639123282116232188.pdf",
-      "_processed_at": "2026-04-20T20:07:25.344983"
+      "_processed_at": "2026-04-20T20:34:59.612441"
     },
     {
       "site_name": "1BOX Roermond",
@@ -796,7 +796,7 @@
         "pct_insured": 89.9
       },
       "_source_file": "2026-04-20_MIS 1BOX-08-Roermond-639123282119200967.pdf",
-      "_processed_at": "2026-04-20T20:07:36.109432"
+      "_processed_at": "2026-04-20T20:35:10.456287"
     },
     {
       "site_name": "1BOX Sittard",
@@ -813,7 +813,7 @@
         "vacant_sqm": 519.43,
         "locked_units": 9,
         "terminated_units": 3,
-        "reserved_units": 6,
+        "reserved_units": 0,
         "out_of_order_units": 2,
         "business_units": 32,
         "private_units": 171
@@ -868,7 +868,7 @@
         "pct_insured": 84.2
       },
       "_source_file": "2026-04-20_MIS 1BOX-09-Sittard-639123282122326093.pdf",
-      "_processed_at": "2026-04-20T20:07:47.800341"
+      "_processed_at": "2026-04-20T20:35:21.483891"
     },
     {
       "site_name": "1BOX Heerlen",
@@ -940,7 +940,7 @@
         "pct_insured": 92.8
       },
       "_source_file": "2026-04-20_MIS 1BOX-10-Heerlen-639123282125138575.pdf",
-      "_processed_at": "2026-04-20T20:07:58.695506"
+      "_processed_at": "2026-04-20T20:35:32.258558"
     },
     {
       "site_name": "1BOX Bergen op Zoom",
@@ -957,7 +957,7 @@
         "vacant_sqm": 414.81,
         "locked_units": 6,
         "terminated_units": 5,
-        "reserved_units": 2,
+        "reserved_units": 0,
         "out_of_order_units": 0,
         "business_units": 23,
         "private_units": 153
@@ -1003,7 +1003,7 @@
         "arrears_30_plus": 469.22,
         "arrears_count": 23,
         "payment_without_inv": -67.12,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 124,
@@ -1012,7 +1012,7 @@
         "pct_insured": 70.5
       },
       "_source_file": "2026-04-20_MIS 1BOX-11-Bergen op Zoom-639123282128419879.pdf",
-      "_processed_at": "2026-04-20T20:08:09.620219"
+      "_processed_at": "2026-04-20T20:35:43.294602"
     },
     {
       "site_name": "1BOX Goes",
@@ -1074,7 +1074,7 @@
         "outstanding_total": 31162.48,
         "arrears_30_plus": 902.77,
         "arrears_count": 19,
-        "payment_without_inv": 2,
+        "payment_without_inv": -123.86,
         "doubtful_debtors": 0
       },
       "insurance": {
@@ -1084,7 +1084,7 @@
         "pct_insured": 73.0
       },
       "_source_file": "2026-04-20_MIS 1BOX-12-Goes-639123282131388674.pdf",
-      "_processed_at": "2026-04-20T20:08:20.684122"
+      "_processed_at": "2026-04-20T20:35:54.525425"
     },
     {
       "site_name": "1BOX Hellevoetsluis",
@@ -1156,7 +1156,7 @@
         "pct_insured": 81.0
       },
       "_source_file": "2026-04-20_MIS 1BOX-13-Hellevoetsluis-639123282134357486.pdf",
-      "_processed_at": "2026-04-20T20:08:31.774561"
+      "_processed_at": "2026-04-20T20:36:07.675852"
     },
     {
       "site_name": "1BOX Tilburg",
@@ -1228,7 +1228,7 @@
         "pct_insured": 92.7
       },
       "_source_file": "2026-04-20_MIS 1BOX-14-Tilburg-639123282137170010.pdf",
-      "_processed_at": "2026-04-20T20:08:42.801734"
+      "_processed_at": "2026-04-20T20:36:18.659866"
     },
     {
       "site_name": "1BOX Breda",
@@ -1300,7 +1300,7 @@
         "pct_insured": 85.6
       },
       "_source_file": "2026-04-20_MIS 1BOX-15-Breda-639123282140763872.pdf",
-      "_processed_at": "2026-04-20T20:08:53.898528"
+      "_processed_at": "2026-04-20T20:36:29.926913"
     },
     {
       "site_name": "1BOX Den Haag",
@@ -1317,8 +1317,8 @@
         "vacant_sqm": 297.44,
         "locked_units": 33,
         "terminated_units": 11,
-        "reserved_units": 5,
-        "out_of_order_units": 12,
+        "reserved_units": 1,
+        "out_of_order_units": 1,
         "business_units": 72,
         "private_units": 541
       },
@@ -1372,7 +1372,7 @@
         "pct_insured": 93.1
       },
       "_source_file": "2026-04-20_MIS 1BOX-16-Den Haag-639123282143888873.pdf",
-      "_processed_at": "2026-04-20T20:09:05.913002"
+      "_processed_at": "2026-04-20T20:36:41.339690"
     },
     {
       "site_name": "1BOX Utrecht",
@@ -1389,7 +1389,7 @@
         "vacant_sqm": 749.79,
         "locked_units": 15,
         "terminated_units": 13,
-        "reserved_units": 4,
+        "reserved_units": 0,
         "out_of_order_units": 2,
         "business_units": 57,
         "private_units": 347
@@ -1444,7 +1444,7 @@
         "pct_insured": 90.6
       },
       "_source_file": "2026-04-20_MIS 1BOX-17-Utrecht-639123282147170279.pdf",
-      "_processed_at": "2026-04-20T20:09:17.324285"
+      "_processed_at": "2026-04-20T20:36:52.667775"
     },
     {
       "site_name": "1BOX Barendrecht",
@@ -1507,7 +1507,7 @@
         "arrears_30_plus": 2888.28,
         "arrears_count": 62,
         "payment_without_inv": 24.3,
-        "doubtful_debtors": 0
+        "doubtful_debtors": 0.0
       },
       "insurance": {
         "policies_count": 418,
@@ -1516,7 +1516,7 @@
         "pct_insured": 90.9
       },
       "_source_file": "2026-04-20_MIS 1BOX-18-Barendrecht-639123282150295319.pdf",
-      "_processed_at": "2026-04-20T20:09:28.754774"
+      "_processed_at": "2026-04-20T20:37:03.932848"
     },
     {
       "site_name": "1BOX Helmond",
@@ -1588,7 +1588,7 @@
         "pct_insured": 59.2
       },
       "_source_file": "2026-04-20_MIS 1BOX-20-Helmond-639123282153576526.pdf",
-      "_processed_at": "2026-04-20T20:09:39.643685"
+      "_processed_at": "2026-04-20T20:37:15.093284"
     },
     {
       "site_name": "1BOX Heerlen-Heerlerbaan",
@@ -1651,7 +1651,7 @@
         "arrears_30_plus": 2852.17,
         "arrears_count": 37,
         "payment_without_inv": 120.0,
-        "doubtful_debtors": 0
+        "doubtful_debtors": 0.0
       },
       "insurance": {
         "policies_count": 163,
@@ -1660,7 +1660,7 @@
         "pct_insured": 89.6
       },
       "_source_file": "2026-04-20_MIS 1BOX-21-Heerlen-Heerlerbaan-639123282156545317.pdf",
-      "_processed_at": "2026-04-20T20:09:51.049430"
+      "_processed_at": "2026-04-20T20:37:26.822877"
     },
     {
       "site_name": "1BOX Rotterdam Centrum",
@@ -1677,7 +1677,7 @@
         "vacant_sqm": 609.71,
         "locked_units": 22,
         "terminated_units": 21,
-        "reserved_units": 2,
+        "reserved_units": 0,
         "out_of_order_units": 4,
         "business_units": 141,
         "private_units": 508
@@ -1732,7 +1732,7 @@
         "pct_insured": 77.2
       },
       "_source_file": "2026-04-20_MIS 1BOX-22-Rotterdam Centrum-639123282159826613.pdf",
-      "_processed_at": "2026-04-20T20:10:02.170952"
+      "_processed_at": "2026-04-20T20:37:37.929896"
     },
     {
       "site_name": "1BOX Schiedam",
@@ -1804,7 +1804,7 @@
         "pct_insured": 81.5
       },
       "_source_file": "2026-04-20_MIS 1BOX-23-Schiedam-639123282162795430.pdf",
-      "_processed_at": "2026-04-20T20:10:13.955525"
+      "_processed_at": "2026-04-20T20:37:50.320828"
     },
     {
       "site_name": "1BOX Rotterdam Zuid",
@@ -1876,7 +1876,7 @@
         "pct_insured": 84.1
       },
       "_source_file": "2026-04-20_MIS 1BOX-24-Rotterdam Zuid-639123282165923509.pdf",
-      "_processed_at": "2026-04-20T20:10:25.146465"
+      "_processed_at": "2026-04-20T20:38:01.380163"
     },
     {
       "site_name": "1BOX Alphen aan den Rijn",
@@ -1948,7 +1948,7 @@
         "pct_insured": 83.2
       },
       "_source_file": "2026-04-20_MIS 1BOX-25-Alphen aan den Rijn-639123282168889274.pdf",
-      "_processed_at": "2026-04-20T20:10:36.478252"
+      "_processed_at": "2026-04-20T20:38:12.354654"
     },
     {
       "site_name": "1BOX Alkmaar",
@@ -2002,7 +2002,7 @@
         "net_total": 49115.26,
         "invoiced_in_advance": 54343.63,
         "current_rent_amount": 28569.1,
-        "max_rent_potential": 32092.0,
+        "max_rent_potential": 28868.1,
         "avg_rate_per_sqm": 19.19,
         "max_rate_per_sqm": 18.72
       },
@@ -2020,7 +2020,7 @@
         "pct_insured": 78.9
       },
       "_source_file": "2026-04-20_MIS 1BOX-26-Alkmaar-639123282172014321.pdf",
-      "_processed_at": "2026-04-20T20:10:47.768085"
+      "_processed_at": "2026-04-20T20:38:23.583382"
     },
     {
       "site_name": "1BOX Amsterdam-Schepenbergweg",
@@ -2038,7 +2038,7 @@
         "locked_units": 14,
         "terminated_units": 13,
         "reserved_units": 1,
-        "out_of_order_units": 2,
+        "out_of_order_units": 0,
         "business_units": 46,
         "private_units": 268
       },
@@ -2083,7 +2083,7 @@
         "arrears_30_plus": 3268.45,
         "arrears_count": 49,
         "payment_without_inv": 306.81,
-        "doubtful_debtors": 0.0
+        "doubtful_debtors": 0
       },
       "insurance": {
         "policies_count": 306,
@@ -2092,7 +2092,7 @@
         "pct_insured": 97.5
       },
       "_source_file": "2026-04-20_MIS 1BOX-27-Amsterdam-639123282174983105.pdf",
-      "_processed_at": "2026-04-20T20:10:59.196390"
+      "_processed_at": "2026-04-20T20:38:37.658855"
     },
     {
       "site_name": "1BOX Almere",
@@ -2164,7 +2164,7 @@
         "pct_insured": 90.6
       },
       "_source_file": "2026-04-20_MIS 1BOX-28-Almere-639123282178108197.pdf",
-      "_processed_at": "2026-04-20T20:11:10.251293"
+      "_processed_at": "2026-04-20T20:38:48.796510"
     },
     {
       "site_name": "1BOX Helmond Kanaaldijk",
@@ -2236,7 +2236,7 @@
         "pct_insured": 92.6
       },
       "_source_file": "2026-04-20_MIS 1BOX-29-Helmond-Kanaaldijk-639123282181233234.pdf",
-      "_processed_at": "2026-04-20T20:11:21.886413"
+      "_processed_at": "2026-04-20T20:39:00.265093"
     },
     {
       "site_name": "1BOX Lelystad",
@@ -2308,7 +2308,7 @@
         "pct_insured": 87.7
       },
       "_source_file": "2026-04-20_MIS 1BOX-30-Lelystad-639123282184514507.pdf",
-      "_processed_at": "2026-04-20T20:11:32.970031"
+      "_processed_at": "2026-04-20T20:39:11.218806"
     }
   ]
 }
