@@ -127,18 +127,19 @@
   header {
     background: var(--dark);
     padding: 0 24px;
-    height: 14px;
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky; top: 0; z-index: 100;
   }
   .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 14px;
-    color: #fff;
     display: flex; align-items: center; gap: 8px;
+  }
+  .logo img {
+    height: 34px;
+    width: auto;
+    display: block;
   }
   .header-right {
     display: flex; align-items: center; gap: 12px;
@@ -169,7 +170,7 @@
     background: var(--green-bar);
     width: 0%;
     transition: width 0.4s ease;
-    position: fixed; top: 14px; left: 0; z-index: 200;
+    position: fixed; top: 52px; left: 0; z-index: 200;
   }
 
   #status-banner {
@@ -600,7 +601,9 @@
   <div id="loading-bar"></div>
 
   <header>
-    <div class="logo">1BOX</div>
+    <div class="logo">
+      <img src="logo.jpg" alt="1BOX Self Storage" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-family:Syne,sans-serif;font-weight:800;color:#fff\'>1BOX</span>'">
+    </div>
     <div class="header-right">
       <span id="last-updated"></span>
       <button class="btn-refresh" onclick="refreshData()">↻ Refresh</button>
