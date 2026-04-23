@@ -2111,7 +2111,8 @@ function renderDetails() {
 let SP_DATA = {
   byLocation: null,
   byCategory: null,
-  byStoreCategory: null
+  byStoreCategory: null,
+  escalationsByCategory: null
 };
 
 // Simple CSV parser — assumes no quoted commas, trims whitespace
@@ -2178,7 +2179,8 @@ async function loadStoragePilotData() {
   const files = [
     { key: 'byLocation', path: 'data/storagepilot/conversations_by_location.csv' },
     { key: 'byCategory', path: 'data/storagepilot/conversations_by_category.csv' },
-    { key: 'byStoreCategory', path: 'data/storagepilot/conversations_by_store_category.csv' }
+    { key: 'byStoreCategory', path: 'data/storagepilot/conversations_by_store_category.csv' },
+    { key: 'escalationsByCategory', path: 'data/storagepilot/escalations_by_category.csv' }
   ];
 
   await Promise.all(files.map(async (f) => {
@@ -2307,6 +2309,23 @@ function renderStoragePilot() {
     total: catRows.reduce((s, r) => s + (r[h] || 0), 0)
   })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
 
+  // Chart 3: Escalations by Category — portfolio view only
+  // Exclude 'ignore' for consistency with conversations pie
+  let escTotals = [];
+  let totalEsc = 0;
+  if (SP_DATA.escalationsByCategory && SP_DATA.escalationsByCategory.rows.length) {
+    const escRows = filterToAprilMTD(SP_DATA.escalationsByCategory.rows);
+    const escHeaders = SP_DATA.escalationsByCategory.headers.filter(h =>
+      h !== 'date' && h !== 'total' && h !== 'ignore'
+    );
+    escTotals = escHeaders.map(h => ({
+      category: h.replace(/_/g, ' '),
+      categoryRaw: h,
+      total: escRows.reduce((s, r) => s + (r[h] || 0), 0)
+    })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+    totalEsc = escTotals.reduce((s, c) => s + c.total, 0);
+  }
+
   // KPIs — exclude 'ignore' from total
   const totalConv = catTotals.reduce((s, c) => s + c.total, 0);
   const topCategory = catTotals[0] ? catTotals[0].category : '—';
@@ -2341,9 +2360,19 @@ function renderStoragePilot() {
       <div style="position:relative;height:${Math.max(280, locTotals.length * 22)}px"><canvas id="ch-sp-location"></canvas></div>
     </div>
 
-    <div class="card">
-      <div class="card-title">Conversations by Category (April MTD)</div>
-      <div style="position:relative;height:360px"><canvas id="ch-sp-category"></canvas></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Conversations by Category (April MTD)</div>
+        <div style="position:relative;height:360px"><canvas id="ch-sp-category"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Escalations by Category (April MTD)</div>
+        ${escTotals.length > 0
+          ? `<div style="position:relative;height:360px"><canvas id="ch-sp-escalations"></canvas></div>
+             <div style="font-size:11px;color:var(--muted-2);margin-top:8px;text-align:center">${fmt(totalEsc)} total escalations</div>`
+          : `<div style="display:flex;align-items:center;justify-content:center;height:360px;color:var(--muted-2);font-size:12px">No escalation data available</div>`
+        }
+      </div>
     </div>
   `;
 
@@ -2362,6 +2391,15 @@ function renderStoragePilot() {
       catTotals.map(c => c.total),
       catTotals.map((_, i) => catColors[i % catColors.length])
     );
+
+    // Chart 3 — escalations pie (portfolio view only)
+    if (escTotals.length > 0) {
+      mkDonut('ch-sp-escalations',
+        escTotals.map(c => c.category),
+        escTotals.map(c => c.total),
+        escTotals.map((_, i) => catColors[i % catColors.length])
+      );
+    }
   });
 }
 
