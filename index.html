@@ -127,19 +127,18 @@
   header {
     background: var(--dark);
     padding: 0 24px;
-    height: 52px;
+    height: 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky; top: 0; z-index: 100;
   }
   .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: #fff;
     display: flex; align-items: center; gap: 8px;
-  }
-  .logo img {
-    height: 34px;
-    width: auto;
-    display: block;
   }
   .header-right {
     display: flex; align-items: center; gap: 12px;
@@ -170,7 +169,7 @@
     background: var(--green-bar);
     width: 0%;
     transition: width 0.4s ease;
-    position: fixed; top: 52px; left: 0; z-index: 200;
+    position: fixed; top: 14px; left: 0; z-index: 200;
   }
 
   #status-banner {
@@ -601,9 +600,7 @@
   <div id="loading-bar"></div>
 
   <header>
-    <div class="logo">
-      <img src="logo.jpg" alt="1BOX Self Storage" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-family:Syne,sans-serif;font-weight:800;color:#fff\'>1BOX</span>'">
-    </div>
+    <div class="logo">1BOX</div>
     <div class="header-right">
       <span id="last-updated"></span>
       <button class="btn-refresh" onclick="refreshData()">↻ Refresh</button>
@@ -639,7 +636,6 @@
     <button class="tab-btn" onclick="switchTab('rentals')" id="tab-rentals">Rentals</button>
     <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
     <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
-    <button class="tab-btn" onclick="switchTab('storagepilot')" id="tab-storagepilot">StoragePilot</button>
     <button class="tab-btn" onclick="switchTab('trends')" id="tab-trends">Trends</button>
   </div>
 
@@ -649,7 +645,6 @@
     <div id="panel-rentals" class="tab-panel"></div>
     <div id="panel-revenue" class="tab-panel"></div>
     <div id="panel-details" class="tab-panel"></div>
-    <div id="panel-storagepilot" class="tab-panel"></div>
     <div id="panel-trends" class="tab-panel"></div>
   </main>
 </div>
@@ -862,13 +857,6 @@ function getBudgetTotals() {
 
 async function refreshData() {
   if (IS_DEMO) { renderAll(); return; }
-
-  // Refresh StoragePilot CSVs alongside MIS data
-  loadStoragePilotData().then(() => {
-    if (document.getElementById('panel-storagepilot')?.classList.contains('active')) {
-      renderStoragePilot();
-    }
-  });
 
   setStatus('loading', 'Checking for today\'s data…');
   const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
@@ -1178,7 +1166,6 @@ function renderAll() {
   renderRentals();
   renderRevenue();
   renderDetails();
-  renderStoragePilot();
   renderTrends();
 }
 
@@ -1294,10 +1281,14 @@ function renderOverview() {
     : `<div class="chart-wrap-lg"><canvas id="ch-rev-budget"></canvas></div>`;
   const occBudgetHTML = occBudgetEmpty
     ? budgetEmptyHTML
-    : `<div class="chart-wrap-lg"><canvas id="ch-occ-budget"></canvas></div>`;
+    : `<div class="chart-wrap"><canvas id="ch-occ-budget"></canvas></div>`;
 
   let revVarText = '', occVarText = '';
-  // Variance now shown per-month inline (Revenue + Occupancy charts)
+  // Revenue variance now shown per-month under each bar group in the chart itself
+  if (!occBudgetEmpty) {
+    const occVar = actualOcc - budgetTotals.occupancy_pct;
+    occVarText = `<div class="variance-text ${occVar >= 0 ? 'pos' : 'neg'}">Total Variance: ${occVar >= 0 ? '+' : ''}${fmt(occVar, 1)} pp</div>`;
+  }
 
   // Move-Ins vs Move-Outs + Net Rentals (Portfolio view)
   // Both are 4-month line charts: Jan-Mar historicals + Apr MTD dashed
@@ -1358,18 +1349,6 @@ function renderOverview() {
     `;
   }
 
-  // Rate per m² trend — 4-month line chart for Portfolio view
-  let ratePerSqmHTML = '';
-  if (isAllSites && FILTERED_DATA.length > 1) {
-    ratePerSqmHTML = `
-      <div class="card">
-        <div class="card-title">Average Rate per m² — YTD</div>
-        <div class="chart-wrap-sm"><canvas id="ch-rate-sqm-ov"></canvas></div>
-      </div>
-      <div class="section-gap"></div>
-    `;
-  }
-
   document.getElementById('panel-overview').innerHTML = `
     <div class="grid-2">
       <div class="card">
@@ -1384,20 +1363,13 @@ function renderOverview() {
         ${revVarText}
       </div>
       <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <div class="card-title" style="margin-bottom:0">Occupancy vs Budget (${monthName})</div>
-          <div style="display:flex;gap:12px;font-size:11px;color:var(--muted-2)">
-            <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>Actual</span>
-            <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#d1d5db;border-radius:2px"></span>Budget</span>
-          </div>
-        </div>
+        <div class="card-title">Occupancy vs Budget (${monthName})</div>
         ${occBudgetHTML}
         ${occVarText}
       </div>
     </div>
     <div class="section-gap"></div>
     ${activityHTML}
-    ${ratePerSqmHTML}
     ${singleSiteHTML}
   `;
 
@@ -1465,73 +1437,29 @@ function renderOverview() {
         mkRevVarChart('ch-rev-budget', labels, actualData, budgetData);
       }
 
-      // Total Occupancy Actual vs Budget — 4-month grouped bars (Jan/Feb/Mar/Apr MTD)
-      // No YTD column since occupancy is a point-in-time metric that doesn't aggregate
+      // Total Occupancy Actual vs Budget — single comparison (2 bars, weighted average)
       if (!occBudgetEmpty) {
-        const occActualByMonth = {};
-        const occBudgetByMonth = {};
-        const occMonthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
-
-        // Historical actuals (Jan/Feb/Mar) from history.json — weighted average
-        if (HISTORY_DATA && HISTORY_DATA.sites) {
-          const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
-            if (s.is_rollup) return false;
-            if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
-            if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
-            return true;
-          });
-          occMonthKeys.slice(0, 3).forEach(mk => {
-            let rSqm = 0, tSqm = 0;
-            histSites.forEach(s => {
-              const e = (s.series || []).find(x => x.month === mk);
-              if (e?.occupancy) {
-                rSqm += e.occupancy.rented_sqm || 0;
-                tSqm += e.occupancy.total_sqm || 0;
-              }
-            });
-            occActualByMonth[mk] = tSqm > 0 ? (rSqm / tSqm * 100) : 0;
-          });
-        }
-
-        // April Actual from live FILTERED_DATA — weighted average
-        const aprRentedSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.rented_sqm || 0), 0);
-        const aprTotalSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.total_sqm || 0), 0);
-        occActualByMonth['2026-04'] = aprTotalSqm > 0 ? (aprRentedSqm / aprTotalSqm * 100) : 0;
-
-        // Budgets: weight each site's budget % by its total_sqm to get portfolio-weighted budget
-        occMonthKeys.forEach(mk => {
-          let weightedSqm = 0, totalSqm = 0;
-          FILTERED_DATA.forEach(d => {
-            const key = siteKeyFromName(d.site_name);
-            if (!key || !BUDGET_DATA) return;
-            const mb = BUDGET_DATA.sites[key]?.[mk];
-            if (mb?.occupancy_pct !== null && mb?.occupancy_pct !== undefined) {
-              const sqm = d.occupancy?.total_sqm || 0;
-              weightedSqm += (mb.occupancy_pct / 100) * sqm;
-              totalSqm += sqm;
-            }
-          });
-          occBudgetByMonth[mk] = totalSqm > 0 ? (weightedSqm / totalSqm * 100) : 0;
+        const siteOccBudget = FILTERED_DATA.map(d => {
+          if (!BUDGET_DATA) return 0;
+          const key = siteKeyFromName(d.site_name);
+          const mk = getCurrentMonthKey();
+          return BUDGET_DATA.sites[key]?.[mk]?.occupancy_pct || 0;
         });
 
-        // Build variance labels (percentage points, not euros)
-        const fmtOccVar = (actual, budget) => {
-          if (!budget) return '';
-          const v = actual - budget;
-          const sign = v >= 0 ? '+' : '−';
-          return sign + fmt(Math.abs(v), 1) + ' pp';
-        };
+        const totalRentedSqm = FILTERED_DATA.reduce((s,d) => s + (d.occupancy?.rented_sqm || 0), 0);
+        const totalSqm = FILTERED_DATA.reduce((s,d) => s + (d.occupancy?.total_sqm || 0), 0);
+        const totalActualOcc = totalSqm > 0 ? (totalRentedSqm / totalSqm * 100) : 0;
 
-        const occMonthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
-        const occLabels = occMonthKeys.map((mk, i) => [
-          occMonthNames[i],
-          fmtOccVar(occActualByMonth[mk] || 0, occBudgetByMonth[mk] || 0)
-        ]);
+        let totalBudgetRentedSqm = 0;
+        FILTERED_DATA.forEach((d, i) => {
+          const sqm = d.occupancy?.total_sqm || 0;
+          totalBudgetRentedSqm += (siteOccBudget[i] / 100) * sqm;
+        });
+        const totalBudgetOcc = totalSqm > 0 ? (totalBudgetRentedSqm / totalSqm * 100) : 0;
 
-        const occActualData = occMonthKeys.map(mk => occActualByMonth[mk] || 0);
-        const occBudgetData = occMonthKeys.map(mk => occBudgetByMonth[mk] || 0);
-
-        mkPctVarChart('ch-occ-budget', occLabels, occActualData, occBudgetData);
+        mkHBarChart('ch-occ-budget', ['Actual', 'Budget'], [{
+          label: '', data: [totalActualOcc, totalBudgetOcc], color: ['#16a34a', '#d1d5db']
+        }], v => v + '%', 100);
       }
 
       // Move-Ins vs Move-Outs + Net Rentals — both 4-month line charts
@@ -1599,67 +1527,6 @@ function renderOverview() {
       mkLineChart('ch-net-rentals-ov', miMoLabels, [
         { label: 'Net Rentals', data: netSeries, color: '#f97316' }
       ], { yFmt: v => v, mtdMonths: mtdMonthsSet, months: miMoMonths });
-
-      // Rate per m² trend — 4-month portfolio weighted average line
-      const rateMonths = [];
-      const rateSeries = [];
-
-      if (HISTORY_DATA && HISTORY_DATA.sites) {
-        const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
-          if (s.is_rollup) return false;
-          if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
-          if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
-          return true;
-        });
-        const monthSet = new Set();
-        histSites.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
-        const histMonths = [...monthSet].sort();
-
-        histMonths.forEach(m => {
-          let rateNum = 0, rateDen = 0;
-          histSites.forEach(s => {
-            const e = (s.series || []).find(x => x.month === m);
-            if (e?.revenue?.avg_rate_per_sqm && e?.occupancy?.rented_sqm) {
-              rateNum += e.revenue.avg_rate_per_sqm * e.occupancy.rented_sqm;
-              rateDen += e.occupancy.rented_sqm;
-            }
-          });
-          rateMonths.push(m);
-          rateSeries.push(rateDen > 0 ? (rateNum / rateDen) : null);
-        });
-
-        if (!rateMonths.includes(currentMonth)) {
-          // Portfolio weighted avg for live data
-          let num = 0, den = 0;
-          FILTERED_DATA.forEach(d => {
-            const rate = d.revenue?.avg_rate_per_sqm || 0;
-            const sqm = d.occupancy?.rented_sqm || 0;
-            if (rate && sqm) { num += rate * sqm; den += sqm; }
-          });
-          rateMonths.push(currentMonth);
-          rateSeries.push(den > 0 ? (num / den) : null);
-        }
-      } else {
-        // Live-only fallback
-        let num = 0, den = 0;
-        FILTERED_DATA.forEach(d => {
-          const rate = d.revenue?.avg_rate_per_sqm || 0;
-          const sqm = d.occupancy?.rented_sqm || 0;
-          if (rate && sqm) { num += rate * sqm; den += sqm; }
-        });
-        rateMonths.push(currentMonth);
-        rateSeries.push(den > 0 ? (num / den) : null);
-      }
-
-      const rateLabels = rateMonths.map(m => {
-        const [y, mo] = m.split('-');
-        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return names[parseInt(mo,10)-1] + ' ' + y;
-      });
-
-      mkLineChart('ch-rate-sqm-ov', rateLabels, [
-        { label: 'Avg Rate/m²', data: rateSeries, color: '#8b5cf6' }
-      ], { yFmt: v => '€' + fmt(v, 2), yMin: 0, mtdMonths: mtdMonthsSet, months: rateMonths });
     } else {
       // Single site view
       if (!revBudgetEmpty) {
@@ -1810,76 +1677,17 @@ function renderRentals() {
       </div>
     </div>
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:0">Rental Activity</div>
-        <div style="display:flex;gap:12px;font-size:11px;color:var(--muted-2)">
-          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>Move-Ins</span>
-          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#f97316;border-radius:2px"></span>Move-Outs</span>
-        </div>
-      </div>
+      <div class="card-title">Rental Activity</div>
       <div class="chart-wrap"><canvas id="ch-rental-activity"></canvas></div>
     </div>
   `;
 
   nextTick(() => {
-    // Pull Jan/Feb/Mar historicals for MI/MO/Net; April from live FILTERED_DATA
-    const monthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
-    const miByMonth = {};
-    const moByMonth = {};
-    const netByMonth = {};
-
-    if (HISTORY_DATA && HISTORY_DATA.sites) {
-      const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
-        if (s.is_rollup) return false;
-        if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
-        if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
-        return true;
-      });
-      // Filter further by current site if single-site view
-      const scopedSites = CURRENT_SITE === 'all'
-        ? histSites
-        : histSites.filter(s => s.name === CURRENT_SITE);
-
-      monthKeys.slice(0, 3).forEach(mk => {
-        let miSum = 0, moSum = 0, netSum = 0;
-        scopedSites.forEach(s => {
-          const e = (s.series || []).find(x => x.month === mk);
-          if (e?.rentals) {
-            miSum += e.rentals.move_ins_month || 0;
-            moSum += e.rentals.vacates_month || 0;
-            netSum += e.rentals.net_month || 0;
-          }
-        });
-        miByMonth[mk] = miSum;
-        moByMonth[mk] = moSum;
-        netByMonth[mk] = netSum;
-      });
-    }
-
-    // April MTD from live FILTERED_DATA (already filtered by country + site)
-    miByMonth['2026-04'] = agg('rentals.move_ins_month');
-    moByMonth['2026-04'] = agg('rentals.vacates_month');
-    netByMonth['2026-04'] = miByMonth['2026-04'] - moByMonth['2026-04'];
-
-    // YTD totals
-    const ytdMI = monthKeys.reduce((s, mk) => s + (miByMonth[mk] || 0), 0);
-    const ytdMO = monthKeys.reduce((s, mk) => s + (moByMonth[mk] || 0), 0);
-    const ytdNet = ytdMI - ytdMO;
-
-    // Build labels with "Net: ±N" underneath each month
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
-    const labels = [
-      ...monthKeys.map((mk, i) => [
-        monthNames[i],
-        (netByMonth[mk] >= 0 ? '+' : '') + netByMonth[mk]
-      ]),
-      ['YTD', (ytdNet >= 0 ? '+' : '') + ytdNet]
-    ];
-
-    const miData = [...monthKeys.map(mk => miByMonth[mk] || 0), ytdMI];
-    const moData = [...monthKeys.map(mk => moByMonth[mk] || 0), ytdMO];
-
-    mkRentalActivityChart('ch-rental-activity', labels, miData, moData);
+    mkVBarChart('ch-rental-activity', ['Today', 'Week', 'Month', 'Year'], [
+      { label: 'Move-Ins', data: [miT, miW, miM, miY], color: '#16a34a' },
+      { label: 'Vacates', data: [vaT, vaW, vaM, vaY], color: '#f97316' },
+      { label: 'Net', data: [netT, netW, netM, netY], color: '#1f2937' }
+    ]);
   });
 }
 
@@ -2106,236 +1914,6 @@ function renderDetails() {
 }
 
 // ─────────────────────────────────────────────
-// STORAGEPILOT TAB
-// ─────────────────────────────────────────────
-let SP_DATA = {
-  byLocation: null,
-  byCategory: null,
-  escalationsByCategory: null
-};
-
-// Simple CSV parser — assumes no quoted commas, trims whitespace
-function parseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return { headers: [], rows: [] };
-  const headers = lines[0].split(',').map(h => h.trim());
-  const rows = lines.slice(1).map(line => {
-    const cells = line.split(',').map(c => c.trim());
-    const row = {};
-    headers.forEach((h, i) => {
-      const raw = cells[i];
-      // First column is date string; everything else is a number
-      row[h] = i === 0 ? raw : (raw === '' ? 0 : Number(raw));
-    });
-    return row;
-  });
-  return { headers, rows };
-}
-
-// Parse date string — supports both YYYY-MM-DD and M/D/YYYY formats
-function parseSpDate(s) {
-  if (!s) return null;
-  const str = String(s).trim();
-  // YYYY-MM-DD
-  let m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (m) return { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
-  // M/D/YYYY
-  m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m) return { year: Number(m[3]), month: Number(m[1]), day: Number(m[2]) };
-  return null;
-}
-
-// Filter rows to April 2026 through today (MTD semantics)
-function filterToAprilMTD(rows) {
-  const today = new Date();
-  const todayYear = today.getFullYear();
-  const todayMonth = today.getMonth() + 1;
-  const todayDay = today.getDate();
-
-  return rows.filter(r => {
-    const d = parseSpDate(r.date);
-    if (!d) return false;
-    if (d.year !== 2026 || d.month !== 4) return false;
-    // Keep days <= today if we're in April; keep all April days if we're past April
-    if (todayYear === 2026 && todayMonth === 4) {
-      return d.day <= todayDay;
-    }
-    return todayYear > 2026 || (todayYear === 2026 && todayMonth > 4);
-  });
-}
-
-async function loadStoragePilotData() {
-  const files = [
-    { key: 'byLocation', path: 'data/storagepilot/conversations_by_location.csv' },
-    { key: 'byCategory', path: 'data/storagepilot/conversations_by_category.csv' },
-    { key: 'escalationsByCategory', path: 'data/storagepilot/escalations_by_category.csv' }
-  ];
-
-  await Promise.all(files.map(async (f) => {
-    try {
-      const resp = await fetch(f.path + '?t=' + Date.now(), { cache: 'no-store' });
-      if (!resp.ok) { SP_DATA[f.key] = null; return; }
-      const text = await resp.text();
-      SP_DATA[f.key] = parseCSV(text);
-    } catch (e) {
-      console.log(`StoragePilot: failed to load ${f.path}:`, e.message);
-      SP_DATA[f.key] = null;
-    }
-  }));
-}
-
-function renderStoragePilot() {
-  const panel = document.getElementById('panel-storagepilot');
-  if (!panel) return;
-
-  // Gate to Netherlands portfolio view only
-  if (CURRENT_COUNTRY !== 'nl' || CURRENT_SITE !== 'all') {
-    panel.innerHTML = `
-      <div class="empty-state">
-        <div class="big">🇳🇱</div>
-        <p>StoragePilot data is available for the Netherlands portfolio view only.<br>
-        Select <strong>Netherlands</strong> and <strong>All Sites</strong> to view.</p>
-      </div>
-    `;
-    return;
-  }
-
-  if (!SP_DATA.byLocation || !SP_DATA.byCategory || !SP_DATA.escalationsByCategory) {
-    panel.innerHTML = `
-      <div class="empty-state">
-        <div class="big">💬</div>
-        <p>StoragePilot data not yet loaded.<br>
-        Upload CSVs to <code>data/storagepilot/</code> in the repo.</p>
-      </div>
-    `;
-    return;
-  }
-
-  const locRows = filterToAprilMTD(SP_DATA.byLocation.rows);
-  const catRows = filterToAprilMTD(SP_DATA.byCategory.rows);
-  const escRows = filterToAprilMTD(SP_DATA.escalationsByCategory.rows);
-
-  if (locRows.length === 0) {
-    panel.innerHTML = `
-      <div class="empty-state">
-        <div class="big">📅</div>
-        <p>No April 2026 data found in the CSVs.<br>
-        Check the date column format (expected <code>M/D/YYYY</code>).</p>
-      </div>
-    `;
-    return;
-  }
-
-  // Chart 1: Conversations by Location — sum each store column across April rows
-  const locHeaders = SP_DATA.byLocation.headers.filter(h =>
-    h !== 'date' && h !== 'total' && h !== 'Company'
-  );
-  const locTotals = locHeaders.map(h => ({
-    store: h,
-    total: locRows.reduce((s, r) => s + (r[h] || 0), 0)
-  })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
-
-  // Chart 2: Conversations by Category — sum each category column
-  // Exclude 'ignore' — it's spam/noise and dominates the chart misleadingly
-  const catHeaders = SP_DATA.byCategory.headers.filter(h =>
-    h !== 'date' && h !== 'total' && h !== 'ignore'
-  );
-  const catTotals = catHeaders.map(h => ({
-    category: h.replace(/_/g, ' '),
-    categoryRaw: h,
-    total: catRows.reduce((s, r) => s + (r[h] || 0), 0)
-  })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
-
-  // Chart 3: Escalations per 100 Conversations (can exceed 100 when a single
-  // conversation triggers multiple escalations — honest label instead of a "rate")
-  const escTotalsByKey = {};
-  catHeaders.forEach(h => {
-    escTotalsByKey[h] = escRows.reduce((s, r) => s + (r[h] || 0), 0);
-  });
-  const escRates = catTotals.map(c => {
-    const esc = escTotalsByKey[c.categoryRaw] || 0;
-    const rate = c.total > 0 ? (esc / c.total * 100) : 0;
-    return { category: c.category, conversations: c.total, escalations: esc, rate };
-  }).filter(x => x.conversations >= 5) // drop low-volume noise
-    .sort((a, b) => b.rate - a.rate);
-
-  // KPIs — exclude 'ignore' from total and from escalation rate math
-  const totalConv = catTotals.reduce((s, c) => s + c.total, 0);
-  const totalEsc = catHeaders.reduce((s, h) => s + (escTotalsByKey[h] || 0), 0);
-  const escRatePortfolio = totalConv > 0 ? (totalEsc / totalConv * 100) : 0;
-  const topCategory = catTotals[0] ? catTotals[0].category : '—';
-  const avgPerDay = locRows.length > 0 ? (totalConv / locRows.length) : 0;
-
-  panel.innerHTML = `
-    <div class="grid-4" style="margin-bottom:12px">
-      <div class="stat-card" style="text-align:center">
-        <div class="label">TOTAL CONVERSATIONS</div>
-        <div class="value">${fmt(totalConv)}</div>
-        <div class="sub">April MTD • ${locRows.length} days</div>
-      </div>
-      <div class="stat-card" style="text-align:center">
-        <div class="label">ESCALATIONS</div>
-        <div class="value amber">${fmt(totalEsc)}</div>
-        <div class="sub">${fmt(escRatePortfolio, 1)}% of conversations</div>
-      </div>
-      <div class="stat-card" style="text-align:center">
-        <div class="label">TOP CATEGORY</div>
-        <div class="value" style="font-size:20px">${topCategory}</div>
-        <div class="sub">${catTotals[0] ? fmt(catTotals[0].total) + ' conversations' : ''}</div>
-      </div>
-      <div class="stat-card" style="text-align:center">
-        <div class="label">AVG PER DAY</div>
-        <div class="value">${fmt(avgPerDay, 1)}</div>
-        <div class="sub">Portfolio-wide</div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:12px">
-      <div class="card-title">Conversations by Location (April MTD)</div>
-      <div style="position:relative;height:${Math.max(280, locTotals.length * 22)}px"><canvas id="ch-sp-location"></canvas></div>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Conversations by Category (April MTD)</div>
-        <div style="position:relative;height:320px"><canvas id="ch-sp-category"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Escalations per 100 Conversations (April MTD)</div>
-        <div style="position:relative;height:320px"><canvas id="ch-sp-escalation"></canvas></div>
-        <div style="font-size:10px;color:var(--muted-2);margin-top:8px;text-align:center">
-          Categories with fewer than 5 conversations excluded
-        </div>
-      </div>
-    </div>
-  `;
-
-  nextTick(() => {
-    // Chart 1 — horizontal bar, sorted descending
-    mkHBarChart('ch-sp-location',
-      locTotals.map(x => x.store),
-      [{ label: '', data: locTotals.map(x => x.total), color: '#8b5cf6' }],
-      v => v
-    );
-
-    // Chart 2 — donut for category distribution
-    const catColors = ['#16a34a', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6', '#6b7280', '#9ca3af'];
-    mkDonut('ch-sp-category',
-      catTotals.map(c => c.category),
-      catTotals.map(c => c.total),
-      catTotals.map((_, i) => catColors[i % catColors.length])
-    );
-
-    // Chart 3 — horizontal bar of escalations per 100 conversations
-    mkHBarChart('ch-sp-escalation',
-      escRates.map(x => x.category),
-      [{ label: '', data: escRates.map(x => Number(x.rate.toFixed(1))), color: '#f97316' }],
-      v => v
-    );
-  });
-}
-
-// ─────────────────────────────────────────────
 // TRENDS TAB
 // ─────────────────────────────────────────────
 function renderTrends() {
@@ -2554,140 +2132,6 @@ function setTrendsView(v) {
 function siteShort(name) {
   if (!name) return '';
   return name.replace(/^1BOX\s+/i, '').replace(/^1Box\s+/i, '');
-}
-
-function mkRentalActivityChart(id, labels, miData, moData) {
-  // MI/MO grouped bars with "Net: ±N" shown per month (green if positive, red if negative).
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-
-  const monthLabels = labels.map(l => l[0]);
-  const netLabels = labels.map(l => l[1]);
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: monthLabels,
-      datasets: [
-        { label: 'Move-Ins', data: miData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
-        { label: 'Move-Outs', data: moData, backgroundColor: '#f97316', borderRadius: 2, borderWidth: 0 }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: { bottom: 20 } },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
-          grid: { display: false }
-        },
-        y: {
-          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } },
-          grid: { color: '#f3f4f6', drawBorder: false }
-        }
-      }
-    },
-    plugins: [{
-      id: 'netLabels',
-      afterDraw(chart) {
-        const x = chart.scales.x;
-        if (!x) return;
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.font = '600 11px Inter';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        x.ticks.forEach((tick, i) => {
-          const netStr = netLabels[i];
-          if (netStr === undefined || netStr === null || netStr === '') return;
-          const isPos = !netStr.startsWith('-') && !netStr.startsWith('−');
-          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
-          const px = x.getPixelForTick(i);
-          const py = x.bottom + 4;
-          ctx.fillText('Net: ' + netStr, px, py);
-        });
-        ctx.restore();
-      }
-    }]
-  });
-}
-
-function mkPctVarChart(id, labels, actualData, budgetData) {
-  // Occupancy % grouped bars with inline per-month variance (in pp).
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-
-  const monthLabels = labels.map(l => l[0]);
-  const varLabels = labels.map(l => l[1]);
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: monthLabels,
-      datasets: [
-        { label: 'Actual', data: actualData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
-        { label: 'Budget', data: budgetData, backgroundColor: '#d1d5db', borderRadius: 2, borderWidth: 0 }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: { bottom: 20 } },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.y, 1) + '%' }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
-          grid: { display: false }
-        },
-        y: {
-          min: 0,
-          max: 100,
-          ticks: {
-            color: '#9ca3af',
-            font: { family: 'Inter', size: 10 },
-            callback: v => v + '%'
-          },
-          grid: { color: '#f3f4f6', drawBorder: false }
-        }
-      }
-    },
-    plugins: [{
-      id: 'varianceLabelsPct',
-      afterDraw(chart) {
-        const x = chart.scales.x;
-        if (!x) return;
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.font = '600 11px Inter';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        x.ticks.forEach((tick, i) => {
-          const varStr = varLabels[i];
-          if (!varStr) return;
-          const isPos = varStr.startsWith('+');
-          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
-          const px = x.getPixelForTick(i);
-          const py = x.bottom + 4;
-          ctx.fillText(varStr, px, py);
-        });
-        ctx.restore();
-      }
-    }]
-  });
 }
 
 function mkRevVarChart(id, labels, actualData, budgetData) {
@@ -3014,9 +2458,6 @@ window.addEventListener('load', async () => {
   const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
   if (hist) HISTORY_DATA = hist;
   if (budgets) BUDGET_DATA = budgets;
-
-  // StoragePilot CSVs (best-effort; tab handles missing files gracefully)
-  loadStoragePilotData();
 
   if (cached) {
     IS_DEMO = false;
