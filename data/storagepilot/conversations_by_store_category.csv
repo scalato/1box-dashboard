@@ -1,0 +1,31 @@
+Store,Date,general,sales_inquiry,gate_code,account_balance,billing,account_changes,customer_support,physical_issue,wants_human,spam,other,ignore,total
+1Box Self Storage (All),30-Apr-26,11,176,60,16,86,101,99,42,75,1,39,318,1024
+Alkmaar,30-Apr-26,1,2,2,0,0,2,2,0,0,0,0,0,9
+Almere,30-Apr-26,0,2,0,1,0,1,1,1,0,0,0,0,6
+Alphen aan den Rijn,30-Apr-26,0,2,2,1,3,3,3,2,2,0,3,7,28
+Amsterdam,30-Apr-26,2,10,2,0,4,1,3,4,10,0,1,16,53
+Barendrecht,30-Apr-26,0,6,2,1,5,11,2,1,2,0,0,7,37
+Bergen op Zoom,30-Apr-26,0,2,0,0,0,0,2,0,0,0,0,0,4
+Boxtel,30-Apr-26,0,3,0,0,0,1,1,0,1,0,0,1,7
+Breda,30-Apr-26,0,5,1,0,4,5,4,1,0,0,1,11,32
+Den Bosch,30-Apr-26,0,3,4,1,5,6,2,2,1,0,0,8,32
+Den Haag,30-Apr-26,1,10,9,1,7,6,9,7,2,1,0,20,73
+Eindhoven Best,30-Apr-26,0,2,0,1,1,0,0,0,0,0,0,0,4
+Goes,30-Apr-26,0,4,0,0,2,1,0,0,0,0,0,3,10
+Groningen,30-Apr-26,1,3,1,0,1,7,2,0,1,0,3,13,32
+Heerlen,30-Apr-26,0,6,2,0,1,1,2,0,2,0,0,3,17
+Heerlen Heerlerbaan,30-Apr-26,0,2,0,0,3,0,1,0,2,0,1,0,9
+Hellevoetsluis,30-Apr-26,0,3,2,0,3,4,3,0,2,0,0,8,25
+Helmond,30-Apr-26,0,0,0,0,2,0,4,0,0,0,5,12,23
+Helmond kanaaldijk,30-Apr-26,0,0,1,0,2,2,2,0,5,0,1,2,15
+Lelystad,30-Apr-26,0,3,0,0,1,4,1,2,1,0,0,1,13
+Nijmegen Wijchen,30-Apr-26,0,4,0,0,2,2,1,3,0,0,0,2,14
+Rijswijk,30-Apr-26,0,8,1,1,4,5,2,1,2,0,1,8,33
+Roermond,30-Apr-26,0,1,0,0,0,1,0,0,0,0,1,7,10
+Rotterdam Centrum,30-Apr-26,0,17,4,1,12,6,7,2,12,0,3,39,103
+Rotterdam Zuid,30-Apr-26,2,9,2,1,3,6,1,1,3,0,3,21,52
+Schiedam,30-Apr-26,0,7,5,1,4,1,5,3,4,0,3,27,60
+Sittard,30-Apr-26,2,4,2,2,4,2,0,2,3,0,0,14,35
+Tilburg,30-Apr-26,0,14,6,1,2,5,10,3,7,0,3,24,75
+Utrecht,30-Apr-26,1,7,6,1,4,3,8,4,5,0,3,22,64
+Venlo,30-Apr-26,0,8,1,0,2,0,0,0,0,0,1,3,15
