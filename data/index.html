@@ -1,0 +1,3129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1BOX Portfolio Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f0f1f2;
+    --surface: #ffffff;
+    --surface-alt: #fafafa;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --text: #1a1a1a;
+    --text-secondary: #4b5563;
+    --muted: #9ca3af;
+    --muted-2: #6b7280;
+    --green: #10b981;
+    --green-bar: #16a34a;
+    --red: #ef4444;
+    --amber: #f97316;
+    --amber-2: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --dark: #0a0a0a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .num, .data-table .num, .kpi-value, .ms-val { font-variant-numeric: tabular-nums; }
+
+  /* ── CONFIG MODAL ── */
+  #config-modal {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(15,15,15,0.6);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #config-modal.hidden { display: none; }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px;
+    width: 500px;
+    max-width: 95vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .modal-box h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .modal-box .subtitle {
+    color: var(--muted-2);
+    font-size: 12px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .field-group { margin-bottom: 16px; }
+  .field-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted-2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .field-group input {
+    width: 100%;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'Inter', monospace;
+    font-size: 12px;
+    outline: none;
+  }
+  .field-group input:focus { border-color: var(--dark); }
+  .field-group .hint { color: var(--muted); font-size: 11px; margin-top: 5px; }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--dark);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary {
+    width: 100%;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn-secondary:hover { border-color: var(--dark); }
+
+  /* ── MAIN LAYOUT ── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  #app.visible { display: flex; }
+
+  header {
+    background: var(--dark);
+    padding: 0 24px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo img {
+    height: 34px;
+    width: auto;
+    display: block;
+  }
+  .header-right {
+    display: flex; align-items: center; gap: 12px;
+  }
+  #last-updated {
+    color: rgba(255,255,255,0.6);
+    font-size: 11px;
+  }
+  .btn-refresh {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .btn-refresh:hover { background: rgba(255,255,255,0.16); }
+  .btn-settings {
+    background: transparent; border: none;
+    color: rgba(255,255,255,0.6); cursor: pointer; font-size: 14px;
+    padding: 2px;
+  }
+  .btn-settings:hover { color: #fff; }
+
+  #loading-bar {
+    height: 2px;
+    background: var(--green-bar);
+    width: 0%;
+    transition: width 0.4s ease;
+    position: fixed; top: 52px; left: 0; z-index: 200;
+  }
+
+  #status-banner {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    color: var(--muted-2);
+    font-size: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  #status-banner.hidden { display: none; }
+  #status-banner.error { background: #fef2f2; color: var(--red); }
+  #status-banner.success { background: #f0fdf4; color: var(--green-bar); }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--dark);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── FILTERS ── */
+  .filters-wrap {
+    padding: 14px 24px 8px;
+    background: var(--bg);
+  }
+  .country-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .country-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px 6px 6px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.15s;
+  }
+  .country-btn:hover { border-color: var(--muted); }
+  .country-btn.active {
+    background: var(--dark);
+    border-color: var(--dark);
+    color: #fff;
+  }
+  .country-btn .flag {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0;
+  }
+  .country-btn.active .flag {
+    background: var(--surface);
+    color: var(--dark);
+  }
+
+  .site-row {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    max-height: 120px; overflow-y: auto;
+  }
+  .site-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .site-btn:hover { border-color: var(--muted); color: var(--text); }
+  .site-btn.active {
+    background: var(--dark);
+    border-color: var(--dark);
+    color: #fff;
+  }
+
+  /* ── KPI STRIP ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 4px 24px 14px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .kpi-card.green::before { background: var(--green-bar); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.purple::before { background: var(--purple); }
+  .kpi-card.amber::before { background: var(--amber); }
+  .kpi-card.blue::before { background: var(--blue); }
+
+  .kpi-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted-2);
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  .kpi-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 3px;
+    display: flex; align-items: baseline; gap: 4px;
+  }
+  .kpi-value .unit { font-size: 13px; font-weight: 500; color: var(--text); }
+  .kpi-value .trend-icon { font-size: 12px; color: var(--green-bar); font-weight: 400; }
+  .kpi-value .trend-icon.flat { color: var(--muted); }
+  .kpi-sub { font-size: 11px; color: var(--muted-2); }
+
+  /* ── TABS ── */
+  .tabs {
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 0;
+    background: var(--bg);
+  }
+  .tab-btn {
+    background: transparent; border: none;
+    padding: 12px 16px;
+    color: var(--muted-2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--dark); font-weight: 600; }
+
+  main { padding: 16px 24px; flex: 1; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .card-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-2);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .chart-wrap { position: relative; height: 200px; }
+  .chart-wrap-sm { position: relative; height: 180px; }
+  .chart-wrap-lg { position: relative; height: 250px; }
+
+  /* ── TABLES ── */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted-2);
+    font-weight: 600;
+    padding: 10px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 11px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--text);
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface-alt); }
+  .data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .data-table .green { color: var(--green-bar); }
+  .data-table .red { color: var(--red); }
+  .data-table .amber { color: var(--amber); }
+
+  /* KV table for details */
+  .kv-table { width: 100%; border-collapse: collapse; }
+  .kv-table th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted-2);
+    font-weight: 600;
+    padding: 6px 0 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .kv-table th.num { text-align: right; }
+  .kv-table td {
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .kv-table tr:last-child td { border-bottom: none; }
+  .kv-table td.label { color: var(--text); }
+  .kv-table td.value {
+    text-align: right;
+    color: var(--text);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .kv-table td.value .sub {
+    color: var(--muted-2);
+    font-weight: 400;
+    margin-left: 8px;
+    font-size: 11px;
+  }
+
+  /* ── MINI STATS (rentals) ── */
+  .mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .mini-stat {
+    padding: 6px 14px;
+    border-right: 1px solid var(--border);
+  }
+  .mini-stat:last-child { border-right: none; }
+  .mini-stat .ms-val {
+    font-size: 22px; font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .mini-stat .ms-val.green { color: var(--green-bar); }
+  .mini-stat .ms-val.red { color: var(--amber); }
+  .mini-stat .ms-val.neutral { color: var(--text); }
+  .mini-stat .ms-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-2);
+    font-weight: 600;
+  }
+
+  /* Site pill in tables */
+  .site-pill {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    margin-left: 6px;
+  }
+  .site-pill.fr { border-color: #dbeafe; background: #eff6ff; color: #1e40af; }
+  .site-pill.nl { border-color: #fed7aa; background: #fff7ed; color: #9a3412; }
+
+  /* Stat card big number */
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .stat-card .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-2);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .stat-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-card .value.green { color: var(--green-bar); }
+  .stat-card .value.red { color: var(--red); }
+  .stat-card .value.amber { color: var(--amber); }
+  .stat-card .value.purple { color: var(--purple); }
+  .stat-card .value .unit { font-size: 15px; font-weight: 500; color: var(--text); }
+  .stat-card .sub {
+    font-size: 11px;
+    color: var(--muted-2);
+    margin-top: 6px;
+  }
+
+  .variance-text {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .variance-text.pos { color: var(--green-bar); }
+  .variance-text.neg { color: var(--red); }
+  .variance-text.none { color: var(--muted); }
+
+  /* Progress bars */
+  .progress-bar {
+    height: 6px;
+    background: var(--surface-alt);
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .progress-bar-fill.green { background: var(--green-bar); }
+  .progress-bar-fill.amber { background: var(--amber); }
+
+  /* Toggle (Portfolio/By Store) */
+  .toggle-group {
+    display: inline-flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted-2);
+    cursor: pointer;
+    border-radius: 999px;
+  }
+  .toggle-btn.active {
+    background: var(--dark);
+    color: #fff;
+  }
+
+  /* Trends header */
+  .trends-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .trends-scope {
+    font-size: 13px;
+    color: var(--muted-2);
+    font-weight: 400;
+  }
+
+  /* Details table single-row */
+  .details-site-table { margin-bottom: 14px; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 50px 20px;
+    color: var(--muted-2);
+  }
+  .empty-state .big { font-size: 36px; margin-bottom: 10px; }
+  .empty-state code {
+    background: var(--surface-alt);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+  }
+
+  .section-gap { height: 12px; }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    main { padding: 14px; }
+    header { padding: 0 14px; }
+    .filters-wrap, .tabs { padding-left: 14px; padding-right: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CONFIG MODAL -->
+<div id="config-modal">
+  <div class="modal-box">
+    <h2>1BOX Dashboard</h2>
+    <p class="subtitle">Connect to your Microsoft account to automatically pull MIS reports from your OneDrive folder.</p>
+
+    <div class="field-group">
+      <label>Microsoft Client ID</label>
+      <input type="text" id="cfg-client-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      <div class="hint">From your Azure App Registration.</div>
+    </div>
+
+    <div class="field-group">
+      <label>OneDrive Folder Path</label>
+      <input type="text" id="cfg-folder" placeholder="/1Box MIS Reports" value="/1Box MIS Reports">
+    </div>
+
+    <div class="field-group">
+      <label>Claude API Key</label>
+      <input type="password" id="cfg-api-key" placeholder="sk-ant-...">
+      <div class="hint">Stored only in your browser's local storage.</div>
+    </div>
+
+    <button class="btn-primary" onclick="saveConfig()">Connect & Load Dashboard</button>
+    <button class="btn-secondary" onclick="loadDemo()">Load with Demo Data</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="loading-bar"></div>
+
+  <header>
+    <div class="logo">
+      <img src="logo.jpg" alt="1BOX Self Storage" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-family:Syne,sans-serif;font-weight:800;color:#fff\'>1BOX</span>'">
+    </div>
+    <div class="header-right">
+      <span id="last-updated"></span>
+      <button class="btn-refresh" onclick="refreshData()">↻ Refresh</button>
+      <button class="btn-settings" onclick="showConfig()" title="Settings">⚙</button>
+    </div>
+  </header>
+
+  <div id="status-banner" class="hidden">
+    <div class="spinner" id="status-spinner"></div>
+    <span id="status-text"></span>
+  </div>
+
+  <!-- Country + Site Filters -->
+  <div class="filters-wrap">
+    <div class="country-row">
+      <button class="country-btn" onclick="setCountry('fr')" id="f-fr">
+        <span class="flag">FR</span>France
+      </button>
+      <button class="country-btn" onclick="setCountry('nl')" id="f-nl">
+        <span class="flag">NL</span>Netherlands
+      </button>
+    </div>
+    <div class="site-row" id="site-filters"></div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')" id="tab-overview">Overview</button>
+    <button class="tab-btn" onclick="switchTab('occupancy')" id="tab-occupancy">Occupancy</button>
+    <button class="tab-btn" onclick="switchTab('rentals')" id="tab-rentals">Rentals</button>
+    <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
+    <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
+    <button class="tab-btn" onclick="switchTab('storagepilot')" id="tab-storagepilot">StoragePilot</button>
+    <button class="tab-btn" onclick="switchTab('trends')" id="tab-trends">Trends</button>
+  </div>
+
+  <main>
+    <div id="panel-overview" class="tab-panel active"></div>
+    <div id="panel-occupancy" class="tab-panel"></div>
+    <div id="panel-rentals" class="tab-panel"></div>
+    <div id="panel-revenue" class="tab-panel"></div>
+    <div id="panel-details" class="tab-panel"></div>
+    <div id="panel-storagepilot" class="tab-panel"></div>
+    <div id="panel-trends" class="tab-panel"></div>
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG & STATE
+// ─────────────────────────────────────────────
+let CONFIG = {};
+let RAW_DATA = [];
+let HISTORY_DATA = null;
+let BUDGET_DATA = null;
+let FILTERED_DATA = [];
+let CURRENT_COUNTRY = 'fr';
+let CURRENT_SITE = 'all';
+let TRENDS_VIEW = 'portfolio'; // 'portfolio' | 'bystore'
+let CHARTS = {};
+let IS_DEMO = false;
+let MS_TOKEN = null;
+
+// ─────────────────────────────────────────────
+// FORMATTERS (EU format: "97 387 €", "14,63 €/m²")
+// ─────────────────────────────────────────────
+function fmt(n, dec) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  dec = dec || 0;
+  return Number(n).toLocaleString('fr-FR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+function fmtEur(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return fmt(n, 0) + ' €';
+}
+function fmtEurDec(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return fmt(n, 2) + ' €';
+}
+function fmtRate(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return fmt(n, 2) + ' €/m²';
+}
+function fmtPct(n, dec) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  dec = dec !== undefined ? dec : 1;
+  return fmt(n, dec) + ' %';
+}
+
+// ─────────────────────────────────────────────
+// CONFIG / AUTH
+// ─────────────────────────────────────────────
+function saveConfig() {
+  CONFIG = {
+    clientId: document.getElementById('cfg-client-id').value.trim(),
+    folder: document.getElementById('cfg-folder').value.trim() || '/1Box MIS Reports',
+    apiKey: document.getElementById('cfg-api-key').value.trim()
+  };
+  if (!CONFIG.clientId || !CONFIG.apiKey) {
+    alert('Please fill in Client ID and Claude API Key');
+    return;
+  }
+  localStorage.setItem('1box_config', JSON.stringify(CONFIG));
+  document.getElementById('config-modal').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  startAuth();
+}
+
+function showConfig() {
+  document.getElementById('config-modal').classList.remove('hidden');
+  const s = localStorage.getItem('1box_config');
+  if (s) {
+    const c = JSON.parse(s);
+    document.getElementById('cfg-client-id').value = c.clientId || '';
+    document.getElementById('cfg-folder').value = c.folder || '/1Box MIS Reports';
+    document.getElementById('cfg-api-key').value = c.apiKey || '';
+  }
+}
+
+function loadDemo() {
+  IS_DEMO = true;
+  document.getElementById('config-modal').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  RAW_DATA = generateDemoData();
+  HISTORY_DATA = generateDemoHistory();
+  renderAll();
+  document.getElementById('last-updated').textContent = 'Demo data — ' + new Date().toLocaleDateString('en-GB');
+}
+
+function startAuth() {
+  const stored = localStorage.getItem('ms_token');
+  if (stored) {
+    try {
+      const payload = JSON.parse(atob(stored.split('.')[1]));
+      const expiresAt = payload.exp * 1000;
+      if (Date.now() < expiresAt - 60000) {
+        MS_TOKEN = stored;
+        refreshData();
+        return;
+      }
+      localStorage.removeItem('ms_token');
+    } catch(e) {
+      localStorage.removeItem('ms_token');
+    }
+  }
+
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.slice(1));
+    MS_TOKEN = params.get('access_token');
+    localStorage.setItem('ms_token', MS_TOKEN);
+    window.location.hash = '';
+    refreshData();
+    return;
+  }
+  const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize` +
+    `?client_id=${encodeURIComponent(CONFIG.clientId)}` +
+    `&response_type=token` +
+    `&redirect_uri=${encodeURIComponent(window.location.href.split('#')[0])}` +
+    `&scope=${encodeURIComponent('Files.Read User.Read')}` +
+    `&response_mode=fragment`;
+  window.location.href = authUrl;
+}
+
+// ─────────────────────────────────────────────
+// DATA FETCH (from GitHub Pages /data/*.json)
+// ─────────────────────────────────────────────
+async function tryLoadFromGitHub() {
+  try {
+    const resp = await fetch('data/latest.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!Array.isArray(data.sites) || data.sites.length === 0) return null;
+
+    const dataDate = new Date(data.date + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysOld = Math.floor((today - dataDate) / (1000 * 60 * 60 * 24));
+    if (daysOld > 5) return null;
+
+    window._dashDataDate = data.date;
+    window._dashDaysOld = daysOld;
+    return data.sites;
+  } catch (e) { return null; }
+}
+
+async function tryLoadHistory() {
+  try {
+    const resp = await fetch('data/history.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data || !data.sites) return null;
+    return data;
+  } catch (e) { return null; }
+}
+
+async function tryLoadBudgets() {
+  try {
+    const resp = await fetch('data/budgets.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data || !data.sites) return null;
+    return data;
+  } catch (e) { return null; }
+}
+
+function getCurrentMonthKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function siteKeyFromName(name) {
+  if (!HISTORY_DATA) return null;
+  for (const [key, siteObj] of Object.entries(HISTORY_DATA.sites)) {
+    if (siteObj.name === name) return key;
+  }
+  return null;
+}
+
+function getBudgetTotals() {
+  const monthKey = getCurrentMonthKey();
+  if (!BUDGET_DATA) return { revenue: null, occupancy_pct: null, hasData: false };
+
+  let totalRev = 0, totalRentedSqm = 0, totalSqm = 0;
+  let anyNonNull = false;
+
+  FILTERED_DATA.forEach(d => {
+    const siteKey = siteKeyFromName(d.site_name);
+    if (!siteKey) return;
+    const siteBudgets = BUDGET_DATA.sites[siteKey];
+    if (!siteBudgets) return;
+    const monthBudget = siteBudgets[monthKey];
+    if (!monthBudget) return;
+
+    if (monthBudget.revenue !== null && monthBudget.revenue !== undefined) {
+      totalRev += monthBudget.revenue;
+      anyNonNull = true;
+    }
+    if (monthBudget.occupancy_pct !== null && monthBudget.occupancy_pct !== undefined) {
+      const sqm = d.occupancy?.total_sqm || 0;
+      totalSqm += sqm;
+      totalRentedSqm += (monthBudget.occupancy_pct / 100) * sqm;
+      anyNonNull = true;
+    }
+  });
+
+  return {
+    revenue: anyNonNull && totalRev > 0 ? totalRev : null,
+    occupancy_pct: totalSqm > 0 ? (totalRentedSqm / totalSqm * 100) : null,
+    hasData: anyNonNull
+  };
+}
+
+async function refreshData() {
+  if (IS_DEMO) { renderAll(); return; }
+
+  // Refresh StoragePilot CSVs alongside MIS data
+  loadStoragePilotData().then(() => {
+    if (document.getElementById('panel-storagepilot')?.classList.contains('active')) {
+      renderStoragePilot();
+    }
+  });
+
+  setStatus('loading', 'Checking for today\'s data…');
+  const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
+  if (hist) HISTORY_DATA = hist;
+  if (budgets) BUDGET_DATA = budgets;
+
+  if (cached) {
+    RAW_DATA = cached;
+    renderAll();
+    setStatus('success', `Loaded ${cached.length} sites from cache`);
+    setTimeout(() => hideStatus(), 2000);
+    updateLastUpdatedLabel();
+    return;
+  }
+
+  setStatus('loading', 'Loading dashboard data…');
+  setProgress(10);
+
+  try {
+    const folderPath = CONFIG.folder.replace(/^\//, '');
+    const rootRes = await graphFetch('https://graph.microsoft.com/v1.0/me/drive/root/children');
+    if (!rootRes.ok) throw new Error('Cannot access OneDrive.');
+    const rootData = await rootRes.json();
+    const folder = (rootData.value||[]).find(f => f.name === folderPath);
+    if (!folder) throw new Error(`Folder "${folderPath}" not found.`);
+
+    const listRes = await graphFetch(`https://graph.microsoft.com/v1.0/me/drive/items/${folder.id}/children?$orderby=lastModifiedDateTime desc&$top=100`);
+    const listData = await listRes.json();
+    const allFiles = listData.value || [];
+
+    const jsonFiles = allFiles.filter(f => f.name.endsWith('.json'));
+    const todayJsonFiles = getTodaysFiles(jsonFiles);
+
+    if (todayJsonFiles.length > 0) {
+      setStatus('loading', `Loading ${todayJsonFiles.length} pre-processed reports…`);
+      setProgress(30);
+      const siteDataArr = [];
+      const results = await Promise.all(todayJsonFiles.map(async (f) => {
+        const dlRes = await graphFetch(f['@microsoft.graph.downloadUrl'] || `https://graph.microsoft.com/v1.0/me/drive/items/${f.id}/content`);
+        const text = await dlRes.text();
+        try { return JSON.parse(text); } catch(e) { return null; }
+      }));
+      results.forEach(r => { if (r) siteDataArr.push(r); });
+      if (siteDataArr.length > 0) {
+        RAW_DATA = siteDataArr;
+        setProgress(100);
+        renderAll();
+        setTimeout(() => setProgress(0), 500);
+        setStatus('success', `Loaded ${siteDataArr.length} sites`);
+        setTimeout(() => hideStatus(), 3000);
+        updateLastUpdatedLabel();
+        return;
+      }
+    }
+
+    const pdfFiles = allFiles.filter(f => f.name.endsWith('.pdf'));
+    if (pdfFiles.length === 0) throw new Error('No reports found in OneDrive.');
+    const todayFiles = getTodaysFiles(pdfFiles);
+    setStatus('loading', `Processing ${todayFiles.length} PDFs…`);
+    setProgress(20);
+
+    const downloads = await Promise.all(todayFiles.map(async (f) => {
+      const dlRes = await graphFetch(f['@microsoft.graph.downloadUrl'] || `https://graph.microsoft.com/v1.0/me/drive/items/${f.id}/content`);
+      const blob = await dlRes.blob();
+      const b64 = await blobToBase64(blob);
+      return { name: f.name, b64 };
+    }));
+
+    const siteDataArr = [];
+    for (let i = 0; i < downloads.length; i += 1) {
+      setStatus('loading', `Processing ${i+1} of ${downloads.length}…`);
+      setProgress(20 + (70 * i / downloads.length));
+      const r = await extractWithClaude(downloads[i].b64, downloads[i].name);
+      if (r) siteDataArr.push(r);
+      if (i + 1 < downloads.length) await new Promise(r => setTimeout(r, 6000));
+    }
+
+    RAW_DATA = siteDataArr;
+    setProgress(95);
+    renderAll();
+    setProgress(100);
+    setTimeout(() => setProgress(0), 500);
+    setStatus('success', `Dashboard updated`);
+    setTimeout(() => hideStatus(), 3000);
+    updateLastUpdatedLabel();
+
+  } catch(e) {
+    setProgress(0);
+    setStatus('error', e.message || 'Failed to fetch');
+    console.error('Dashboard error:', e);
+  }
+}
+
+function updateLastUpdatedLabel() {
+  const el = document.getElementById('last-updated');
+  if (window._dashDataDate && window._dashDaysOld > 0) {
+    const d = new Date(window._dashDataDate + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+    el.textContent = 'Data from ' + d + ' (' + window._dashDaysOld + ' day' + (window._dashDaysOld>1?'s':'') + ' old)';
+  } else {
+    el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+  }
+}
+
+function getTodaysFiles(files) {
+  if (!files || files.length === 0) return [];
+  const validFiles = files.filter(f => f && f.lastModifiedDateTime);
+  if (validFiles.length === 0) return [];
+  const today = new Date().toDateString();
+  const todayFiles = validFiles.filter(f => new Date(f.lastModifiedDateTime).toDateString() === today);
+  if (todayFiles.length === 0) {
+    const latest = new Date(validFiles[0].lastModifiedDateTime).toDateString();
+    return validFiles.filter(f => new Date(f.lastModifiedDateTime).toDateString() === latest);
+  }
+  return todayFiles;
+}
+
+async function graphFetch(url) {
+  const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + MS_TOKEN } });
+  if (res.status === 401) {
+    localStorage.removeItem('ms_token');
+    startAuth();
+    throw new Error('Token expired');
+  }
+  return res;
+}
+
+function blobToBase64(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+async function extractWithClaude(pdfBase64, filename) {
+  const country = filename.toLowerCase().includes('nl') || filename.toLowerCase().includes('best') ? 'NL' : 'FR';
+  const prompt = `Extract data from this 1BOX MIS report PDF. Return ONLY valid JSON with this structure (use null for missing, numbers not strings):
+{
+  "site_name": "string",
+  "country": "${country}",
+  "date": "YYYY-MM-DD",
+  "occupancy": { "unit_pct": 0, "surface_pct": 0, "total_units": 0, "rented_units": 0, "vacant_units": 0, "total_sqm": 0, "rented_sqm": 0, "vacant_sqm": 0, "locked_units": 0, "terminated_units": 0, "reserved_units": 0, "out_of_order_units": 0, "business_units": 0, "private_units": 0 },
+  "rentals": { "move_ins_today": 0, "move_ins_week": 0, "move_ins_month": 0, "move_ins_year": 0, "vacates_today": 0, "vacates_week": 0, "vacates_month": 0, "vacates_year": 0, "net_today": 0, "net_week": 0, "net_month": 0, "net_year": 0, "transfers_in_today": 0, "transfers_in_week": 0, "transfers_in_month": 0, "transfers_in_year": 0, "transfers_out_today": 0, "transfers_out_week": 0, "transfers_out_month": 0, "transfers_out_year": 0 },
+  "revenue": { "gross_rent": 0, "discounts": 0, "net_rent": 0, "gross_insurance": 0, "net_insurance": 0, "gross_total": 0, "net_total": 0, "invoiced_in_advance": 0, "current_rent_amount": 0, "max_rent_potential": 0, "avg_rate_per_sqm": 0, "max_rate_per_sqm": 0 },
+  "arrears": { "outstanding_total": 0, "arrears_30_plus": 0, "arrears_count": 0, "payment_without_inv": 0, "doubtful_debtors": 0 },
+  "insurance": { "policies_count": 0, "insured_value": 0, "premium_total": 0, "pct_insured": 0 }
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': CONFIG.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: pdfBase64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
+  });
+
+  if (!response.ok) throw new Error('Claude API error: ' + response.status);
+  const data = await response.json();
+  const text = data.content[0].text.replace(/```json|```/g, '').trim();
+  try { return JSON.parse(text); } catch(e) { return null; }
+}
+
+// ─────────────────────────────────────────────
+// DEMO DATA
+// ─────────────────────────────────────────────
+function generateDemoData() {
+  return [
+    {
+      site_name: '1BOX Six-Fours', country: 'FR', date: new Date().toISOString().slice(0,10),
+      occupancy: { unit_pct: 85.4, surface_pct: 86.3, total_units: 361, rented_units: 308, vacant_units: 47, total_sqm: 2325, rented_sqm: 2006, vacant_sqm: 319, locked_units: 2, terminated_units: 3, reserved_units: 2, out_of_order_units: 0, business_units: 92, private_units: 216 },
+      rentals: { move_ins_today: 1, move_ins_week: 6, move_ins_month: 19, move_ins_year: 100, vacates_today: 0, vacates_week: 1, vacates_month: 10, vacates_year: 84, net_today: 1, net_week: 5, net_month: 9, net_year: 16 },
+      revenue: { gross_rent: 48622, discounts: 5074, net_rent: 43548, gross_insurance: 5013, net_insurance: 5013, gross_total: 53635, net_total: 42020, invoiced_in_advance: 7604, current_rent_amount: 42020, max_rent_potential: 61965, avg_rate_per_sqm: 17.23, max_rate_per_sqm: 26.65 },
+      arrears: { outstanding_total: 7656, arrears_30_plus: 58, arrears_count: 12, payment_without_inv: 125, doubtful_debtors: 0 },
+      insurance: { policies_count: 265, insured_value: 1500000, premium_total: 4660, pct_insured: 87.7 }
+    },
+    {
+      site_name: '1BOX Colomiers', country: 'FR', date: new Date().toISOString().slice(0,10),
+      occupancy: { unit_pct: 62.0, surface_pct: 64.8, total_units: 577, rented_units: 358, vacant_units: 215, total_sqm: 3425, rented_sqm: 2219, vacant_sqm: 1173, locked_units: 8, terminated_units: 3, reserved_units: 2, out_of_order_units: 4, business_units: 50, private_units: 310 },
+      rentals: { move_ins_today: 0, move_ins_week: 1, move_ins_month: 9, move_ins_year: 58, vacates_today: 0, vacates_week: 2, vacates_month: 7, vacates_year: 51, net_today: 0, net_week: -1, net_month: 2, net_year: 7 },
+      revenue: { gross_rent: 29683, discounts: 2116, net_rent: 27567, gross_insurance: 5534, net_insurance: 5534, gross_total: 35408, net_total: 27335, invoiced_in_advance: 1076, current_rent_amount: 27335, max_rent_potential: 29629, avg_rate_per_sqm: 12.32, max_rate_per_sqm: 14.62 },
+      arrears: { outstanding_total: 4120, arrears_30_plus: 97, arrears_count: 32, payment_without_inv: 88, doubtful_debtors: 0 },
+      insurance: { policies_count: 281, insured_value: 1350800, premium_total: 5485, pct_insured: 78.1 }
+    },
+    {
+      site_name: '1BOX Mérignac', country: 'FR', date: new Date().toISOString().slice(0,10),
+      occupancy: { unit_pct: 52.8, surface_pct: 53.3, total_units: 480, rented_units: 253, vacant_units: 219, total_sqm: 4561, rented_sqm: 2432, vacant_sqm: 2129, locked_units: 4, terminated_units: 4, reserved_units: 0, out_of_order_units: 11, business_units: 52, private_units: 201 },
+      rentals: { move_ins_today: 0, move_ins_week: 2, move_ins_month: 12, move_ins_year: 99, vacates_today: 0, vacates_week: 1, vacates_month: 7, vacates_year: 39, net_today: 0, net_week: 1, net_month: 5, net_year: 60 },
+      revenue: { gross_rent: 29631, discounts: 3534, net_rent: 26097, gross_insurance: 2583, net_insurance: 2583, gross_total: 32214, net_total: 28031, invoiced_in_advance: 7085, current_rent_amount: 28031, max_rent_potential: 65629, avg_rate_per_sqm: 13.2, max_rate_per_sqm: 17.8 },
+      arrears: { outstanding_total: 3800, arrears_30_plus: 0, arrears_count: 28, payment_without_inv: 60, doubtful_debtors: 0 },
+      insurance: { policies_count: 289, insured_value: 1266000, premium_total: 6370, pct_insured: 88.1 }
+    },
+    {
+      site_name: '1BOX Best', country: 'NL', date: new Date().toISOString().slice(0,10),
+      occupancy: { unit_pct: 78.2, surface_pct: 78.2, total_units: 298, rented_units: 233, vacant_units: 58, total_sqm: 2800, rented_sqm: 2189, vacant_sqm: 611, locked_units: 3, terminated_units: 2, reserved_units: 1, out_of_order_units: 1, business_units: 82, private_units: 151 },
+      rentals: { move_ins_today: 1, move_ins_week: 2, move_ins_month: 12, move_ins_year: 96, vacates_today: 0, vacates_week: 1, vacates_month: 8, vacates_year: 72, net_today: 1, net_week: 1, net_month: 4, net_year: 24 },
+      revenue: { gross_rent: 38200, discounts: 1800, net_rent: 36400, gross_insurance: 2800, net_insurance: 2800, gross_total: 41000, net_total: 39200, invoiced_in_advance: 5200, current_rent_amount: 35800, max_rent_potential: 52000, avg_rate_per_sqm: 18.5, max_rate_per_sqm: 22.3 },
+      arrears: { outstanding_total: 2200, arrears_30_plus: 0, arrears_count: 18, payment_without_inv: 40, doubtful_debtors: 0 },
+      insurance: { policies_count: 158, insured_value: 1100000, premium_total: 2600, pct_insured: 82.1 }
+    }
+  ];
+}
+
+function generateDemoHistory() {
+  const months = ['2025-01','2025-03','2025-06','2025-09','2025-12','2026-01','2026-03','2026-04'];
+  const sites = {};
+  ['1BOX Six-Fours', '1BOX Colomiers', '1BOX Mérignac', '1BOX Best'].forEach(name => {
+    const country = name === '1BOX Best' ? 'NL' : 'FR';
+    sites[name] = {
+      name, country, is_rollup: false,
+      series: months.map((m, i) => ({
+        month: m,
+        occupancy: { rented_sqm: 1500 + i*200, total_sqm: 3000 },
+        revenue: { net_total: 40000 + i*5000, avg_rate_per_sqm: 13 + i*0.3 },
+        rentals: { net_month: [10, 60, 65, 40, 15, 35, 10, 15][i] }
+      }))
+    };
+  });
+  return { site_count: 4, months, sites };
+}
+
+// ─────────────────────────────────────────────
+// FILTERS
+// ─────────────────────────────────────────────
+function setCountry(c) {
+  CURRENT_COUNTRY = c;
+  CURRENT_SITE = 'all';
+  renderSiteFilters();
+  renderCountryButtons();
+  renderAll();
+}
+
+function setSite(s) {
+  CURRENT_SITE = s;
+  renderSiteFilters();
+  renderAll();
+}
+
+function renderCountryButtons() {
+  document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('f-' + CURRENT_COUNTRY)?.classList.add('active');
+}
+
+function renderSiteFilters() {
+  const el = document.getElementById('site-filters');
+  const countrySites = RAW_DATA
+    .filter(d => CURRENT_COUNTRY === 'all' || d.country.toLowerCase() === CURRENT_COUNTRY)
+    .map(d => d.site_name)
+    .filter((s, i, arr) => s && arr.indexOf(s) === i)
+    .sort();
+
+  let html = '';
+  html += `<button class="site-btn${CURRENT_SITE === 'all' ? ' active' : ''}" onclick="setSite('all')">All Sites</button>`;
+  countrySites.forEach(s => {
+    const label = s.replace(/^1BOX\s+/i, '').replace(/^1Box\s+/i, '');
+    html += `<button class="site-btn${CURRENT_SITE === s ? ' active' : ''}" onclick="setSite('${s.replace(/'/g,"\\'")}')">${label}</button>`;
+  });
+  el.innerHTML = html;
+}
+
+function applyFilters() {
+  FILTERED_DATA = RAW_DATA.filter(d => {
+    if (CURRENT_COUNTRY !== 'all' && d.country.toLowerCase() !== CURRENT_COUNTRY) return false;
+    if (CURRENT_SITE !== 'all' && d.site_name !== CURRENT_SITE) return false;
+    return true;
+  });
+}
+
+// ─────────────────────────────────────────────
+// AGGREGATION
+// ─────────────────────────────────────────────
+function agg(key) {
+  return FILTERED_DATA.reduce((sum, d) => {
+    const v = key.split('.').reduce((o,k) => o?.[k], d);
+    return sum + (v || 0);
+  }, 0);
+}
+function aggPct(num, den) {
+  const n = agg(num), d = agg(den);
+  return d ? (n / d * 100) : 0;
+}
+
+// ─────────────────────────────────────────────
+// RENDER ALL
+// ─────────────────────────────────────────────
+function renderAll() {
+  if (RAW_DATA.length === 0) return;
+  applyFilters();
+  renderCountryButtons();
+  renderSiteFilters();
+  renderKPIs();
+  renderOverview();
+  renderOccupancy();
+  renderRentals();
+  renderRevenue();
+  renderDetails();
+  renderStoragePilot();
+  renderTrends();
+}
+
+// ─────────────────────────────────────────────
+// KPIs
+// ─────────────────────────────────────────────
+function renderKPIs() {
+  const sqmPct = aggPct('occupancy.rented_sqm','occupancy.total_sqm');
+  const rentedSqm = agg('occupancy.rented_sqm');
+  const totalSqm = agg('occupancy.total_sqm');
+  const netMTD = agg('rentals.net_month');
+  const moveInMTD = agg('rentals.move_ins_month');
+  const vacateMTD = agg('rentals.vacates_month');
+  const currRent = agg('revenue.current_rent_amount');
+  const avgRate = rentedSqm ? (currRent / rentedSqm) : 0;
+  const arrears30 = agg('arrears.arrears_30_plus');
+  const moveInYTD = agg('rentals.move_ins_year');
+  const vacateYTD = agg('rentals.vacates_year');
+
+  // Net SQM MTD (approximate via avg unit size)
+  let netSqmMTD = 0;
+  FILTERED_DATA.forEach(d => {
+    const avgSize = (d.occupancy?.rented_units || 0) > 0 ? (d.occupancy.rented_sqm / d.occupancy.rented_units) : 0;
+    netSqmMTD += (d.rentals?.net_month || 0) * avgSize;
+  });
+
+  const maxRate = Math.max(0, ...FILTERED_DATA.map(d => d.revenue?.avg_rate_per_sqm || 0));
+  const maxPotential = agg('revenue.max_rent_potential');
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card red">
+      <div class="kpi-label">SQM OCCUPANCY</div>
+      <div class="kpi-value">${fmt(sqmPct, 1)}<span class="unit">%</span></div>
+      <div class="kpi-sub">${fmt(rentedSqm)} m² of ${fmt(totalSqm)} m²</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">NET RENTALS (MTD)</div>
+      <div class="kpi-value">${netMTD >= 0 ? '+' : ''}${netMTD}</div>
+      <div class="kpi-sub">${moveInMTD} in / ${vacateMTD} out</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">CURRENT RENT</div>
+      <div class="kpi-value">${fmtEur(currRent)}</div>
+      <div class="kpi-sub">${fmtRate(avgRate)}</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">ARREARS > 30 DAYS</div>
+      <div class="kpi-value">${fmtEur(arrears30)}</div>
+      <div class="kpi-sub">&nbsp;</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">MTD MOVE-INS</div>
+      <div class="kpi-value">${moveInMTD}</div>
+      <div class="kpi-sub">${moveInYTD} yr to date</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">MTD VACATES</div>
+      <div class="kpi-value">${vacateMTD}</div>
+      <div class="kpi-sub">${vacateYTD} yr to date</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">MTD NET SQM</div>
+      <div class="kpi-value">+${fmt(Math.round(netSqmMTD))} <span class="unit">m²</span></div>
+      <div class="kpi-sub">+${netMTD} net contracts</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">MAX RENT RATE</div>
+      <div class="kpi-value">${fmtRate(maxRate)}</div>
+      <div class="kpi-sub">${fmt(maxPotential)} € max</div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// OVERVIEW TAB
+// ─────────────────────────────────────────────
+function renderOverview() {
+  const actualRev = agg('revenue.net_total');
+  const actualOcc = aggPct('occupancy.rented_sqm', 'occupancy.total_sqm');
+  const budgetTotals = getBudgetTotals();
+  const monthName = new Date().toLocaleDateString('en-GB', { month: 'long' });
+
+  const isAllSites = CURRENT_SITE === 'all';
+
+  // Check if any budgets exist for this scope
+  const hasRevBudget = budgetTotals.revenue !== null;
+  const hasOccBudget = budgetTotals.occupancy_pct !== null;
+
+  // Build per-site budget check for All Sites view
+  let sitesWithRevBudget = 0, sitesWithOccBudget = 0;
+  if (isAllSites && BUDGET_DATA) {
+    FILTERED_DATA.forEach(d => {
+      const key = siteKeyFromName(d.site_name);
+      const mk = getCurrentMonthKey();
+      const mb = BUDGET_DATA.sites[key]?.[mk];
+      if (mb?.revenue !== null && mb?.revenue !== undefined) sitesWithRevBudget++;
+      if (mb?.occupancy_pct !== null && mb?.occupancy_pct !== undefined) sitesWithOccBudget++;
+    });
+  }
+
+  const revBudgetEmpty = isAllSites && FILTERED_DATA.length > 1 ? sitesWithRevBudget === 0 : !hasRevBudget;
+  const occBudgetEmpty = isAllSites && FILTERED_DATA.length > 1 ? sitesWithOccBudget === 0 : !hasOccBudget;
+
+  const budgetEmptyHTML = `
+    <div style="height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px;text-align:center">
+      <div style="font-size:24px;margin-bottom:8px;opacity:0.4">—</div>
+      <div>Budget not set yet</div>
+    </div>
+  `;
+
+  const revBudgetHTML = revBudgetEmpty
+    ? budgetEmptyHTML
+    : `<div class="chart-wrap-lg"><canvas id="ch-rev-budget"></canvas></div>`;
+  const occBudgetHTML = occBudgetEmpty
+    ? budgetEmptyHTML
+    : `<div class="chart-wrap-lg"><canvas id="ch-occ-budget"></canvas></div>`;
+
+  let revVarText = '', occVarText = '';
+  // Variance now shown per-month inline (Revenue + Occupancy charts)
+
+  // Move-Ins vs Move-Outs + Net Rentals (Portfolio view)
+  // Both are 4-month line charts: Jan-Mar historicals + Apr MTD dashed
+  const totalMI = agg('rentals.move_ins_month');
+  const totalMO = agg('rentals.vacates_month');
+
+  let activityHTML = '';
+  if (isAllSites && FILTERED_DATA.length > 1) {
+    activityHTML = `
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Move-Ins vs Move-Outs (YTD)</div>
+          <div class="chart-wrap-sm"><canvas id="ch-mi-mo"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Net Rentals (YTD)</div>
+          <div class="chart-wrap-sm"><canvas id="ch-net-rentals-ov"></canvas></div>
+        </div>
+      </div>
+      <div class="section-gap"></div>
+    `;
+  }
+
+  // Single-site view (unchanged)
+  let singleSiteHTML = '';
+  if (!(isAllSites && FILTERED_DATA.length > 1)) {
+    const rentedSqm = agg('occupancy.rented_sqm');
+    const currRent = agg('revenue.current_rent_amount');
+    const maxPotential = agg('revenue.max_rent_potential');
+    const avgRate = rentedSqm ? (currRent / rentedSqm) : 0;
+    const potentialRate = rentedSqm ? (maxPotential / rentedSqm) : 0;
+    const maxRate = Math.max(0, ...FILTERED_DATA.map(d => d.revenue?.max_rate_per_sqm || 0));
+
+    singleSiteHTML = `
+      <div class="card">
+        <div class="card-title">Average Rate per m² Rented</div>
+        <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap">
+          <div style="font-size:40px;font-weight:700;color:var(--purple);line-height:1">
+            ${fmt(avgRate, 2)}<span style="font-size:16px;color:var(--muted-2);font-weight:500">/m²</span>
+          </div>
+          <div style="color:var(--muted-2);font-size:12px;line-height:1.8">
+            Potential: ${fmt(potentialRate, 2)} €/m²<br>
+            Max: ${fmt(maxRate, 2)} €/m²
+          </div>
+        </div>
+      </div>
+      <div class="section-gap"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Rental Activity</div>
+          <div class="chart-wrap"><canvas id="ch-rental-activity-ov"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Rent Breakdown</div>
+          <div class="chart-wrap"><canvas id="ch-rent-breakdown"></canvas></div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Rate per m² trend — 4-month line chart for Portfolio view
+  let ratePerSqmHTML = '';
+  if (isAllSites && FILTERED_DATA.length > 1) {
+    ratePerSqmHTML = `
+      <div class="card">
+        <div class="card-title">Average Rate per m² — YTD</div>
+        <div class="chart-wrap-sm"><canvas id="ch-rate-sqm-ov"></canvas></div>
+      </div>
+      <div class="section-gap"></div>
+    `;
+  }
+
+  document.getElementById('panel-overview').innerHTML = `
+    <div class="grid-2">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="card-title" style="margin-bottom:0">Revenue vs Budget (${monthName})</div>
+          <div style="display:flex;gap:12px;font-size:11px;color:var(--muted-2)">
+            <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>Actual</span>
+            <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#d1d5db;border-radius:2px"></span>Budget</span>
+          </div>
+        </div>
+        ${revBudgetHTML}
+        ${revVarText}
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="card-title" style="margin-bottom:0">Occupancy vs Budget (${monthName})</div>
+          <div style="display:flex;gap:12px;font-size:11px;color:var(--muted-2)">
+            <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>Actual</span>
+            <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#d1d5db;border-radius:2px"></span>Budget</span>
+          </div>
+        </div>
+        ${occBudgetHTML}
+        ${occVarText}
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    ${activityHTML}
+    ${ratePerSqmHTML}
+    ${singleSiteHTML}
+  `;
+
+  nextTick(() => {
+    if (isAllSites && FILTERED_DATA.length > 1) {
+      // Revenue vs Budget — Jan/Feb/Mar/Apr/YTD grouped bars (Actual + Budget)
+      // with per-month variance shown under each bar group
+      if (!revBudgetEmpty) {
+        const revActualByMonth = {};
+        const revBudgetByMonth = {};
+        const monthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
+
+        if (HISTORY_DATA && HISTORY_DATA.sites) {
+          const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+            if (s.is_rollup) return false;
+            if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+            if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+            return true;
+          });
+          monthKeys.slice(0, 3).forEach(mk => {
+            let sum = 0;
+            histSites.forEach(s => {
+              const e = (s.series || []).find(x => x.month === mk);
+              if (e?.revenue?.net_total) sum += e.revenue.net_total;
+            });
+            revActualByMonth[mk] = sum;
+          });
+        }
+
+        revActualByMonth['2026-04'] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.net_total || 0), 0);
+
+        monthKeys.forEach(mk => {
+          let sum = 0;
+          FILTERED_DATA.forEach(d => {
+            const key = siteKeyFromName(d.site_name);
+            if (!key || !BUDGET_DATA) return;
+            const mb = BUDGET_DATA.sites[key]?.[mk];
+            if (mb?.revenue) sum += mb.revenue;
+          });
+          revBudgetByMonth[mk] = sum;
+        });
+
+        const ytdActual = monthKeys.reduce((s, mk) => s + (revActualByMonth[mk] || 0), 0);
+        const ytdBudget = monthKeys.reduce((s, mk) => s + (revBudgetByMonth[mk] || 0), 0);
+
+        // Build multi-line x-axis labels: month name + variance string
+        const fmtVar = (actual, budget) => {
+          if (!budget) return '';
+          const v = actual - budget;
+          const sign = v >= 0 ? '+' : '−';
+          const absVal = Math.abs(v);
+          if (absVal >= 1000) return sign + '€' + fmt(absVal/1000, 0) + 'k';
+          return sign + '€' + fmt(absVal, 0);
+        };
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
+        const labels = [
+          ...monthKeys.map((mk, i) => [monthNames[i], fmtVar(revActualByMonth[mk] || 0, revBudgetByMonth[mk] || 0)]),
+          ['YTD', fmtVar(ytdActual, ytdBudget)]
+        ];
+
+        const actualData = [...monthKeys.map(mk => revActualByMonth[mk] || 0), ytdActual];
+        const budgetData = [...monthKeys.map(mk => revBudgetByMonth[mk] || 0), ytdBudget];
+
+        mkRevVarChart('ch-rev-budget', labels, actualData, budgetData);
+      }
+
+      // Total Occupancy Actual vs Budget — 4-month grouped bars (Jan/Feb/Mar/Apr MTD)
+      // No YTD column since occupancy is a point-in-time metric that doesn't aggregate
+      if (!occBudgetEmpty) {
+        const occActualByMonth = {};
+        const occBudgetByMonth = {};
+        const occMonthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
+
+        // Historical actuals (Jan/Feb/Mar) from history.json — weighted average
+        if (HISTORY_DATA && HISTORY_DATA.sites) {
+          const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+            if (s.is_rollup) return false;
+            if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+            if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+            return true;
+          });
+          occMonthKeys.slice(0, 3).forEach(mk => {
+            let rSqm = 0, tSqm = 0;
+            histSites.forEach(s => {
+              const e = (s.series || []).find(x => x.month === mk);
+              if (e?.occupancy) {
+                rSqm += e.occupancy.rented_sqm || 0;
+                tSqm += e.occupancy.total_sqm || 0;
+              }
+            });
+            occActualByMonth[mk] = tSqm > 0 ? (rSqm / tSqm * 100) : 0;
+          });
+        }
+
+        // April Actual from live FILTERED_DATA — weighted average
+        const aprRentedSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.rented_sqm || 0), 0);
+        const aprTotalSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.total_sqm || 0), 0);
+        occActualByMonth['2026-04'] = aprTotalSqm > 0 ? (aprRentedSqm / aprTotalSqm * 100) : 0;
+
+        // Budgets: weight each site's budget % by its total_sqm to get portfolio-weighted budget
+        occMonthKeys.forEach(mk => {
+          let weightedSqm = 0, totalSqm = 0;
+          FILTERED_DATA.forEach(d => {
+            const key = siteKeyFromName(d.site_name);
+            if (!key || !BUDGET_DATA) return;
+            const mb = BUDGET_DATA.sites[key]?.[mk];
+            if (mb?.occupancy_pct !== null && mb?.occupancy_pct !== undefined) {
+              const sqm = d.occupancy?.total_sqm || 0;
+              weightedSqm += (mb.occupancy_pct / 100) * sqm;
+              totalSqm += sqm;
+            }
+          });
+          occBudgetByMonth[mk] = totalSqm > 0 ? (weightedSqm / totalSqm * 100) : 0;
+        });
+
+        // Build variance labels (percentage points, not euros)
+        const fmtOccVar = (actual, budget) => {
+          if (!budget) return '';
+          const v = actual - budget;
+          const sign = v >= 0 ? '+' : '−';
+          return sign + fmt(Math.abs(v), 1) + ' pp';
+        };
+
+        const occMonthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
+        const occLabels = occMonthKeys.map((mk, i) => [
+          occMonthNames[i],
+          fmtOccVar(occActualByMonth[mk] || 0, occBudgetByMonth[mk] || 0)
+        ]);
+
+        const occActualData = occMonthKeys.map(mk => occActualByMonth[mk] || 0);
+        const occBudgetData = occMonthKeys.map(mk => occBudgetByMonth[mk] || 0);
+
+        mkPctVarChart('ch-occ-budget', occLabels, occActualData, occBudgetData);
+      }
+
+      // Move-Ins vs Move-Outs + Net Rentals — both 4-month line charts
+      // Pull Jan/Feb/Mar from history.json; April from live FILTERED_DATA
+      const miMoMonths = [];
+      const miSeries = [];
+      const moSeries = [];
+      const netSeries = [];
+      const currentMonth = getCurrentMonthKey();
+
+      if (HISTORY_DATA && HISTORY_DATA.sites) {
+        const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+          if (s.is_rollup) return false;
+          if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+          if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+          return true;
+        });
+
+        const monthSet = new Set();
+        histSites.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
+        const histMonths = [...monthSet].sort();
+
+        histMonths.forEach(m => {
+          let miSum = 0, moSum = 0, netSum = 0;
+          histSites.forEach(s => {
+            const e = (s.series || []).find(x => x.month === m);
+            if (e?.rentals) {
+              miSum += e.rentals.move_ins_month || 0;
+              moSum += e.rentals.vacates_month || 0;
+              netSum += e.rentals.net_month || 0;
+            }
+          });
+          miMoMonths.push(m);
+          miSeries.push(miSum);
+          moSeries.push(moSum);
+          netSeries.push(netSum);
+        });
+
+        if (!miMoMonths.includes(currentMonth)) {
+          miMoMonths.push(currentMonth);
+          miSeries.push(totalMI);
+          moSeries.push(totalMO);
+          netSeries.push(totalMI - totalMO);
+        }
+      } else {
+        miMoMonths.push(currentMonth);
+        miSeries.push(totalMI);
+        moSeries.push(totalMO);
+        netSeries.push(totalMI - totalMO);
+      }
+
+      const miMoLabels = miMoMonths.map(m => {
+        const [y, mo] = m.split('-');
+        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return names[parseInt(mo,10)-1] + ' ' + y;
+      });
+
+      const mtdMonthsSet = new Set([currentMonth]);
+
+      mkLineChart('ch-mi-mo', miMoLabels, [
+        { label: 'Move-Ins', data: miSeries, color: '#16a34a' },
+        { label: 'Move-Outs', data: moSeries, color: '#f97316' }
+      ], { yFmt: v => v, yMin: 0, mtdMonths: mtdMonthsSet, months: miMoMonths });
+
+      mkLineChart('ch-net-rentals-ov', miMoLabels, [
+        { label: 'Net Rentals', data: netSeries, color: '#f97316' }
+      ], { yFmt: v => v, mtdMonths: mtdMonthsSet, months: miMoMonths });
+
+      // Rate per m² trend — 4-month portfolio weighted average line
+      const rateMonths = [];
+      const rateSeries = [];
+
+      if (HISTORY_DATA && HISTORY_DATA.sites) {
+        const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+          if (s.is_rollup) return false;
+          if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+          if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+          return true;
+        });
+        const monthSet = new Set();
+        histSites.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
+        const histMonths = [...monthSet].sort();
+
+        histMonths.forEach(m => {
+          let rateNum = 0, rateDen = 0;
+          histSites.forEach(s => {
+            const e = (s.series || []).find(x => x.month === m);
+            if (e?.revenue?.avg_rate_per_sqm && e?.occupancy?.rented_sqm) {
+              rateNum += e.revenue.avg_rate_per_sqm * e.occupancy.rented_sqm;
+              rateDen += e.occupancy.rented_sqm;
+            }
+          });
+          rateMonths.push(m);
+          rateSeries.push(rateDen > 0 ? (rateNum / rateDen) : null);
+        });
+
+        if (!rateMonths.includes(currentMonth)) {
+          // Portfolio weighted avg for live data
+          let num = 0, den = 0;
+          FILTERED_DATA.forEach(d => {
+            const rate = d.revenue?.avg_rate_per_sqm || 0;
+            const sqm = d.occupancy?.rented_sqm || 0;
+            if (rate && sqm) { num += rate * sqm; den += sqm; }
+          });
+          rateMonths.push(currentMonth);
+          rateSeries.push(den > 0 ? (num / den) : null);
+        }
+      } else {
+        // Live-only fallback
+        let num = 0, den = 0;
+        FILTERED_DATA.forEach(d => {
+          const rate = d.revenue?.avg_rate_per_sqm || 0;
+          const sqm = d.occupancy?.rented_sqm || 0;
+          if (rate && sqm) { num += rate * sqm; den += sqm; }
+        });
+        rateMonths.push(currentMonth);
+        rateSeries.push(den > 0 ? (num / den) : null);
+      }
+
+      const rateLabels = rateMonths.map(m => {
+        const [y, mo] = m.split('-');
+        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return names[parseInt(mo,10)-1] + ' ' + y;
+      });
+
+      mkLineChart('ch-rate-sqm-ov', rateLabels, [
+        { label: 'Avg Rate/m²', data: rateSeries, color: '#8b5cf6' }
+      ], { yFmt: v => '€' + fmt(v, 2), yMin: 0, mtdMonths: mtdMonthsSet, months: rateMonths });
+    } else {
+      // Single site view
+      if (!revBudgetEmpty) {
+        mkHBarChart('ch-rev-budget', ['Actual', 'Budget'], [{
+          label: '', data: [actualRev, budgetTotals.revenue], color: ['#16a34a', '#d1d5db']
+        }], v => fmt(v/1000, 0) + 'k');
+      }
+      if (!occBudgetEmpty) {
+        mkHBarChart('ch-occ-budget', ['Actual', 'Budget'], [{
+          label: '', data: [actualOcc, budgetTotals.occupancy_pct], color: ['#16a34a', '#d1d5db']
+        }], v => v + '%', 100);
+      }
+
+      const periods = ['Today', 'Week', 'Month', 'Year'];
+      const miVals = ['move_ins_today','move_ins_week','move_ins_month','move_ins_year'].map(k => agg('rentals.'+k));
+      const vaVals = ['vacates_today','vacates_week','vacates_month','vacates_year'].map(k => agg('rentals.'+k));
+      const netVals = miVals.map((v,i) => v - vaVals[i]);
+
+      mkVBarChart('ch-rental-activity-ov', periods, [
+        { label: 'Move-Ins', data: miVals, color: '#16a34a' },
+        { label: 'Vacates', data: vaVals, color: '#f97316' },
+        { label: 'Net', data: netVals, color: '#1f2937' }
+      ]);
+
+      const currRent = agg('revenue.current_rent_amount');
+      const maxPotential = agg('revenue.max_rent_potential');
+      const maxRent = Math.max(maxPotential, currRent * 1.5);
+      mkHBarChart('ch-rent-breakdown',
+        ['Current Rent', 'Potential Rent', 'Max Rent'],
+        [{ label: '', data: [currRent, maxPotential, maxRent], color: ['#16a34a', '#8b5cf6', '#d1d5db'] }],
+        v => fmt(v/1000, 0) + 'k'
+      );
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// OCCUPANCY TAB
+// ─────────────────────────────────────────────
+function renderOccupancy() {
+  const unitPct = aggPct('occupancy.rented_units', 'occupancy.total_units');
+  const surfPct = aggPct('occupancy.rented_sqm', 'occupancy.total_sqm');
+  const vacant = agg('occupancy.vacant_units');
+  const vacantSqm = agg('occupancy.vacant_sqm');
+  const rented = agg('occupancy.rented_units');
+  const total = agg('occupancy.total_units');
+  const totalSqm = agg('occupancy.total_sqm');
+  const rentedSqm = agg('occupancy.rented_sqm');
+  const business = agg('occupancy.business_units');
+  const priv = agg('occupancy.private_units');
+  const locked = agg('occupancy.locked_units');
+  const terminated = agg('occupancy.terminated_units');
+  const reserved = agg('occupancy.reserved_units');
+  const ood = agg('occupancy.out_of_order_units');
+
+  // Business SQM estimate (proportional)
+  const bizSqm = rented > 0 ? Math.round((business / rented) * rentedSqm) : 0;
+  const privSqm = rentedSqm - bizSqm;
+
+  document.getElementById('panel-occupancy').innerHTML = `
+    <div class="grid-3" style="margin-bottom:12px">
+      <div class="stat-card" style="text-align:center">
+        <div class="label">UNIT OCCUPANCY</div>
+        <div class="value">${fmt(unitPct, 1)}<span class="unit">%</span></div>
+        <div class="sub">${fmt(rented)} of ${fmt(total)} units</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">SURFACE OCCUPANCY</div>
+        <div class="value">${fmt(surfPct, 1)}<span class="unit">%</span></div>
+        <div class="sub">${fmt(rentedSqm)} m² of ${fmt(totalSqm)} m²</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">VACANT UNITS</div>
+        <div class="value amber">${fmt(vacant)}</div>
+        <div class="sub">${fmt(vacantSqm)} m² available</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Occupancy Breakdown</div>
+        <table class="data-table">
+          <thead><tr><th>STATUS</th><th class="num">UNITS</th><th class="num">%</th><th class="num">SURFACE</th><th class="num">SURF %</th></tr></thead>
+          <tbody>
+            <tr><td>Business</td><td class="num">${fmt(business)}</td><td class="num">${fmt(total?business/total*100:0, 1)}%</td><td class="num">${fmt(bizSqm)} m²</td><td class="num">${fmt(totalSqm?bizSqm/totalSqm*100:0, 1)}%</td></tr>
+            <tr><td>Private</td><td class="num">${fmt(priv)}</td><td class="num">${fmt(total?priv/total*100:0, 1)}%</td><td class="num">${fmt(privSqm)} m²</td><td class="num">${fmt(totalSqm?privSqm/totalSqm*100:0, 1)}%</td></tr>
+            <tr style="font-weight:600"><td>Total Rented</td><td class="num">${fmt(rented)}</td><td class="num">${fmt(unitPct, 1)}%</td><td class="num">${fmt(rentedSqm)} m²</td><td class="num">${fmt(surfPct, 1)}%</td></tr>
+            <tr><td>Locked</td><td class="num">${fmt(locked)}</td><td class="num">${fmt(total?locked/total*100:0, 1)}%</td><td class="num">${fmt(Math.round(locked*(rentedSqm/Math.max(rented,1))))} m²</td><td class="num">${fmt(totalSqm ? (locked*(rentedSqm/Math.max(rented,1)))/totalSqm*100 : 0, 1)}%</td></tr>
+            <tr><td>Terminated</td><td class="num">${fmt(terminated)}</td><td class="num">${fmt(total?terminated/total*100:0, 1)}%</td><td class="num">${fmt(Math.round(terminated*(rentedSqm/Math.max(rented,1))))} m²</td><td class="num">${fmt(totalSqm ? (terminated*(rentedSqm/Math.max(rented,1)))/totalSqm*100 : 0, 1)}%</td></tr>
+            <tr><td class="amber">Vacant</td><td class="num amber">${fmt(vacant)}</td><td class="num amber">${fmt(total?vacant/total*100:0, 1)}%</td><td class="num amber">${fmt(vacantSqm)} m²</td><td class="num amber">${fmt(totalSqm?vacantSqm/totalSqm*100:0, 1)}%</td></tr>
+            <tr><td>Reserved</td><td class="num">${fmt(reserved)}</td><td class="num">${fmt(total?reserved/total*100:0, 1)}%</td><td class="num">${fmt(Math.round(reserved*(rentedSqm/Math.max(rented,1))))} m²</td><td class="num">${fmt(totalSqm ? (reserved*(rentedSqm/Math.max(rented,1)))/totalSqm*100 : 0, 1)}%</td></tr>
+            <tr><td>Res. w/ Contract</td><td class="num">${fmt(0)}</td><td class="num">0,0%</td><td class="num">0 m²</td><td class="num">0,0%</td></tr>
+            <tr><td>Out of Order</td><td class="num">${fmt(ood)}</td><td class="num">${fmt(total?ood/total*100:0, 1)}%</td><td class="num">${fmt(Math.round(ood*(rentedSqm/Math.max(rented,1))))} m²</td><td class="num">${fmt(totalSqm ? (ood*(rentedSqm/Math.max(rented,1)))/totalSqm*100 : 0, 1)}%</td></tr>
+            <tr style="font-weight:600"><td>Total</td><td class="num">${fmt(total)}</td><td class="num">—</td><td class="num">${fmt(totalSqm)} m²</td><td class="num">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Unit Distribution</div>
+        <div style="position:relative;height:320px"><canvas id="ch-occ-donut"></canvas></div>
+      </div>
+    </div>
+  `;
+
+  nextTick(() => {
+    const labels = ['Rented', 'Vacant', 'Locked', 'Terminated', 'Reserved'];
+    const data = [rented, vacant, locked, terminated, reserved];
+    const colors = ['#16a34a', '#f97316', '#9ca3af', '#6b7280', '#8b5cf6'];
+    mkDonut('ch-occ-donut', labels, data, colors);
+  });
+}
+
+// ─────────────────────────────────────────────
+// RENTALS TAB
+// ─────────────────────────────────────────────
+function renderRentals() {
+  const miT = agg('rentals.move_ins_today'), miW = agg('rentals.move_ins_week'), miM = agg('rentals.move_ins_month'), miY = agg('rentals.move_ins_year');
+  const vaT = agg('rentals.vacates_today'), vaW = agg('rentals.vacates_week'), vaM = agg('rentals.vacates_month'), vaY = agg('rentals.vacates_year');
+  const netT = miT - vaT, netW = miW - vaW, netM = miM - vaM, netY = miY - vaY;
+
+  document.getElementById('panel-rentals').innerHTML = `
+    <div class="grid-3" style="margin-bottom:12px">
+      <div class="card">
+        <div class="card-title">Move-Ins</div>
+        <div class="mini-stats">
+          <div class="mini-stat"><div class="ms-val green">${miT}</div><div class="ms-label">Today</div></div>
+          <div class="mini-stat"><div class="ms-val green">${miW}</div><div class="ms-label">Week</div></div>
+          <div class="mini-stat"><div class="ms-val green">${miM}</div><div class="ms-label">Month</div></div>
+          <div class="mini-stat"><div class="ms-val green">${miY}</div><div class="ms-label">Year</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Vacates</div>
+        <div class="mini-stats">
+          <div class="mini-stat"><div class="ms-val red">${vaT}</div><div class="ms-label">Today</div></div>
+          <div class="mini-stat"><div class="ms-val red">${vaW}</div><div class="ms-label">Week</div></div>
+          <div class="mini-stat"><div class="ms-val red">${vaM}</div><div class="ms-label">Month</div></div>
+          <div class="mini-stat"><div class="ms-val red">${vaY}</div><div class="ms-label">Year</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Net Contracts</div>
+        <div class="mini-stats">
+          <div class="mini-stat"><div class="ms-val neutral">${netT}</div><div class="ms-label">Today</div></div>
+          <div class="mini-stat"><div class="ms-val neutral">${netW}</div><div class="ms-label">Week</div></div>
+          <div class="mini-stat"><div class="ms-val neutral">${netM}</div><div class="ms-label">Month</div></div>
+          <div class="mini-stat"><div class="ms-val neutral">${netY}</div><div class="ms-label">Year</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0">Rental Activity</div>
+        <div style="display:flex;gap:12px;font-size:11px;color:var(--muted-2)">
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>Move-Ins</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#f97316;border-radius:2px"></span>Move-Outs</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="ch-rental-activity"></canvas></div>
+    </div>
+  `;
+
+  nextTick(() => {
+    // Pull Jan/Feb/Mar historicals for MI/MO/Net; April from live FILTERED_DATA
+    const monthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
+    const miByMonth = {};
+    const moByMonth = {};
+    const netByMonth = {};
+
+    if (HISTORY_DATA && HISTORY_DATA.sites) {
+      const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+        if (s.is_rollup) return false;
+        if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+        if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+        return true;
+      });
+      // Filter further by current site if single-site view
+      const scopedSites = CURRENT_SITE === 'all'
+        ? histSites
+        : histSites.filter(s => s.name === CURRENT_SITE);
+
+      monthKeys.slice(0, 3).forEach(mk => {
+        let miSum = 0, moSum = 0, netSum = 0;
+        scopedSites.forEach(s => {
+          const e = (s.series || []).find(x => x.month === mk);
+          if (e?.rentals) {
+            miSum += e.rentals.move_ins_month || 0;
+            moSum += e.rentals.vacates_month || 0;
+            netSum += e.rentals.net_month || 0;
+          }
+        });
+        miByMonth[mk] = miSum;
+        moByMonth[mk] = moSum;
+        netByMonth[mk] = netSum;
+      });
+    }
+
+    // April MTD from live FILTERED_DATA (already filtered by country + site)
+    miByMonth['2026-04'] = agg('rentals.move_ins_month');
+    moByMonth['2026-04'] = agg('rentals.vacates_month');
+    netByMonth['2026-04'] = miByMonth['2026-04'] - moByMonth['2026-04'];
+
+    // YTD totals
+    const ytdMI = monthKeys.reduce((s, mk) => s + (miByMonth[mk] || 0), 0);
+    const ytdMO = monthKeys.reduce((s, mk) => s + (moByMonth[mk] || 0), 0);
+    const ytdNet = ytdMI - ytdMO;
+
+    // Build labels with "Net: ±N" underneath each month
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
+    const labels = [
+      ...monthKeys.map((mk, i) => [
+        monthNames[i],
+        (netByMonth[mk] >= 0 ? '+' : '') + netByMonth[mk]
+      ]),
+      ['YTD', (ytdNet >= 0 ? '+' : '') + ytdNet]
+    ];
+
+    const miData = [...monthKeys.map(mk => miByMonth[mk] || 0), ytdMI];
+    const moData = [...monthKeys.map(mk => moByMonth[mk] || 0), ytdMO];
+
+    mkRentalActivityChart('ch-rental-activity', labels, miData, moData);
+  });
+}
+
+// ─────────────────────────────────────────────
+// REVENUE TAB
+// ─────────────────────────────────────────────
+function renderRevenue() {
+  const grossRent = agg('revenue.gross_rent');
+  const netRent = agg('revenue.net_rent');
+  const grossIns = agg('revenue.gross_insurance');
+  const netIns = agg('revenue.net_insurance');
+  const gross = agg('revenue.gross_total');
+  const disc = agg('revenue.discounts');
+  const net = agg('revenue.net_total');
+  const advance = agg('revenue.invoiced_in_advance');
+
+  const maxRent = agg('revenue.max_rent_potential');
+  const currentRent = agg('revenue.current_rent_amount');
+  const potentialRent = maxRent;
+  const rentedSqm = agg('occupancy.rented_sqm');
+  const totalSqm = agg('occupancy.total_sqm');
+
+  const netMaxRate = totalSqm > 0 ? (maxRent / totalSqm) : 0;
+  const netPotentialRate = rentedSqm > 0 ? (potentialRent / rentedSqm) : 0;
+  const netCurrentRate = rentedSqm > 0 ? (currentRent / rentedSqm) : 0;
+  const totalDiscRate = rentedSqm > 0 ? (disc / rentedSqm) : 0;
+
+  document.getElementById('panel-revenue').innerHTML = `
+    <div class="grid-4" style="margin-bottom:12px">
+      <div class="stat-card" style="text-align:center">
+        <div class="label">GROSS REVENUE</div>
+        <div class="value">${fmtEur(gross)}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">DISCOUNTS</div>
+        <div class="value amber">${fmtEur(disc)}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">NET REVENUE</div>
+        <div class="value green">${fmtEur(net)}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">INVOICED IN ADVANCE</div>
+        <div class="value purple">${fmtEur(advance)}</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Turnover Breakdown</div>
+        <table class="data-table">
+          <thead><tr><th>CATEGORY</th><th class="num">GROSS</th><th class="num">DISCOUNT</th><th class="num">NET</th></tr></thead>
+          <tbody>
+            <tr><td>Rent</td><td class="num">${fmtEurDec(grossRent)}</td><td class="num red">-${fmtEurDec(disc)}</td><td class="num">${fmtEurDec(netRent)}</td></tr>
+            <tr><td>Insurance</td><td class="num">${fmtEurDec(grossIns)}</td><td class="num">—</td><td class="num">${fmtEurDec(netIns)}</td></tr>
+            <tr style="font-weight:600"><td>Total</td><td class="num">${fmtEurDec(gross)}</td><td class="num red">-${fmtEurDec(disc)}</td><td class="num">${fmtEurDec(net)}</td></tr>
+            <tr><td>Invoiced in Advance</td><td class="num"></td><td class="num"></td><td class="num">${fmtEurDec(advance)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Revenue Composition</div>
+        <div class="chart-wrap"><canvas id="ch-rev-comp"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="card">
+      <div class="card-title">Rent Amounts</div>
+      <table class="kv-table">
+        <tbody>
+          <tr><td class="label">Max Rent</td><td class="value">${fmtEurDec(maxRent)} <span class="sub">${fmt(netMaxRate, 2)} €/m²</span></td></tr>
+          <tr><td class="label">Potential Rent</td><td class="value">${fmtEurDec(potentialRent)} <span class="sub">${fmt(netPotentialRate, 2)} €/m²</span></td></tr>
+          <tr><td class="label">Current Rent</td><td class="value">${fmtEurDec(currentRent)} <span class="sub">${fmt(netCurrentRate, 2)} €/m²</span></td></tr>
+          <tr><td class="label">Total Discounts</td><td class="value">${fmtEurDec(disc)} <span class="sub">${fmt(totalDiscRate, 2)} €/m²</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  nextTick(() => {
+    mkVBarChart('ch-rev-comp', ['Rent', 'Insurance', 'Total'], [
+      { label: 'Gross', data: [grossRent, grossIns, gross], color: '#d1d5db' },
+      { label: 'Net', data: [netRent, netIns, net], color: '#16a34a' }
+    ]);
+  });
+}
+
+// ─────────────────────────────────────────────
+// DETAILS TAB
+// ─────────────────────────────────────────────
+function renderDetails() {
+  const rows = FILTERED_DATA.map(d => {
+    const o = d.occupancy;
+    const r = d.rentals;
+    const v = d.revenue;
+    const pct = (o?.surface_pct || 0);
+    const pctColor = pct >= 70 ? 'green' : pct >= 50 ? 'amber' : 'red';
+    const ar30 = d.arrears?.arrears_30_plus;
+
+    return `<tr>
+      <td>${siteShort(d.site_name)}<span class="site-pill ${d.country.toLowerCase()}">${d.country}</span></td>
+      <td class="num ${pctColor}">${fmt(pct, 1)}%</td>
+      <td class="num">${r?.move_ins_month || 0}</td>
+      <td class="num">${r?.vacates_month || 0}</td>
+      <td class="num green">+${r?.net_month || 0}</td>
+      <td class="num">${fmtEur(v?.current_rent_amount)}</td>
+      <td class="num">${fmtEur(v?.max_rent_potential)}</td>
+      <td class="num">${fmt(o?.total_sqm)}</td>
+      <td class="num">${fmt(o?.rented_sqm)}</td>
+      <td class="num ${ar30 > 0 ? 'red' : ''}">${ar30 !== null && ar30 !== undefined ? fmtEur(ar30) : 'NaN €'}</td>
+    </tr>`;
+  }).join('');
+
+  // Aggregates
+  const arOutstanding = agg('arrears.outstanding_total');
+  const arArrears30 = agg('arrears.arrears_30_plus');
+  const arCount = agg('arrears.arrears_count');
+  const arPaidAdvance = agg('arrears.payment_without_inv');
+  const arDoubtful = agg('arrears.doubtful_debtors');
+
+  const policies = agg('insurance.policies_count');
+  const premium = agg('insurance.premium_total');
+  const insuredValue = agg('insurance.insured_value');
+  const totalRented = agg('occupancy.rented_units');
+  const insuranceRate = totalRented > 0 ? (policies / totalRented * 100) : 0;
+  let covNum = 0, covDen = 0;
+  FILTERED_DATA.forEach(d => {
+    const p = d.insurance?.policies_count || 0;
+    const r = d.insurance?.pct_insured || 0;
+    if (p > 0) { covNum += r * p; covDen += p; }
+  });
+  const coverageRate = covDen > 0 ? (covNum / covDen) : insuranceRate;
+
+  const discounts = agg('revenue.discounts');
+  const totalSqm = agg('occupancy.total_sqm');
+  const rentedSqm = agg('occupancy.rented_sqm');
+  const maxRent = agg('revenue.max_rent_potential');
+  const currentRent = agg('revenue.current_rent_amount');
+  const totalDiscRate = rentedSqm > 0 ? (discounts / rentedSqm) : 0;
+  const discountPctOfMax = maxRent > 0 ? (discounts / maxRent * 100) : 0;
+
+  const totalUnits = agg('occupancy.total_units');
+  const avgUnitSize = totalUnits > 0 ? (totalSqm / totalUnits) : 0;
+  const revenueCapture = maxRent > 0 ? (currentRent / maxRent * 100) : 0;
+  const rentGap = maxRent - currentRent;
+
+  document.getElementById('panel-details').innerHTML = `
+    <div class="card details-site-table">
+      <div class="card-title">Site Details</div>
+      <table class="data-table">
+        <thead><tr>
+          <th>SITE</th>
+          <th class="num">SQM OCC</th>
+          <th class="num">RENTALS</th>
+          <th class="num">VACATES</th>
+          <th class="num">NET</th>
+          <th class="num">PROJ. RENT</th>
+          <th class="num">GPI</th>
+          <th class="num">TOTAL SQM</th>
+          <th class="num">OCC SQM</th>
+          <th class="num">AR >30</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Accounts Receivable</div>
+        <table class="kv-table">
+          <thead><tr><th>CATEGORY</th><th class="num">COUNT</th><th class="num">AMOUNT</th></tr></thead>
+          <tbody>
+            <tr><td class="label">Outstanding Invoices</td><td class="value">${arCount > 0 ? fmt(arCount) : 'NaN'}</td><td class="value">${arOutstanding > 0 ? fmtEur(arOutstanding) : 'NaN €'}</td></tr>
+            <tr><td class="label">In Arrears</td><td class="value">—</td><td class="value" style="color:${arArrears30>0?'var(--red)':'var(--text)'}">${arArrears30 > 0 ? fmtEur(arArrears30) : 'NaN €'}</td></tr>
+            <tr><td class="label">Paid in Advance</td><td class="value">—</td><td class="value">${arPaidAdvance > 0 ? fmtEur(arPaidAdvance) : 'NaN €'}</td></tr>
+            <tr><td class="label">Invoiced Not Due</td><td class="value">—</td><td class="value">${arDoubtful > 0 ? fmtEur(arDoubtful) : 'NaN €'}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Insurance Details</div>
+        <table class="kv-table">
+          <tbody>
+            <tr><td class="label">Active Policies</td><td class="value">${fmt(policies)}</td></tr>
+            <tr><td class="label">Monthly Premium</td><td class="value">${fmtEurDec(premium)}</td></tr>
+            <tr><td class="label">Total Insured Value</td><td class="value">${fmtEur(insuredValue)}</td></tr>
+            <tr><td class="label">Insurance Rate</td><td class="value">${fmt(insuranceRate, 1)} %</td></tr>
+            <tr><td class="label">Coverage Rate</td><td class="value">${fmt(coverageRate, 1)} %</td></tr>
+          </tbody>
+        </table>
+        <div class="progress-bar"><div class="progress-bar-fill green" style="width:${Math.min(100, coverageRate)}%"></div></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Current Discounts & Liabilities</div>
+        <table class="kv-table">
+          <tbody>
+            <tr><td class="label">Total Discounts</td><td class="value">${fmtEurDec(discounts)} <span class="sub">${fmt(totalDiscRate, 2)} €/m²</span></td></tr>
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px">
+          <span style="color:var(--muted-2)">Discount % of Max Rent</span>
+          <span style="font-weight:600">${fmt(discountPctOfMax, 1)}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill amber" style="width:${Math.min(100, discountPctOfMax * 5)}%"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Property Summary</div>
+        <table class="kv-table">
+          <tbody>
+            <tr><td class="label">Total Units</td><td class="value">${fmt(totalUnits)}</td></tr>
+            <tr><td class="label">Total Surface</td><td class="value">${fmt(totalSqm)} m²</td></tr>
+            <tr><td class="label">Avg Unit Size</td><td class="value">${fmt(avgUnitSize, 1)} m²</td></tr>
+            <tr><td class="label">Max Monthly Rent</td><td class="value">${fmtEur(maxRent)}</td></tr>
+            <tr><td class="label">Current Monthly Rent</td><td class="value">${fmtEur(currentRent)}</td></tr>
+            <tr><td class="label">Revenue Capture Rate</td><td class="value">${fmt(revenueCapture, 1)} %</td></tr>
+            <tr><td class="label">Potential Rent Gap</td><td class="value" style="color:${rentGap>0?'var(--amber)':'var(--text)'}">${fmtEur(rentGap)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// STORAGEPILOT TAB
+// ─────────────────────────────────────────────
+let SP_DATA = {
+  byLocation: null,
+  byCategory: null,
+  byStoreCategory: null
+};
+
+// Simple CSV parser — assumes no quoted commas, trims whitespace
+// String columns: 'date', 'Date', 'Store', 'Company'. Everything else = number.
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return { headers: [], rows: [] };
+  let headers = lines[0].split(',').map(h => h.trim());
+  // Strip trailing empty headers (Excel exports often pad with empty columns)
+  while (headers.length > 0 && headers[headers.length - 1] === '') headers.pop();
+  const stringCols = new Set(['date', 'Date', 'Store', 'Company']);
+  const rows = lines.slice(1).map(line => {
+    const cells = line.split(',').map(c => c.trim());
+    const row = {};
+    headers.forEach((h, i) => {
+      const raw = cells[i];
+      if (stringCols.has(h)) {
+        row[h] = raw || '';
+      } else {
+        row[h] = (raw === undefined || raw === '') ? 0 : Number(raw);
+      }
+    });
+    return row;
+  }).filter(r => {
+    // Drop fully-empty rows
+    return Object.values(r).some(v => v !== '' && v !== 0);
+  });
+  return { headers, rows };
+}
+
+// Parse date string — supports both YYYY-MM-DD and M/D/YYYY formats
+function parseSpDate(s) {
+  if (!s) return null;
+  const str = String(s).trim();
+  // YYYY-MM-DD
+  let m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
+  // M/D/YYYY
+  m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return { year: Number(m[3]), month: Number(m[1]), day: Number(m[2]) };
+  return null;
+}
+
+// Filter rows to April 2026 through today (MTD semantics)
+function filterToAprilMTD(rows) {
+  const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth() + 1;
+  const todayDay = today.getDate();
+
+  return rows.filter(r => {
+    const d = parseSpDate(r.date);
+    if (!d) return false;
+    if (d.year !== 2026 || d.month !== 4) return false;
+    // Keep days <= today if we're in April; keep all April days if we're past April
+    if (todayYear === 2026 && todayMonth === 4) {
+      return d.day <= todayDay;
+    }
+    return todayYear > 2026 || (todayYear === 2026 && todayMonth > 4);
+  });
+}
+
+async function loadStoragePilotData() {
+  const files = [
+    { key: 'byLocation', path: 'data/storagepilot/conversations_by_location.csv' },
+    { key: 'byCategory', path: 'data/storagepilot/conversations_by_category.csv' },
+    { key: 'byStoreCategory', path: 'data/storagepilot/conversations_by_store_category.csv' }
+  ];
+
+  await Promise.all(files.map(async (f) => {
+    try {
+      const resp = await fetch(f.path + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!resp.ok) { SP_DATA[f.key] = null; return; }
+      const text = await resp.text();
+      SP_DATA[f.key] = parseCSV(text);
+    } catch (e) {
+      console.log(`StoragePilot: failed to load ${f.path}:`, e.message);
+      SP_DATA[f.key] = null;
+    }
+  }));
+}
+
+// Match a CURRENT_SITE value (e.g. '1BOX Breda') to a Store entry in the
+// per-store category CSV (e.g. 'Breda'). Case-insensitive, strips a leading
+// '1BOX '/'1Box ' prefix from the site name before comparing.
+function matchStoreRow(storeRows, siteName) {
+  if (!storeRows || !siteName) return null;
+  const normalize = s => String(s || '')
+    .toLowerCase()
+    .replace(/^1box\s+/i, '')
+    .trim();
+  const target = normalize(siteName);
+  return storeRows.find(r => normalize(r.Store) === target) || null;
+}
+
+function renderStoragePilot() {
+  const panel = document.getElementById('panel-storagepilot');
+  if (!panel) return;
+
+  // Per-store view: read from byStoreCategory snapshot
+  if (CURRENT_SITE !== 'all') {
+    renderStoragePilotStore(panel);
+    return;
+  }
+
+  // Portfolio (All Sites) view continues below — gated to Netherlands
+  if (CURRENT_COUNTRY !== 'nl') {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🇳🇱</div>
+        <p>StoragePilot data is available for the Netherlands portfolio only.<br>
+        Select <strong>Netherlands</strong> to view.</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (!SP_DATA.byLocation || !SP_DATA.byCategory) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">💬</div>
+        <p>StoragePilot data not yet loaded.<br>
+        Upload CSVs to <code>data/storagepilot/</code> in the repo.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const locRows = filterToAprilMTD(SP_DATA.byLocation.rows);
+  const catRows = filterToAprilMTD(SP_DATA.byCategory.rows);
+
+  if (locRows.length === 0) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">📅</div>
+        <p>No April 2026 data found in the CSVs.<br>
+        Check the date column format (expected <code>M/D/YYYY</code>).</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Chart 1: Conversations by Location — sum each store column across April rows
+  const locHeaders = SP_DATA.byLocation.headers.filter(h =>
+    h !== 'date' && h !== 'total' && h !== 'Company'
+  );
+  const locTotals = locHeaders.map(h => ({
+    store: h,
+    total: locRows.reduce((s, r) => s + (r[h] || 0), 0)
+  })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+
+  // Chart 2: Conversations by Category — sum each category column
+  // Exclude 'ignore' — it's spam/noise and dominates the chart misleadingly
+  const catHeaders = SP_DATA.byCategory.headers.filter(h =>
+    h !== 'date' && h !== 'total' && h !== 'ignore'
+  );
+  const catTotals = catHeaders.map(h => ({
+    category: h.replace(/_/g, ' '),
+    categoryRaw: h,
+    total: catRows.reduce((s, r) => s + (r[h] || 0), 0)
+  })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+
+  // KPIs — exclude 'ignore' from total
+  const totalConv = catTotals.reduce((s, c) => s + c.total, 0);
+  const topCategory = catTotals[0] ? catTotals[0].category : '—';
+  const avgPerDay = locRows.length > 0 ? (totalConv / locRows.length) : 0;
+
+  panel.innerHTML = `
+    <div class="grid-4" style="margin-bottom:12px">
+      <div class="stat-card" style="text-align:center">
+        <div class="label">TOTAL CONVERSATIONS</div>
+        <div class="value">${fmt(totalConv)}</div>
+        <div class="sub">April MTD • ${locRows.length} days</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">TOP CATEGORY</div>
+        <div class="value" style="font-size:20px">${topCategory}</div>
+        <div class="sub">${catTotals[0] ? fmt(catTotals[0].total) + ' conversations' : ''}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">AVG PER DAY</div>
+        <div class="value">${fmt(avgPerDay, 1)}</div>
+        <div class="sub">Portfolio-wide</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">ACTIVE STORES</div>
+        <div class="value">${fmt(locTotals.length)}</div>
+        <div class="sub">with conversations this month</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Conversations by Location (April MTD)</div>
+      <div style="position:relative;height:${Math.max(280, locTotals.length * 22)}px"><canvas id="ch-sp-location"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Conversations by Category (April MTD)</div>
+      <div style="position:relative;height:360px"><canvas id="ch-sp-category"></canvas></div>
+    </div>
+  `;
+
+  nextTick(() => {
+    // Chart 1 — horizontal bar, sorted descending
+    mkHBarChart('ch-sp-location',
+      locTotals.map(x => x.store),
+      [{ label: '', data: locTotals.map(x => x.total), color: '#8b5cf6' }],
+      v => v
+    );
+
+    // Chart 2 — donut for category distribution
+    const catColors = ['#16a34a', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6', '#6b7280'];
+    mkDonut('ch-sp-category',
+      catTotals.map(c => c.category),
+      catTotals.map(c => c.total),
+      catTotals.map((_, i) => catColors[i % catColors.length])
+    );
+  });
+}
+
+// Per-store view: MTD total calls KPI + category breakdown pie
+function renderStoragePilotStore(panel) {
+  if (!SP_DATA.byStoreCategory || !SP_DATA.byStoreCategory.rows.length) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">💬</div>
+        <p>Per-store StoragePilot data not yet loaded.<br>
+        Upload <code>conversations_by_store_category.csv</code> to <code>data/storagepilot/</code>.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const row = matchStoreRow(SP_DATA.byStoreCategory.rows, CURRENT_SITE);
+
+  if (!row) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🔍</div>
+        <p>No StoragePilot data found for <strong>${CURRENT_SITE}</strong>.<br>
+        This store may not be covered by StoragePilot yet, or the store name in the CSV doesn't match.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Category columns — exclude meta columns and 'ignore' (spam/noise)
+  const catHeaders = SP_DATA.byStoreCategory.headers.filter(h =>
+    h !== 'Store' && h !== 'Date' && h !== 'total' && h !== 'ignore'
+  );
+  const catTotals = catHeaders.map(h => ({
+    category: h.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    categoryRaw: h,
+    total: Number(row[h]) || 0
+  })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+
+  const totalCalls = catTotals.reduce((s, c) => s + c.total, 0);
+  const topCategory = catTotals[0] ? catTotals[0].category : '—';
+  const reportDate = row.Date || '—';
+
+  panel.innerHTML = `
+    <div class="grid-4" style="margin-bottom:12px">
+      <div class="stat-card" style="text-align:center">
+        <div class="label">TOTAL INCOMING CALLS</div>
+        <div class="value">${fmt(totalCalls)}</div>
+        <div class="sub">April MTD • ${CURRENT_SITE}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">TOP CATEGORY</div>
+        <div class="value" style="font-size:20px">${topCategory}</div>
+        <div class="sub">${catTotals[0] ? fmt(catTotals[0].total) + ' calls' : ''}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">CATEGORIES ACTIVE</div>
+        <div class="value">${fmt(catTotals.length)}</div>
+        <div class="sub">of ${catHeaders.length} tracked</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">REPORT DATE</div>
+        <div class="value" style="font-size:18px">${reportDate}</div>
+        <div class="sub">Latest snapshot</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Call Volume by Category — ${CURRENT_SITE} (April MTD)</div>
+      <div style="position:relative;height:380px"><canvas id="ch-sp-store-pie"></canvas></div>
+    </div>
+  `;
+
+  nextTick(() => {
+    const catColors = ['#16a34a', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6', '#6b7280'];
+    mkDonut('ch-sp-store-pie',
+      catTotals.map(c => c.category),
+      catTotals.map(c => c.total),
+      catTotals.map((_, i) => catColors[i % catColors.length])
+    );
+  });
+}
+
+// ─────────────────────────────────────────────
+// TRENDS TAB
+// ─────────────────────────────────────────────
+function renderTrends() {
+  const panel = document.getElementById('panel-trends');
+  if (!panel) return;
+
+  let scopeLabel;
+  if (CURRENT_SITE !== 'all') scopeLabel = siteShort(CURRENT_SITE);
+  else if (CURRENT_COUNTRY === 'fr') scopeLabel = 'France';
+  else if (CURRENT_COUNTRY === 'nl') scopeLabel = 'Netherlands';
+  else scopeLabel = 'Portfolio';
+
+  if (!HISTORY_DATA || !HISTORY_DATA.sites) {
+    panel.innerHTML = `
+      <div class="trends-header">
+        <div class="trends-scope">${scopeLabel} — no data</div>
+      </div>
+      <div class="empty-state">
+        <div class="big">📈</div>
+        <p>No historical data available.<br>Run <code>backfill_historicals.py</code> to generate <code>data/history.json</code>.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const isAllSites = (CURRENT_SITE === 'all');
+  const filteredSiteEntries = Object.values(HISTORY_DATA.sites).filter(site => {
+    if (site.is_rollup) {
+      if (!isAllSites && site.name === CURRENT_SITE) return true;
+      return false;
+    }
+    if (!isAllSites) return site.name === CURRENT_SITE;
+    if (CURRENT_COUNTRY === 'fr') return site.country === 'FR';
+    if (CURRENT_COUNTRY === 'nl') return site.country === 'NL';
+    return true;
+  });
+
+  if (filteredSiteEntries.length === 0) {
+    panel.innerHTML = `
+      <div class="trends-header">
+        <div class="trends-scope">${scopeLabel} — no data</div>
+      </div>
+      <div class="empty-state">
+        <div class="big">📈</div>
+        <p>No historical data for this selection.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const monthSet = new Set();
+  filteredSiteEntries.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
+
+  // Add current month from latest.json as a provisional MTD data point,
+  // but only if history.json doesn't already have an entry for it
+  const currentMonth = getCurrentMonthKey();
+  const currentMonthInHistory = monthSet.has(currentMonth);
+  if (!currentMonthInHistory && RAW_DATA.length > 0) {
+    monthSet.add(currentMonth);
+  }
+
+  const months = [...monthSet].sort();
+  const monthLabels = months.map(m => {
+    const [y, mo] = m.split('-');
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[parseInt(mo,10)-1] + ' ' + y;
+  });
+
+  // Which months are MTD (incomplete)? Only the current month when pulled from live data.
+  const mtdMonths = new Set();
+  if (!currentMonthInHistory) mtdMonths.add(currentMonth);
+
+  panel.innerHTML = `
+    <div class="trends-header">
+      <div class="trends-scope">${scopeLabel} — ${months.length} data point${months.length === 1 ? '' : 's'} (monthly${mtdMonths.size > 0 ? ', current MTD' : ''})</div>
+      <div class="toggle-group">
+        <button class="toggle-btn ${TRENDS_VIEW === 'portfolio' ? 'active' : ''}" onclick="setTrendsView('portfolio')">Portfolio</button>
+        <button class="toggle-btn ${TRENDS_VIEW === 'bystore' ? 'active' : ''}" onclick="setTrendsView('bystore')">By Store</button>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Occupancy</div>
+        <div class="chart-wrap-lg"><canvas id="ch-trend-occ"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Revenue</div>
+        <div class="chart-wrap-lg"><canvas id="ch-trend-rev"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Net Rentals</div>
+        <div class="chart-wrap-lg"><canvas id="ch-trend-net"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Avg Rate/m²</div>
+        <div class="chart-wrap-lg"><canvas id="ch-trend-rate"></canvas></div>
+      </div>
+    </div>
+  `;
+
+  nextTick(() => {
+    if (TRENDS_VIEW === 'portfolio') {
+      // Aggregated series
+      const occSeries = [], revSeries = [], netSeries = [], rateSeries = [];
+      months.forEach(m => {
+        // For the current month (MTD), pull from live FILTERED_DATA
+        if (m === currentMonth && !currentMonthInHistory) {
+          let rSqm = 0, tSqm = 0, rev = 0, net = 0, rateNum = 0, rateDen = 0;
+          FILTERED_DATA.forEach(d => {
+            rSqm += d.occupancy?.rented_sqm || 0;
+            tSqm += d.occupancy?.total_sqm || 0;
+            rev += d.revenue?.net_total || 0;
+            net += d.rentals?.net_month || 0;
+            const rate = d.revenue?.avg_rate_per_sqm || 0;
+            const sqm = d.occupancy?.rented_sqm || 0;
+            if (rate && sqm) { rateNum += rate * sqm; rateDen += sqm; }
+          });
+          occSeries.push(tSqm > 0 ? (rSqm/tSqm*100) : null);
+          revSeries.push(rev);
+          netSeries.push(net);
+          rateSeries.push(rateDen > 0 ? (rateNum/rateDen) : null);
+          return;
+        }
+
+        let rSqm = 0, tSqm = 0, rev = 0, net = 0, rateNum = 0, rateDen = 0;
+        filteredSiteEntries.forEach(s => {
+          const e = (s.series || []).find(x => x.month === m);
+          if (!e) return;
+          rSqm += e.occupancy?.rented_sqm || 0;
+          tSqm += e.occupancy?.total_sqm || 0;
+          rev += e.revenue?.net_total || 0;
+          net += e.rentals?.net_month || 0;
+          if (e.revenue?.avg_rate_per_sqm && e.occupancy?.rented_sqm) {
+            rateNum += e.revenue.avg_rate_per_sqm * e.occupancy.rented_sqm;
+            rateDen += e.occupancy.rented_sqm;
+          }
+        });
+        occSeries.push(tSqm > 0 ? (rSqm/tSqm*100) : null);
+        revSeries.push(rev);
+        netSeries.push(net);
+        rateSeries.push(rateDen > 0 ? (rateNum/rateDen) : null);
+      });
+
+      mkLineChart('ch-trend-occ', monthLabels, [{ label: scopeLabel, data: occSeries, color: '#16a34a' }],
+        { yFmt: v => v + '%', yMin: 0, yMax: 100, stepSize: 25, mtdMonths, months });
+      mkLineChart('ch-trend-rev', monthLabels, [{ label: scopeLabel, data: revSeries, color: '#16a34a' }],
+        { yFmt: v => '€' + (v/1000).toFixed(0) + 'k', yMin: 0, mtdMonths, months });
+      mkLineChart('ch-trend-net', monthLabels, [{ label: scopeLabel, data: netSeries, color: '#f97316' }],
+        { yFmt: v => v, mtdMonths, months });
+      mkLineChart('ch-trend-rate', monthLabels, [{ label: scopeLabel, data: rateSeries, color: '#8b5cf6' }],
+        { yFmt: v => '€' + fmt(v, 0), yMin: 0, mtdMonths, months });
+    } else {
+      // By Store: one line per site
+      const palette = ['#16a34a', '#f97316', '#8b5cf6', '#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6'];
+      const occDatasets = [], revDatasets = [], netDatasets = [], rateDatasets = [];
+
+      filteredSiteEntries.forEach((s, i) => {
+        const color = palette[i % palette.length];
+
+        // For current month, find matching live site data
+        const liveSite = !currentMonthInHistory
+          ? FILTERED_DATA.find(d => d.site_name === s.name)
+          : null;
+
+        const occData = months.map(m => {
+          if (m === currentMonth && liveSite) {
+            const ts = liveSite.occupancy?.total_sqm || 0;
+            return ts > 0 ? ((liveSite.occupancy.rented_sqm / ts) * 100) : null;
+          }
+          const e = (s.series || []).find(x => x.month === m);
+          if (!e || !e.occupancy) return null;
+          const ts = e.occupancy.total_sqm || 0;
+          return ts > 0 ? ((e.occupancy.rented_sqm / ts) * 100) : null;
+        });
+        const revData = months.map(m => {
+          if (m === currentMonth && liveSite) return liveSite.revenue?.net_total || null;
+          const e = (s.series || []).find(x => x.month === m);
+          return e?.revenue?.net_total || null;
+        });
+        const netData = months.map(m => {
+          if (m === currentMonth && liveSite) return liveSite.rentals?.net_month || null;
+          const e = (s.series || []).find(x => x.month === m);
+          return e?.rentals?.net_month || null;
+        });
+        const rateData = months.map(m => {
+          if (m === currentMonth && liveSite) return liveSite.revenue?.avg_rate_per_sqm || null;
+          const e = (s.series || []).find(x => x.month === m);
+          return e?.revenue?.avg_rate_per_sqm || null;
+        });
+
+        occDatasets.push({ label: siteShort(s.name), data: occData, color });
+        revDatasets.push({ label: siteShort(s.name), data: revData, color });
+        netDatasets.push({ label: siteShort(s.name), data: netData, color });
+        rateDatasets.push({ label: siteShort(s.name), data: rateData, color });
+      });
+
+      mkLineChart('ch-trend-occ', monthLabels, occDatasets, { yFmt: v => v + '%', yMin: 0, yMax: 100, stepSize: 25, mtdMonths, months });
+      mkLineChart('ch-trend-rev', monthLabels, revDatasets, { yFmt: v => '€' + (v/1000).toFixed(0) + 'k', yMin: 0, mtdMonths, months });
+      mkLineChart('ch-trend-net', monthLabels, netDatasets, { yFmt: v => v, mtdMonths, months });
+      mkLineChart('ch-trend-rate', monthLabels, rateDatasets, { yFmt: v => '€' + fmt(v, 0), yMin: 0, mtdMonths, months });
+    }
+  });
+}
+
+function setTrendsView(v) {
+  TRENDS_VIEW = v;
+  renderTrends();
+}
+
+// ─────────────────────────────────────────────
+// CHART HELPERS
+// ─────────────────────────────────────────────
+function siteShort(name) {
+  if (!name) return '';
+  return name.replace(/^1BOX\s+/i, '').replace(/^1Box\s+/i, '');
+}
+
+function mkRentalActivityChart(id, labels, miData, moData) {
+  // MI/MO grouped bars with "Net: ±N" shown per month (green if positive, red if negative).
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  const monthLabels = labels.map(l => l[0]);
+  const netLabels = labels.map(l => l[1]);
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'Move-Ins', data: miData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
+        { label: 'Move-Outs', data: moData, backgroundColor: '#f97316', borderRadius: 2, borderWidth: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { bottom: 20 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'netLabels',
+      afterDraw(chart) {
+        const x = chart.scales.x;
+        if (!x) return;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = '600 11px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        x.ticks.forEach((tick, i) => {
+          const netStr = netLabels[i];
+          if (netStr === undefined || netStr === null || netStr === '') return;
+          const isPos = !netStr.startsWith('-') && !netStr.startsWith('−');
+          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
+          const px = x.getPixelForTick(i);
+          const py = x.bottom + 4;
+          ctx.fillText('Net: ' + netStr, px, py);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+function mkPctVarChart(id, labels, actualData, budgetData) {
+  // Occupancy % grouped bars with inline per-month variance (in pp).
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  const monthLabels = labels.map(l => l[0]);
+  const varLabels = labels.map(l => l[1]);
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'Actual', data: actualData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
+        { label: 'Budget', data: budgetData, backgroundColor: '#d1d5db', borderRadius: 2, borderWidth: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { bottom: 20 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.y, 1) + '%' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          ticks: {
+            color: '#9ca3af',
+            font: { family: 'Inter', size: 10 },
+            callback: v => v + '%'
+          },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'varianceLabelsPct',
+      afterDraw(chart) {
+        const x = chart.scales.x;
+        if (!x) return;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = '600 11px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        x.ticks.forEach((tick, i) => {
+          const varStr = varLabels[i];
+          if (!varStr) return;
+          const isPos = varStr.startsWith('+');
+          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
+          const px = x.getPixelForTick(i);
+          const py = x.bottom + 4;
+          ctx.fillText(varStr, px, py);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+function mkRevVarChart(id, labels, actualData, budgetData) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  const monthLabels = labels.map(l => l[0]);
+  const varLabels = labels.map(l => l[1]);
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'Actual', data: actualData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
+        { label: 'Budget', data: budgetData, backgroundColor: '#d1d5db', borderRadius: 2, borderWidth: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { bottom: 20 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': €' + fmt(ctx.parsed.y/1000, 0) + 'k' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        },
+        y: {
+          ticks: {
+            color: '#9ca3af',
+            font: { family: 'Inter', size: 10 },
+            callback: v => '€' + fmt(v/1000, 0) + 'k'
+          },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'varianceLabels',
+      afterDraw(chart) {
+        const x = chart.scales.x;
+        if (!x) return;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = '600 11px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        x.ticks.forEach((tick, i) => {
+          const varStr = varLabels[i];
+          if (!varStr) return;
+          const isPos = varStr.startsWith('+');
+          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
+          const px = x.getPixelForTick(i);
+          const py = x.bottom + 4;
+          ctx.fillText(varStr, px, py);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+function mkHBarChart(id, labels, datasets, fmtFn, maxVal) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  // Handle per-bar coloring when data array length differs from dataset count
+  const ds = datasets.map(d => ({
+    label: d.label,
+    data: d.data,
+    backgroundColor: Array.isArray(d.color) ? d.color : d.color,
+    borderRadius: 3,
+    borderWidth: 0
+  }));
+
+  const xScale = {
+    ticks: {
+      color: '#9ca3af',
+      font: { family: 'Inter', size: 10 },
+      callback: fmtFn ? (v => fmtFn(v)) : undefined
+    },
+    grid: { color: '#f3f4f6', drawBorder: false }
+  };
+  if (maxVal !== undefined) xScale.max = maxVal;
+  xScale.min = 0;
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets: ds },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: {
+          display: datasets.length > 1,
+          position: 'bottom',
+          labels: { color: '#6b7280', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 8 }
+        }
+      },
+      scales: {
+        x: xScale,
+        y: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function mkVBarChart(id, labels, datasets, opts) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+  opts = opts || {};
+
+  const yTicks = {
+    color: '#9ca3af',
+    font: { family: 'Inter', size: 10 }
+  };
+  if (opts.yFmt) yTicks.callback = v => opts.yFmt(v);
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: datasets.map(d => ({
+        label: d.label,
+        data: d.data,
+        backgroundColor: d.color,
+        borderRadius: 2,
+        borderWidth: 0
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: datasets.length > 1,
+          position: 'bottom',
+          labels: { color: '#6b7280', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 8 }
+        },
+        tooltip: opts.yFmt ? {
+          callbacks: { label: ctx => (ctx.dataset.label ? ctx.dataset.label + ': ' : '') + opts.yFmt(ctx.parsed.y) }
+        } : {}
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        },
+        y: {
+          ticks: yTicks,
+          grid: { color: '#f3f4f6', drawBorder: false }
+        }
+      }
+    }
+  });
+}
+
+function mkDonut(id, labels, data, colors) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#4b5563',
+            font: { family: 'Inter', size: 11 },
+            boxWidth: 10,
+            padding: 10,
+            generateLabels: (chart) => {
+              const ds = chart.data.datasets[0];
+              return chart.data.labels.map((l, i) => ({
+                text: `${l} (${ds.data[i]})`,
+                fillStyle: ds.backgroundColor[i],
+                strokeStyle: ds.backgroundColor[i],
+                index: i
+              }));
+            }
+          }
+        }
+      },
+      cutout: '60%'
+    }
+  });
+}
+
+function mkLineChart(id, labels, datasets, opts) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+  opts = opts || {};
+
+  const yScale = {
+    ticks: {
+      color: '#9ca3af',
+      font: { family: 'Inter', size: 10 },
+      callback: v => opts.yFmt ? opts.yFmt(v) : v
+    },
+    grid: { color: '#f3f4f6', drawBorder: false }
+  };
+  if (opts.yMin !== undefined) yScale.min = opts.yMin;
+  if (opts.yMax !== undefined) yScale.max = opts.yMax;
+  if (opts.stepSize) yScale.ticks.stepSize = opts.stepSize;
+
+  const mtdMonths = opts.mtdMonths;
+  const months = opts.months || [];
+
+  // Helper: is the data point at this index MTD (current incomplete month)?
+  const isMTDIndex = (i) => mtdMonths && months[i] && mtdMonths.has(months[i]);
+
+  const chartDatasets = datasets.map(d => ({
+    label: d.label,
+    data: d.data,
+    borderColor: d.color,
+    backgroundColor: 'transparent',
+    pointBackgroundColor: (ctx) => isMTDIndex(ctx.dataIndex) ? '#fff' : '#fff',
+    pointBorderColor: (ctx) => isMTDIndex(ctx.dataIndex) ? d.color : d.color,
+    pointBorderWidth: (ctx) => isMTDIndex(ctx.dataIndex) ? 2 : 2,
+    pointRadius: (ctx) => isMTDIndex(ctx.dataIndex) ? 5 : 3,
+    pointStyle: (ctx) => isMTDIndex(ctx.dataIndex) ? 'rectRot' : 'circle',
+    pointHoverRadius: 6,
+    borderWidth: 2,
+    tension: 0.35,
+    spanGaps: true,
+    segment: {
+      borderDash: (ctx) => {
+        // Dash the segment going INTO the MTD point
+        if (isMTDIndex(ctx.p1DataIndex)) return [4, 4];
+        return undefined;
+      }
+    }
+  }));
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets: chartDatasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: datasets.length > 1,
+          position: 'bottom',
+          labels: { color: '#6b7280', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 8 }
+        },
+        tooltip: {
+          backgroundColor: '#fff',
+          borderColor: '#e5e7eb',
+          borderWidth: 1,
+          titleColor: '#1a1a1a',
+          bodyColor: '#1a1a1a',
+          titleFont: { family: 'Inter', size: 11, weight: '600' },
+          bodyFont: { family: 'Inter', size: 11 },
+          padding: 10,
+          callbacks: {
+            title: (items) => {
+              if (!items.length) return '';
+              const label = items[0].label;
+              if (isMTDIndex(items[0].dataIndex)) return label + ' (MTD, incomplete)';
+              return label;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } },
+          grid: { display: false }
+        },
+        y: yScale
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// TABS / STATUS / UTILS
+// ─────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function setStatus(type, msg) {
+  const el = document.getElementById('status-banner');
+  const sp = document.getElementById('status-spinner');
+  const tx = document.getElementById('status-text');
+  el.className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+  sp.style.display = type === 'loading' ? 'block' : 'none';
+  tx.textContent = msg;
+  el.classList.remove('hidden');
+}
+function hideStatus() { document.getElementById('status-banner').classList.add('hidden'); }
+function setProgress(pct) { document.getElementById('loading-bar').style.width = pct + '%'; }
+function nextTick(fn) { setTimeout(fn, 50); }
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  // Try to load from GitHub (the production deploy)
+  const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
+  if (hist) HISTORY_DATA = hist;
+  if (budgets) BUDGET_DATA = budgets;
+
+  // StoragePilot CSVs (best-effort; tab handles missing files gracefully)
+  loadStoragePilotData();
+
+  if (cached) {
+    IS_DEMO = false;
+    RAW_DATA = cached;
+    document.getElementById('config-modal').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    renderAll();
+    updateLastUpdatedLabel();
+    return;
+  }
+
+  // If no cached data, check for stored config
+  const saved = localStorage.getItem('1box_config');
+  if (saved) {
+    CONFIG = JSON.parse(saved);
+    document.getElementById('cfg-client-id').value = CONFIG.clientId || '';
+    document.getElementById('cfg-folder').value = CONFIG.folder || '/1Box MIS Reports';
+    document.getElementById('cfg-api-key').value = CONFIG.apiKey || '';
+    if (window.location.hash.includes('access_token')) {
+      document.getElementById('config-modal').classList.add('hidden');
+      document.getElementById('app').classList.add('visible');
+      startAuth();
+    }
+  }
+
+  // Auto-load demo if we're in a preview environment (no data, no config)
+  if (!cached && !saved) {
+    // Keep modal open, but make demo easy to try
+  }
+});
+</script>
+</body>
+</html>
