@@ -2236,8 +2236,9 @@ function renderStoragePilot() {
   })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
 
   // Chart 2: Conversations by Category — sum each category column
+  // Exclude 'ignore' — it's spam/noise and dominates the chart misleadingly
   const catHeaders = SP_DATA.byCategory.headers.filter(h =>
-    h !== 'date' && h !== 'total'
+    h !== 'date' && h !== 'total' && h !== 'ignore'
   );
   const catTotals = catHeaders.map(h => ({
     category: h.replace(/_/g, ' '),
@@ -2245,7 +2246,8 @@ function renderStoragePilot() {
     total: catRows.reduce((s, r) => s + (r[h] || 0), 0)
   })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
 
-  // Chart 3: Escalation Rate by Category — escalations / conversations per category
+  // Chart 3: Escalations per 100 Conversations (can exceed 100 when a single
+  // conversation triggers multiple escalations — honest label instead of a "rate")
   const escTotalsByKey = {};
   catHeaders.forEach(h => {
     escTotalsByKey[h] = escRows.reduce((s, r) => s + (r[h] || 0), 0);
@@ -2257,9 +2259,9 @@ function renderStoragePilot() {
   }).filter(x => x.conversations >= 5) // drop low-volume noise
     .sort((a, b) => b.rate - a.rate);
 
-  // KPIs
+  // KPIs — exclude 'ignore' from total and from escalation rate math
   const totalConv = catTotals.reduce((s, c) => s + c.total, 0);
-  const totalEsc = Object.values(escTotalsByKey).reduce((s, v) => s + v, 0);
+  const totalEsc = catHeaders.reduce((s, h) => s + (escTotalsByKey[h] || 0), 0);
   const escRatePortfolio = totalConv > 0 ? (totalEsc / totalConv * 100) : 0;
   const topCategory = catTotals[0] ? catTotals[0].category : '—';
   const avgPerDay = locRows.length > 0 ? (totalConv / locRows.length) : 0;
@@ -2299,7 +2301,7 @@ function renderStoragePilot() {
         <div style="position:relative;height:320px"><canvas id="ch-sp-category"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">Escalation Rate by Category (April MTD)</div>
+        <div class="card-title">Escalations per 100 Conversations (April MTD)</div>
         <div style="position:relative;height:320px"><canvas id="ch-sp-escalation"></canvas></div>
         <div style="font-size:10px;color:var(--muted-2);margin-top:8px;text-align:center">
           Categories with fewer than 5 conversations excluded
@@ -2324,11 +2326,11 @@ function renderStoragePilot() {
       catTotals.map((_, i) => catColors[i % catColors.length])
     );
 
-    // Chart 3 — horizontal bar of escalation rate %
+    // Chart 3 — horizontal bar of escalations per 100 conversations
     mkHBarChart('ch-sp-escalation',
       escRates.map(x => x.category),
       [{ label: '', data: escRates.map(x => Number(x.rate.toFixed(1))), color: '#f97316' }],
-      v => v + '%'
+      v => v
     );
   });
 }
