@@ -2135,11 +2135,12 @@ function parseCSV(text) {
 // Parse date string — supports both YYYY-MM-DD and M/D/YYYY formats
 function parseSpDate(s) {
   if (!s) return null;
+  const str = String(s).trim();
   // YYYY-MM-DD
-  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  let m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (m) return { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
   // M/D/YYYY
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m) return { year: Number(m[3]), month: Number(m[1]), day: Number(m[2]) };
   return null;
 }
