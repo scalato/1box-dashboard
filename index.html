@@ -2197,6 +2197,17 @@ async function loadStoragePilotData() {
 // Match a CURRENT_SITE value (e.g. '1BOX Breda') to a Store entry in the
 // per-store category CSV (e.g. 'Breda'). Case-insensitive, strips a leading
 // '1BOX '/'1Box ' prefix from the site name before comparing.
+//
+// STORE_ALIASES covers cases where the StoragePilot CSV's store name differs
+// from the dashboard's site_name. Map key = normalized CSV store name,
+// value = normalized dashboard site name (after stripping 1BOX/1Box prefix).
+const STORE_ALIASES = {
+  'den bosch': "'s-hertogenbosch",
+  'amsterdam': 'amsterdam-schepenbergweg',
+  'heerlen heerlerbaan': 'heerlen-heerlerbaan',
+  'nijmegen wijchen': 'nijmegen-wijchen'
+};
+
 function matchStoreRow(storeRows, siteName) {
   if (!storeRows || !siteName) return null;
   const normalize = s => String(s || '')
@@ -2204,7 +2215,11 @@ function matchStoreRow(storeRows, siteName) {
     .replace(/^1box\s+/i, '')
     .trim();
   const target = normalize(siteName);
-  return storeRows.find(r => normalize(r.Store) === target) || null;
+  return storeRows.find(r => {
+    const csvNorm = normalize(r.Store);
+    const aliased = STORE_ALIASES[csvNorm] || csvNorm;
+    return aliased === target;
+  }) || null;
 }
 
 function renderStoragePilot() {
