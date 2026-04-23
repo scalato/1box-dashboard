@@ -2254,14 +2254,32 @@ function renderStoragePilot() {
     return;
   }
 
-  // Chart 1: Conversations by Location — sum each store column across April rows
-  const locHeaders = SP_DATA.byLocation.headers.filter(h =>
-    h !== 'date' && h !== 'total' && h !== 'Company'
-  );
-  const locTotals = locHeaders.map(h => ({
-    store: h,
-    total: locRows.reduce((s, r) => s + (r[h] || 0), 0)
-  })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+  // Chart 1: Conversations by Location — sum per-store from byStoreCategory
+  // so 'ignore' is excluded and totals match each store's drill-down tab exactly.
+  // Falls back to byLocation if byStoreCategory isn't loaded.
+  let locTotals;
+  if (SP_DATA.byStoreCategory && SP_DATA.byStoreCategory.rows.length) {
+    const sccHeaders = SP_DATA.byStoreCategory.headers;
+    const catCols = sccHeaders.filter(h =>
+      h !== 'Store' && h !== 'Date' && h !== 'total' && h !== 'ignore'
+    );
+    locTotals = SP_DATA.byStoreCategory.rows
+      .filter(r => r.Store && !/\(All\)/i.test(r.Store))
+      .map(r => ({
+        store: r.Store,
+        total: catCols.reduce((s, c) => s + (Number(r[c]) || 0), 0)
+      }))
+      .filter(x => x.total > 0)
+      .sort((a, b) => b.total - a.total);
+  } else {
+    const locHeaders = SP_DATA.byLocation.headers.filter(h =>
+      h !== 'date' && h !== 'total' && h !== 'Company'
+    );
+    locTotals = locHeaders.map(h => ({
+      store: h,
+      total: locRows.reduce((s, r) => s + (r[h] || 0), 0)
+    })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+  }
 
   // Chart 2: Conversations by Category — sum each category column
   // Exclude 'ignore' — it's spam/noise and dominates the chart misleadingly
