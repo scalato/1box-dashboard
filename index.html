@@ -639,6 +639,7 @@
     <button class="tab-btn" onclick="switchTab('rentals')" id="tab-rentals">Rentals</button>
     <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
     <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
+    <button class="tab-btn" onclick="switchTab('storagepilot')" id="tab-storagepilot">StoragePilot</button>
     <button class="tab-btn" onclick="switchTab('trends')" id="tab-trends">Trends</button>
   </div>
 
@@ -648,6 +649,7 @@
     <div id="panel-rentals" class="tab-panel"></div>
     <div id="panel-revenue" class="tab-panel"></div>
     <div id="panel-details" class="tab-panel"></div>
+    <div id="panel-storagepilot" class="tab-panel"></div>
     <div id="panel-trends" class="tab-panel"></div>
   </main>
 </div>
@@ -860,6 +862,13 @@ function getBudgetTotals() {
 
 async function refreshData() {
   if (IS_DEMO) { renderAll(); return; }
+
+  // Refresh StoragePilot CSVs alongside MIS data
+  loadStoragePilotData().then(() => {
+    if (document.getElementById('panel-storagepilot')?.classList.contains('active')) {
+      renderStoragePilot();
+    }
+  });
 
   setStatus('loading', 'Checking for today\'s data…');
   const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
@@ -1169,6 +1178,7 @@ function renderAll() {
   renderRentals();
   renderRevenue();
   renderDetails();
+  renderStoragePilot();
   renderTrends();
 }
 
@@ -2096,6 +2106,229 @@ function renderDetails() {
 }
 
 // ─────────────────────────────────────────────
+// STORAGEPILOT TAB
+// ─────────────────────────────────────────────
+let SP_DATA = {
+  byLocation: null,
+  byCategory: null,
+  escalationsByCategory: null
+};
+
+// Simple CSV parser — assumes no quoted commas, trims whitespace
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return { headers: [], rows: [] };
+  const headers = lines[0].split(',').map(h => h.trim());
+  const rows = lines.slice(1).map(line => {
+    const cells = line.split(',').map(c => c.trim());
+    const row = {};
+    headers.forEach((h, i) => {
+      const raw = cells[i];
+      // First column is date string; everything else is a number
+      row[h] = i === 0 ? raw : (raw === '' ? 0 : Number(raw));
+    });
+    return row;
+  });
+  return { headers, rows };
+}
+
+// Parse M/D/YYYY format — returns {year, month, day} or null
+function parseSpDate(s) {
+  if (!s) return null;
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  return { year: Number(m[3]), month: Number(m[1]), day: Number(m[2]) };
+}
+
+// Filter rows to April 2026 through today (MTD semantics)
+function filterToAprilMTD(rows) {
+  const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth() + 1;
+  const todayDay = today.getDate();
+
+  return rows.filter(r => {
+    const d = parseSpDate(r.date);
+    if (!d) return false;
+    if (d.year !== 2026 || d.month !== 4) return false;
+    // Keep days <= today if we're in April; keep all April days if we're past April
+    if (todayYear === 2026 && todayMonth === 4) {
+      return d.day <= todayDay;
+    }
+    return todayYear > 2026 || (todayYear === 2026 && todayMonth > 4);
+  });
+}
+
+async function loadStoragePilotData() {
+  const files = [
+    { key: 'byLocation', path: 'data/storagepilot/conversations_by_location.csv' },
+    { key: 'byCategory', path: 'data/storagepilot/conversations_by_category.csv' },
+    { key: 'escalationsByCategory', path: 'data/storagepilot/escalations_by_category.csv' }
+  ];
+
+  await Promise.all(files.map(async (f) => {
+    try {
+      const resp = await fetch(f.path + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!resp.ok) { SP_DATA[f.key] = null; return; }
+      const text = await resp.text();
+      SP_DATA[f.key] = parseCSV(text);
+    } catch (e) {
+      console.log(`StoragePilot: failed to load ${f.path}:`, e.message);
+      SP_DATA[f.key] = null;
+    }
+  }));
+}
+
+function renderStoragePilot() {
+  const panel = document.getElementById('panel-storagepilot');
+  if (!panel) return;
+
+  // Gate to Netherlands portfolio view only
+  if (CURRENT_COUNTRY !== 'nl' || CURRENT_SITE !== 'all') {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🇳🇱</div>
+        <p>StoragePilot data is available for the Netherlands portfolio view only.<br>
+        Select <strong>Netherlands</strong> and <strong>All Sites</strong> to view.</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (!SP_DATA.byLocation || !SP_DATA.byCategory || !SP_DATA.escalationsByCategory) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">💬</div>
+        <p>StoragePilot data not yet loaded.<br>
+        Upload CSVs to <code>data/storagepilot/</code> in the repo.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const locRows = filterToAprilMTD(SP_DATA.byLocation.rows);
+  const catRows = filterToAprilMTD(SP_DATA.byCategory.rows);
+  const escRows = filterToAprilMTD(SP_DATA.escalationsByCategory.rows);
+
+  if (locRows.length === 0) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">📅</div>
+        <p>No April 2026 data found in the CSVs.<br>
+        Check the date column format (expected <code>M/D/YYYY</code>).</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Chart 1: Conversations by Location — sum each store column across April rows
+  const locHeaders = SP_DATA.byLocation.headers.filter(h =>
+    h !== 'date' && h !== 'total' && h !== 'Company'
+  );
+  const locTotals = locHeaders.map(h => ({
+    store: h,
+    total: locRows.reduce((s, r) => s + (r[h] || 0), 0)
+  })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+
+  // Chart 2: Conversations by Category — sum each category column
+  const catHeaders = SP_DATA.byCategory.headers.filter(h =>
+    h !== 'date' && h !== 'total'
+  );
+  const catTotals = catHeaders.map(h => ({
+    category: h.replace(/_/g, ' '),
+    categoryRaw: h,
+    total: catRows.reduce((s, r) => s + (r[h] || 0), 0)
+  })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+
+  // Chart 3: Escalation Rate by Category — escalations / conversations per category
+  const escTotalsByKey = {};
+  catHeaders.forEach(h => {
+    escTotalsByKey[h] = escRows.reduce((s, r) => s + (r[h] || 0), 0);
+  });
+  const escRates = catTotals.map(c => {
+    const esc = escTotalsByKey[c.categoryRaw] || 0;
+    const rate = c.total > 0 ? (esc / c.total * 100) : 0;
+    return { category: c.category, conversations: c.total, escalations: esc, rate };
+  }).filter(x => x.conversations >= 5) // drop low-volume noise
+    .sort((a, b) => b.rate - a.rate);
+
+  // KPIs
+  const totalConv = catTotals.reduce((s, c) => s + c.total, 0);
+  const totalEsc = Object.values(escTotalsByKey).reduce((s, v) => s + v, 0);
+  const escRatePortfolio = totalConv > 0 ? (totalEsc / totalConv * 100) : 0;
+  const topCategory = catTotals[0] ? catTotals[0].category : '—';
+  const avgPerDay = locRows.length > 0 ? (totalConv / locRows.length) : 0;
+
+  panel.innerHTML = `
+    <div class="grid-4" style="margin-bottom:12px">
+      <div class="stat-card" style="text-align:center">
+        <div class="label">TOTAL CONVERSATIONS</div>
+        <div class="value">${fmt(totalConv)}</div>
+        <div class="sub">April MTD • ${locRows.length} days</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">ESCALATIONS</div>
+        <div class="value amber">${fmt(totalEsc)}</div>
+        <div class="sub">${fmt(escRatePortfolio, 1)}% of conversations</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">TOP CATEGORY</div>
+        <div class="value" style="font-size:20px">${topCategory}</div>
+        <div class="sub">${catTotals[0] ? fmt(catTotals[0].total) + ' conversations' : ''}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">AVG PER DAY</div>
+        <div class="value">${fmt(avgPerDay, 1)}</div>
+        <div class="sub">Portfolio-wide</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Conversations by Location (April MTD)</div>
+      <div style="position:relative;height:${Math.max(280, locTotals.length * 22)}px"><canvas id="ch-sp-location"></canvas></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Conversations by Category (April MTD)</div>
+        <div style="position:relative;height:320px"><canvas id="ch-sp-category"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Escalation Rate by Category (April MTD)</div>
+        <div style="position:relative;height:320px"><canvas id="ch-sp-escalation"></canvas></div>
+        <div style="font-size:10px;color:var(--muted-2);margin-top:8px;text-align:center">
+          Categories with fewer than 5 conversations excluded
+        </div>
+      </div>
+    </div>
+  `;
+
+  nextTick(() => {
+    // Chart 1 — horizontal bar, sorted descending
+    mkHBarChart('ch-sp-location',
+      locTotals.map(x => x.store),
+      [{ label: '', data: locTotals.map(x => x.total), color: '#8b5cf6' }],
+      v => v
+    );
+
+    // Chart 2 — donut for category distribution
+    const catColors = ['#16a34a', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6', '#6b7280', '#9ca3af'];
+    mkDonut('ch-sp-category',
+      catTotals.map(c => c.category),
+      catTotals.map(c => c.total),
+      catTotals.map((_, i) => catColors[i % catColors.length])
+    );
+
+    // Chart 3 — horizontal bar of escalation rate %
+    mkHBarChart('ch-sp-escalation',
+      escRates.map(x => x.category),
+      [{ label: '', data: escRates.map(x => Number(x.rate.toFixed(1))), color: '#f97316' }],
+      v => v + '%'
+    );
+  });
+}
+
+// ─────────────────────────────────────────────
 // TRENDS TAB
 // ─────────────────────────────────────────────
 function renderTrends() {
@@ -2774,6 +3007,9 @@ window.addEventListener('load', async () => {
   const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
   if (hist) HISTORY_DATA = hist;
   if (budgets) BUDGET_DATA = budgets;
+
+  // StoragePilot CSVs (best-effort; tab handles missing files gracefully)
+  loadStoragePilotData();
 
   if (cached) {
     IS_DEMO = false;
