@@ -639,8 +639,9 @@
     <button class="tab-btn" onclick="switchTab('rentals')" id="tab-rentals">Rentals</button>
     <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
     <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
-    <button class="tab-btn" onclick="switchTab('storagepilot')" id="tab-storagepilot">StoragePilot</button>
     <button class="tab-btn" onclick="switchTab('trends')" id="tab-trends">Trends</button>
+    <button class="tab-btn" onclick="switchTab('storagepilot')" id="tab-storagepilot">StoragePilot</button>
+    <button class="tab-btn" onclick="switchTab('siteware')" id="tab-siteware">SiteWare</button>
   </div>
 
   <main>
@@ -649,8 +650,9 @@
     <div id="panel-rentals" class="tab-panel"></div>
     <div id="panel-revenue" class="tab-panel"></div>
     <div id="panel-details" class="tab-panel"></div>
-    <div id="panel-storagepilot" class="tab-panel"></div>
     <div id="panel-trends" class="tab-panel"></div>
+    <div id="panel-storagepilot" class="tab-panel"></div>
+    <div id="panel-siteware" class="tab-panel"></div>
   </main>
 </div>
 
@@ -867,6 +869,13 @@ async function refreshData() {
   loadStoragePilotData().then(() => {
     if (document.getElementById('panel-storagepilot')?.classList.contains('active')) {
       renderStoragePilot();
+    }
+  });
+
+  // Refresh SiteWare audit data
+  loadSiteWareData().then(() => {
+    if (document.getElementById('panel-siteware')?.classList.contains('active')) {
+      renderSiteWare();
     }
   });
 
@@ -1180,6 +1189,7 @@ function renderAll() {
   renderDetails();
   renderStoragePilot();
   renderTrends();
+  renderSiteWare();
 }
 
 // ─────────────────────────────────────────────
@@ -2196,6 +2206,251 @@ async function loadStoragePilotData() {
   }));
 }
 
+// ─────────────────────────────────────────────
+// SITEWARE
+// ─────────────────────────────────────────────
+let SW_DATA = {
+  audits: null
+};
+
+async function loadSiteWareData() {
+  try {
+    const resp = await fetch('data/siteware/siteware_audits.csv?t=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) { SW_DATA.audits = null; return; }
+    const text = await resp.text();
+    SW_DATA.audits = parseCSV(text);
+  } catch (e) {
+    console.log('SiteWare: failed to load audits CSV:', e.message);
+    SW_DATA.audits = null;
+  }
+}
+
+// Parse a percent string like "40.63 %" or "40.63%" or "40.63" into a number
+function parseSwPct(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  const s = String(v).replace('%', '').trim();
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// Normalize a grade string ("Grade F", "F", " grade  f ") → "F" / "A" / ...
+function parseSwGrade(v) {
+  if (!v) return '—';
+  const s = String(v).toUpperCase().replace('GRADE', '').trim();
+  if (['A', 'B', 'C', 'D', 'F'].includes(s)) return s;
+  return '—';
+}
+
+function swGradeColor(g) {
+  switch (g) {
+    case 'A': return '#16a34a';   // green
+    case 'B': return '#3b82f6';   // blue
+    case 'C': return '#f59e0b';   // yellow/amber
+    case 'D': return '#f97316';   // orange
+    case 'F': return '#ef4444';   // red
+    default:  return '#6b7280';   // gray for missing
+  }
+}
+
+function swGradeBadge(g, size) {
+  const color = swGradeColor(g);
+  const bg = color + '22';  // light tint
+  const px = size === 'lg' ? 'font-size:42px;padding:14px 22px' : 'font-size:13px;padding:3px 10px';
+  return `<span style="display:inline-block;font-weight:700;border-radius:8px;background:${bg};color:${color};${px}">${g}</span>`;
+}
+
+// Match CURRENT_SITE to a SiteWare row (reuses StoragePilot's matcher approach)
+function matchSwRow(rows, siteName) {
+  if (!rows || !siteName) return null;
+  const normalize = s => String(s || '')
+    .toLowerCase()
+    .replace(/^1box\s+/i, '')
+    .trim();
+  const target = normalize(siteName);
+  return rows.find(r => {
+    const csvNorm = normalize(r['Site Name']);
+    const aliased = STORE_ALIASES[csvNorm] || csvNorm;
+    return aliased === target;
+  }) || null;
+}
+
+function renderSiteWare() {
+  const panel = document.getElementById('panel-siteware');
+  if (!panel) return;
+
+  // Per-store view
+  if (CURRENT_SITE !== 'all') {
+    renderSiteWareStore(panel);
+    return;
+  }
+
+  // Portfolio view — NL only for now (same gate as StoragePilot)
+  if (CURRENT_COUNTRY !== 'nl') {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🇳🇱</div>
+        <p>SiteWare audit data is available for the Netherlands portfolio only.<br>
+        Select <strong>Netherlands</strong> to view.</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (!SW_DATA.audits || !SW_DATA.audits.rows.length) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">📋</div>
+        <p>SiteWare audit data not yet loaded.<br>
+        Upload <code>siteware_audits.csv</code> to <code>data/siteware/</code>.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const rows = SW_DATA.audits.rows
+    .filter(r => r['Site Name'])
+    .map(r => ({
+      site: r['Site Name'],
+      template: r['Template Name'] || '—',
+      audit: r['Audit Title'] || '—',
+      inProgress: parseSwPct(r['In Progress %']),
+      completed: parseSwPct(r['Completed %']),
+      grade: parseSwGrade(r['Audit Grade'])
+    }));
+
+  const totalSites = rows.length;
+  const avgCompleted = totalSites > 0 ? rows.reduce((s, r) => s + r.completed, 0) / totalSites : 0;
+  const avgInProgress = totalSites > 0 ? rows.reduce((s, r) => s + r.inProgress, 0) / totalSites : 0;
+  const failingCount = rows.filter(r => r.grade === 'F').length;
+
+  // Sort: F first (most urgent), then D, C, B, A, then unknown — stable by site name
+  const gradeOrder = { 'F': 0, 'D': 1, 'C': 2, 'B': 3, 'A': 4, '—': 5 };
+  rows.sort((a, b) => {
+    const go = (gradeOrder[a.grade] || 99) - (gradeOrder[b.grade] || 99);
+    if (go !== 0) return go;
+    return a.completed - b.completed;
+  });
+
+  const tableRows = rows.map(r => `
+    <tr>
+      <td style="font-weight:600">${r.site}</td>
+      <td style="color:var(--muted-2);font-size:12px">${r.template}</td>
+      <td style="text-align:right">${fmt(r.inProgress, 2)}%</td>
+      <td style="text-align:right">${fmt(r.completed, 2)}%</td>
+      <td style="text-align:center">${swGradeBadge(r.grade, 'sm')}</td>
+    </tr>
+  `).join('');
+
+  panel.innerHTML = `
+    <div class="grid-4" style="margin-bottom:12px">
+      <div class="stat-card" style="text-align:center">
+        <div class="label">SITES AUDITED</div>
+        <div class="value">${fmt(totalSites)}</div>
+        <div class="sub">Netherlands portfolio</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">AVG COMPLETED</div>
+        <div class="value">${fmt(avgCompleted, 1)}%</div>
+        <div class="sub">Across all audits</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">AVG IN PROGRESS</div>
+        <div class="value">${fmt(avgInProgress, 1)}%</div>
+        <div class="sub">Across all audits</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">FAILING SITES</div>
+        <div class="value" style="color:${failingCount > 0 ? '#ef4444' : 'inherit'}">${fmt(failingCount)}</div>
+        <div class="sub">Grade F</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Audit Status by Site (sorted worst → best)</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);color:var(--muted-2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">
+              <th style="text-align:left;padding:10px 8px">Site</th>
+              <th style="text-align:left;padding:10px 8px">Template</th>
+              <th style="text-align:right;padding:10px 8px">In Progress</th>
+              <th style="text-align:right;padding:10px 8px">Completed</th>
+              <th style="text-align:center;padding:10px 8px">Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows.replace(/<tr>/g, '<tr style="border-bottom:1px solid var(--border)">')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderSiteWareStore(panel) {
+  if (!SW_DATA.audits || !SW_DATA.audits.rows.length) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">📋</div>
+        <p>SiteWare audit data not yet loaded.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const row = matchSwRow(SW_DATA.audits.rows, CURRENT_SITE);
+
+  if (!row) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🔍</div>
+        <p>No SiteWare audit data found for <strong>${CURRENT_SITE}</strong>.<br>
+        This site may not have an audit yet, or the site name in the CSV doesn't match.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const inProgress = parseSwPct(row['In Progress %']);
+  const completed = parseSwPct(row['Completed %']);
+  const grade = parseSwGrade(row['Audit Grade']);
+  const template = row['Template Name'] || '—';
+  const audit = row['Audit Title'] || '—';
+
+  panel.innerHTML = `
+    <div class="grid-4" style="margin-bottom:12px">
+      <div class="stat-card" style="text-align:center">
+        <div class="label">IN PROGRESS</div>
+        <div class="value">${fmt(inProgress, 2)}%</div>
+        <div class="sub">${CURRENT_SITE}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">COMPLETED</div>
+        <div class="value">${fmt(completed, 2)}%</div>
+        <div class="sub">Audit completion</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">AUDIT GRADE</div>
+        <div class="value" style="font-size:28px;color:${swGradeColor(grade)}">${grade}</div>
+        <div class="sub">Current assessment</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">TEMPLATE</div>
+        <div class="value" style="font-size:13px;line-height:1.3">${template}</div>
+        <div class="sub">${audit}</div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;padding:40px 20px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted-2);margin-bottom:16px">Audit Grade — ${CURRENT_SITE}</div>
+      ${swGradeBadge(grade, 'lg')}
+      <div style="margin-top:20px;font-size:13px;color:var(--muted-2)">
+        ${fmt(completed, 2)}% completed &nbsp;·&nbsp; ${fmt(inProgress, 2)}% in progress
+      </div>
+    </div>
+  `;
+}
+
 // Match a CURRENT_SITE value (e.g. '1BOX Breda') to a Store entry in the
 // per-store category CSV (e.g. 'Breda'). Case-insensitive, strips a leading
 // '1BOX '/'1Box ' prefix from the site name before comparing.
@@ -3165,6 +3420,9 @@ window.addEventListener('load', async () => {
 
   // StoragePilot CSVs (best-effort; tab handles missing files gracefully)
   loadStoragePilotData();
+
+  // SiteWare audit CSV (best-effort; tab handles missing file gracefully)
+  loadSiteWareData();
 
   if (cached) {
     IS_DEMO = false;
