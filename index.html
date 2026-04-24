@@ -2126,14 +2126,21 @@ let SP_DATA = {
 };
 
 // Simple CSV parser — assumes no quoted commas, trims whitespace
-// String columns: 'date', 'Date', 'Store', 'Company'. Everything else = number.
+// String columns: date-like, and known text columns used across tabs.
+// Any value that fails to parse as a finite number also falls back to the raw string.
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   if (lines.length < 2) return { headers: [], rows: [] };
   let headers = lines[0].split(',').map(h => h.trim());
   // Strip trailing empty headers (Excel exports often pad with empty columns)
   while (headers.length > 0 && headers[headers.length - 1] === '') headers.pop();
-  const stringCols = new Set(['date', 'Date', 'Store', 'Company']);
+  const stringCols = new Set([
+    'date', 'Date',
+    'Store', 'Company',
+    // SiteWare
+    'Site Name', 'Template Name', 'Audit Title', 'Audit Grade',
+    'In Progress %', 'Completed %'
+  ]);
   const rows = lines.slice(1).map(line => {
     const cells = line.split(',').map(c => c.trim());
     const row = {};
@@ -2142,7 +2149,12 @@ function parseCSV(text) {
       if (stringCols.has(h)) {
         row[h] = raw || '';
       } else {
-        row[h] = (raw === undefined || raw === '') ? 0 : Number(raw);
+        if (raw === undefined || raw === '') {
+          row[h] = 0;
+        } else {
+          const n = Number(raw);
+          row[h] = Number.isFinite(n) ? n : raw;
+        }
       }
     });
     return row;
