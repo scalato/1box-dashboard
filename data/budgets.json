@@ -1550,7 +1550,7 @@
         "occupancy_pct": 77.41
       }
     },
-    "FR-03-M\u00e9rignac": {
+    "FR-03-Mérignac": {
       "2026-01": {
         "revenue": 31366,
         "occupancy_pct": 49.76
@@ -1600,5 +1600,7 @@
         "occupancy_pct": 67.73
       }
     }
-  }
+  },
+  "last_updated": "2026-04-28T18:31:40.520044",
+  "source": "Budget_2026_master.xlsx"
 }
