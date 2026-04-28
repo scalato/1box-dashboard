@@ -3260,6 +3260,130 @@ function renderStoragePilotStore(panel) {
 // ─────────────────────────────────────────────
 // TRENDS TAB
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// COMPETITOR RATES (StorTrack daily pull)
+// ─────────────────────────────────────────────
+// CSVs at data/competitors/<site_key>.csv with one row per day:
+//   date, 1box_rate, shurgard_rate, allsafe_rate, other_rate, ...
+// The puller (fetch_competitor_rates.py) writes these daily; the dashboard
+// reads them and renders a line chart on the Trends tab for per-site NL views.
+const COMPETITOR_CACHE = {};
+
+async function loadCompetitorCsv(siteKey) {
+  if (!siteKey) return null;
+  if (COMPETITOR_CACHE[siteKey] !== undefined) return COMPETITOR_CACHE[siteKey];
+
+  try {
+    const resp = await fetch(`data/competitors/${siteKey}.csv?t=${Date.now()}`, { cache: 'no-store' });
+    if (!resp.ok) {
+      COMPETITOR_CACHE[siteKey] = null;
+      return null;
+    }
+    const text = (await resp.text()).trim();
+    if (!text) { COMPETITOR_CACHE[siteKey] = null; return null; }
+    const parsed = parseCSV(text);
+    if (!parsed.rows.length) { COMPETITOR_CACHE[siteKey] = null; return null; }
+    COMPETITOR_CACHE[siteKey] = parsed;
+    return parsed;
+  } catch (e) {
+    console.log(`Competitor: failed to load ${siteKey}:`, e.message);
+    COMPETITOR_CACHE[siteKey] = null;
+    return null;
+  }
+}
+
+function injectCompetitorChart(siteKey) {
+  const slot = document.getElementById('trends-competitor-slot');
+  if (!slot) return;
+
+  // Show placeholder card while we fetch
+  slot.innerHTML = `
+    <div class="section-gap"></div>
+    <div class="card" id="comp-rate-card" style="opacity:0.6">
+      <div class="card-title">Competitor Rates — Blended €/m² (5 km radius)</div>
+      <div class="chart-wrap-lg" style="display:flex;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px">Loading…</div>
+    </div>
+  `;
+
+  loadCompetitorCsv(siteKey).then(data => {
+    const card = document.getElementById('comp-rate-card');
+    if (!card) return;
+
+    if (!data || !data.rows.length) {
+      card.style.opacity = '1';
+      card.innerHTML = `
+        <div class="card-title">Competitor Rates — Blended €/m² (5 km radius)</div>
+        <div class="chart-wrap-lg" style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px;text-align:center;padding:20px">
+          <div style="font-size:32px;margin-bottom:10px;opacity:0.4">📊</div>
+          <div>No competitor data yet for this site.</div>
+          <div style="margin-top:6px">Run <code>fetch_competitor_rates.py</code> daily; chart appears once data accumulates.</div>
+        </div>
+      `;
+      return;
+    }
+
+    // Sort by date ascending
+    const rows = data.rows.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+
+    const labels = rows.map(r => {
+      const d = String(r.date);
+      // YYYY-MM-DD -> "Apr 27"
+      const parts = d.split('-');
+      if (parts.length === 3) {
+        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return names[parseInt(parts[1],10)-1] + ' ' + parseInt(parts[2],10);
+      }
+      return d;
+    });
+
+    const series = [
+      { label: '1BOX',     key: '1box_rate',     color: '#16a34a' },
+      { label: 'Shurgard', key: 'shurgard_rate', color: '#3b82f6' },
+      { label: 'AllSafe',  key: 'allsafe_rate',  color: '#f97316' },
+      { label: 'Other',    key: 'other_rate',    color: '#9ca3af' }
+    ];
+
+    const datasets = series.map(s => ({
+      label: s.label,
+      data: rows.map(r => {
+        const v = r[s.key];
+        if (v === '' || v === null || v === undefined) return null;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+      }),
+      color: s.color
+    })).filter(ds => ds.data.some(v => v !== null));
+
+    if (!datasets.length) {
+      card.style.opacity = '1';
+      card.innerHTML = `
+        <div class="card-title">Competitor Rates — Blended €/m² (5 km radius)</div>
+        <div class="chart-wrap-lg" style="display:flex;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px">Data file present but no rates parsed.</div>
+      `;
+      return;
+    }
+
+    const dayCount = rows.length;
+    const dayWord = dayCount === 1 ? 'day' : 'days';
+
+    card.style.opacity = '1';
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0">Competitor Rates — Blended €/m² (5 km radius)</div>
+        <div style="font-size:11px;color:var(--muted-2)">${dayCount} ${dayWord} of history</div>
+      </div>
+      <div class="chart-wrap-lg"><canvas id="ch-comp-rate"></canvas></div>
+    `;
+
+    nextTick(() => {
+      mkLineChart('ch-comp-rate', labels, datasets, {
+        yFmt: v => '€' + fmt(v, 2),
+        yMin: 0
+      });
+    });
+  });
+}
+
 function renderTrends() {
   const panel = document.getElementById('panel-trends');
   if (!panel) return;
@@ -3359,7 +3483,14 @@ function renderTrends() {
         <div class="chart-wrap-lg"><canvas id="ch-trend-rate"></canvas></div>
       </div>
     </div>
+    <div id="trends-competitor-slot"></div>
   `;
+
+  // Per-site NL: async-load competitor rates and inject below the 4 trend charts
+  if (!isAllSites && filteredSiteEntries.length === 1 && filteredSiteEntries[0].country === 'NL') {
+    const siteKey = filteredSiteEntries[0].site_key;
+    if (siteKey) injectCompetitorChart(siteKey);
+  }
 
   nextTick(() => {
     if (TRENDS_VIEW === 'portfolio') {
