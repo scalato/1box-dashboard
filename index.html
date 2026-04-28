@@ -3300,7 +3300,7 @@ function injectCompetitorChart(siteKey) {
   slot.innerHTML = `
     <div class="section-gap"></div>
     <div class="card" id="comp-rate-card" style="opacity:0.6">
-      <div class="card-title">Competitor Rates — Blended €/m² (5 km radius)</div>
+      <div class="card-title">Competitor Rates — €/m² by Store (5 km radius)</div>
       <div class="chart-wrap-lg" style="display:flex;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px">Loading…</div>
     </div>
   `;
@@ -3312,7 +3312,7 @@ function injectCompetitorChart(siteKey) {
     if (!data || !data.rows.length) {
       card.style.opacity = '1';
       card.innerHTML = `
-        <div class="card-title">Competitor Rates — Blended €/m² (5 km radius)</div>
+        <div class="card-title">Competitor Rates — €/m² by Store (5 km radius)</div>
         <div class="chart-wrap-lg" style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px;text-align:center;padding:20px">
           <div style="font-size:32px;margin-bottom:10px;opacity:0.4">📊</div>
           <div>No competitor data yet for this site.</div>
@@ -3322,12 +3322,76 @@ function injectCompetitorChart(siteKey) {
       return;
     }
 
-    // Sort by date ascending
-    const rows = data.rows.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    // Long-format rows: { date, brand, store_label, store_id, rate, unit_count }
+    // Build:
+    //   - Sorted unique dates (x-axis)
+    //   - Per-store time series (y-values keyed by date)
+    const allDates = [...new Set(data.rows.map(r => String(r.date)))].sort();
 
-    const labels = rows.map(r => {
-      const d = String(r.date);
-      // YYYY-MM-DD -> "Apr 27"
+    // Group rows by store_id (preferred — labels can drift, ids are stable)
+    const stores = {};
+    for (const r of data.rows) {
+      const id = String(r.store_id || r.store_label || '');
+      if (!id) continue;
+      const rate = Number(r.rate);
+      if (!Number.isFinite(rate)) continue;
+      if (!stores[id]) {
+        stores[id] = {
+          brand: String(r.brand || 'other').toLowerCase(),
+          // Use the most recent label seen for this store id
+          label: String(r.store_label || id),
+          byDate: {}
+        };
+      } else {
+        stores[id].label = String(r.store_label || stores[id].label);
+      }
+      stores[id].byDate[String(r.date)] = rate;
+    }
+
+    // Drop "other" entirely (puller already filters, but defensive)
+    const storeList = Object.entries(stores)
+      .map(([id, s]) => ({ id, ...s }))
+      .filter(s => s.brand === '1box' || s.brand === 'shurgard' || s.brand === 'allsafe');
+
+    if (!storeList.length) {
+      card.style.opacity = '1';
+      card.innerHTML = `
+        <div class="card-title">Competitor Rates — €/m² by Store (5 km radius)</div>
+        <div class="chart-wrap-lg" style="display:flex;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px">No 1Box / Shurgard / AllSafe data parsed.</div>
+      `;
+      return;
+    }
+
+    // Sort: 1box first, then shurgard, then allsafe; within each, alphabetical by label
+    const brandOrder = { '1box': 0, 'shurgard': 1, 'allsafe': 2 };
+    storeList.sort((a, b) =>
+      (brandOrder[a.brand] - brandOrder[b.brand]) || a.label.localeCompare(b.label)
+    );
+
+    // Color palettes per brand. 1BOX = thick green; Shurgard = blues; AllSafe = oranges.
+    const SHURGARD_PALETTE = ['#1d4ed8', '#3b82f6', '#60a5fa', '#93c5fd', '#1e40af'];
+    const ALLSAFE_PALETTE  = ['#c2410c', '#ea580c', '#f97316', '#fb923c', '#fdba74'];
+    const ONE_BOX_COLOR    = '#16a34a';
+
+    let shurgardIdx = 0, allsafeIdx = 0;
+    const datasets = storeList.map(s => {
+      const data = allDates.map(d => (d in s.byDate ? s.byDate[d] : null));
+      let color, lineWidth;
+      if (s.brand === '1box') {
+        color = ONE_BOX_COLOR;
+        lineWidth = 3;
+      } else if (s.brand === 'shurgard') {
+        color = SHURGARD_PALETTE[shurgardIdx++ % SHURGARD_PALETTE.length];
+        lineWidth = 1.5;
+      } else {
+        color = ALLSAFE_PALETTE[allsafeIdx++ % ALLSAFE_PALETTE.length];
+        lineWidth = 1.5;
+      }
+      return { label: s.label, data, color, lineWidth };
+    });
+
+    // Build x-axis labels from dates
+    const labels = allDates.map(d => {
       const parts = d.split('-');
       if (parts.length === 3) {
         const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -3336,41 +3400,15 @@ function injectCompetitorChart(siteKey) {
       return d;
     });
 
-    const series = [
-      { label: '1BOX',     key: '1box_rate',     color: '#16a34a' },
-      { label: 'Shurgard', key: 'shurgard_rate', color: '#3b82f6' },
-      { label: 'AllSafe',  key: 'allsafe_rate',  color: '#f97316' },
-      { label: 'Other',    key: 'other_rate',    color: '#9ca3af' }
-    ];
-
-    const datasets = series.map(s => ({
-      label: s.label,
-      data: rows.map(r => {
-        const v = r[s.key];
-        if (v === '' || v === null || v === undefined) return null;
-        const n = Number(v);
-        return Number.isFinite(n) ? n : null;
-      }),
-      color: s.color
-    })).filter(ds => ds.data.some(v => v !== null));
-
-    if (!datasets.length) {
-      card.style.opacity = '1';
-      card.innerHTML = `
-        <div class="card-title">Competitor Rates — Blended €/m² (5 km radius)</div>
-        <div class="chart-wrap-lg" style="display:flex;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px">Data file present but no rates parsed.</div>
-      `;
-      return;
-    }
-
-    const dayCount = rows.length;
+    const dayCount = allDates.length;
     const dayWord = dayCount === 1 ? 'day' : 'days';
+    const storeWord = storeList.length === 1 ? 'store' : 'stores';
 
     card.style.opacity = '1';
     card.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:0">Competitor Rates — Blended €/m² (5 km radius)</div>
-        <div style="font-size:11px;color:var(--muted-2)">${dayCount} ${dayWord} of history</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0">Competitor Rates — €/m² by Store (5 km radius)</div>
+        <div style="font-size:11px;color:var(--muted-2)">${storeList.length} ${storeWord} · ${dayCount} ${dayWord} of history</div>
       </div>
       <div class="chart-wrap-lg"><canvas id="ch-comp-rate"></canvas></div>
     `;
