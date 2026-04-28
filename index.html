@@ -2225,16 +2225,6 @@ function renderOccupancy() {
   const total = agg('occupancy.total_units');
   const totalSqm = agg('occupancy.total_sqm');
   const rentedSqm = agg('occupancy.rented_sqm');
-  const business = agg('occupancy.business_units');
-  const priv = agg('occupancy.private_units');
-  const locked = agg('occupancy.locked_units');
-  const terminated = agg('occupancy.terminated_units');
-  const reserved = agg('occupancy.reserved_units');
-  const ood = agg('occupancy.out_of_order_units');
-
-  // Business SQM estimate (proportional)
-  const bizSqm = rented > 0 ? Math.round((business / rented) * rentedSqm) : 0;
-  const privSqm = rentedSqm - bizSqm;
 
   document.getElementById('panel-occupancy').innerHTML = `
     <div class="grid-3" style="margin-bottom:12px">
@@ -2254,39 +2244,214 @@ function renderOccupancy() {
         <div class="sub">${fmt(vacantSqm)} m² available</div>
       </div>
     </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Occupancy Breakdown</div>
-        <table class="data-table">
-          <thead><tr><th>STATUS</th><th class="num">UNITS</th><th class="num">%</th><th class="num">SURFACE</th><th class="num">SURF %</th></tr></thead>
-          <tbody>
-            <tr><td>Business</td><td class="num">${fmt(business)}</td><td class="num">${fmt(total?business/total*100:0, 1)}%</td><td class="num">${fmt(bizSqm)} m²</td><td class="num">${fmt(totalSqm?bizSqm/totalSqm*100:0, 1)}%</td></tr>
-            <tr><td>Private</td><td class="num">${fmt(priv)}</td><td class="num">${fmt(total?priv/total*100:0, 1)}%</td><td class="num">${fmt(privSqm)} m²</td><td class="num">${fmt(totalSqm?privSqm/totalSqm*100:0, 1)}%</td></tr>
-            <tr style="font-weight:600"><td>Total Rented</td><td class="num">${fmt(rented)}</td><td class="num">${fmt(unitPct, 1)}%</td><td class="num">${fmt(rentedSqm)} m²</td><td class="num">${fmt(surfPct, 1)}%</td></tr>
-            <tr><td>Locked</td><td class="num">${fmt(locked)}</td><td class="num">${fmt(total?locked/total*100:0, 1)}%</td><td class="num">${fmt(Math.round(locked*(rentedSqm/Math.max(rented,1))))} m²</td><td class="num">${fmt(totalSqm ? (locked*(rentedSqm/Math.max(rented,1)))/totalSqm*100 : 0, 1)}%</td></tr>
-            <tr><td>Terminated</td><td class="num">${fmt(terminated)}</td><td class="num">${fmt(total?terminated/total*100:0, 1)}%</td><td class="num">${fmt(Math.round(terminated*(rentedSqm/Math.max(rented,1))))} m²</td><td class="num">${fmt(totalSqm ? (terminated*(rentedSqm/Math.max(rented,1)))/totalSqm*100 : 0, 1)}%</td></tr>
-            <tr><td class="amber">Vacant</td><td class="num amber">${fmt(vacant)}</td><td class="num amber">${fmt(total?vacant/total*100:0, 1)}%</td><td class="num amber">${fmt(vacantSqm)} m²</td><td class="num amber">${fmt(totalSqm?vacantSqm/totalSqm*100:0, 1)}%</td></tr>
-            <tr><td>Reserved</td><td class="num">${fmt(reserved)}</td><td class="num">${fmt(total?reserved/total*100:0, 1)}%</td><td class="num">${fmt(Math.round(reserved*(rentedSqm/Math.max(rented,1))))} m²</td><td class="num">${fmt(totalSqm ? (reserved*(rentedSqm/Math.max(rented,1)))/totalSqm*100 : 0, 1)}%</td></tr>
-            <tr><td>Res. w/ Contract</td><td class="num">${fmt(0)}</td><td class="num">0,0%</td><td class="num">0 m²</td><td class="num">0,0%</td></tr>
-            <tr><td>Out of Order</td><td class="num">${fmt(ood)}</td><td class="num">${fmt(total?ood/total*100:0, 1)}%</td><td class="num">${fmt(Math.round(ood*(rentedSqm/Math.max(rented,1))))} m²</td><td class="num">${fmt(totalSqm ? (ood*(rentedSqm/Math.max(rented,1)))/totalSqm*100 : 0, 1)}%</td></tr>
-            <tr style="font-weight:600"><td>Total</td><td class="num">${fmt(total)}</td><td class="num">—</td><td class="num">${fmt(totalSqm)} m²</td><td class="num">—</td></tr>
-          </tbody>
-        </table>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px">
+        <div class="card-title" style="margin-bottom:0">Sqm Occupancy vs Budget</div>
+        <div style="display:flex;gap:14px;font-size:11px;color:var(--muted-2);align-items:center;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>≥80%</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#f97316;border-radius:2px"></span>50–80%</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px"></span>&lt;50%</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:0;border-top:2px dashed #1a1a1a"></span>Budget</span>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-title">Unit Distribution</div>
-        <div style="position:relative;height:320px"><canvas id="ch-occ-donut"></canvas></div>
-      </div>
+      <div class="chart-wrap-lg"><canvas id="ch-occ-vs-budget"></canvas></div>
     </div>
   `;
 
   nextTick(() => {
-    const labels = ['Rented', 'Vacant', 'Locked', 'Terminated', 'Reserved'];
-    const data = [rented, vacant, locked, terminated, reserved];
-    const colors = ['#16a34a', '#f97316', '#9ca3af', '#6b7280', '#8b5cf6'];
-    mkDonut('ch-occ-donut', labels, data, colors);
+    // Build month list: Jan 2026 through current month.
+    // History.json has Jan/Feb/Mar EOM snapshots; live FILTERED_DATA covers the current month.
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+    const currentMonthKey = `${currentYear}-${currentMonth}`;
+
+    const months = [];
+    let y = 2026, m = 1;
+    while (true) {
+      const mk = `${y}-${String(m).padStart(2, '0')}`;
+      months.push(mk);
+      if (mk === currentMonthKey) break;
+      m++;
+      if (m > 12) { m = 1; y++; }
+      // safety
+      if (months.length > 36) break;
+    }
+
+    // Filter history sites consistent with current scope (country + site)
+    const isAllSites = (CURRENT_SITE === 'all');
+    const histSites = HISTORY_DATA && HISTORY_DATA.sites
+      ? Object.values(HISTORY_DATA.sites).filter(s => {
+          if (s.is_rollup) return false;
+          if (!isAllSites) return s.name === CURRENT_SITE;
+          if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+          if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+          return true;
+        })
+      : [];
+
+    // Compute actual occupancy % per month (weighted by total_sqm across sites in scope)
+    const actualByMonth = {};
+    months.forEach(mk => {
+      if (mk === currentMonthKey) {
+        // Live data from FILTERED_DATA
+        const r = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.rented_sqm || 0), 0);
+        const t = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.total_sqm || 0), 0);
+        actualByMonth[mk] = t > 0 ? (r / t * 100) : null;
+      } else {
+        let r = 0, t = 0;
+        histSites.forEach(s => {
+          const e = (s.series || []).find(x => x.month === mk);
+          if (e?.occupancy) {
+            r += e.occupancy.rented_sqm || 0;
+            t += e.occupancy.total_sqm || 0;
+          }
+        });
+        actualByMonth[mk] = t > 0 ? (r / t * 100) : null;
+      }
+    });
+
+    // Compute budget % per month — weight each site's budgeted occupancy_pct by total_sqm
+    const budgetByMonth = {};
+    months.forEach(mk => {
+      let weighted = 0, totSqm = 0;
+      // Use sites in scope: prefer FILTERED_DATA for sqm weights (live), but if a site isn't in
+      // FILTERED_DATA (e.g. historical-only scope), fall back to history's last total_sqm.
+      const scopedSiteNames = isAllSites
+        ? histSites.map(s => s.name)
+        : [CURRENT_SITE];
+      scopedSiteNames.forEach(siteName => {
+        const key = siteKeyFromName(siteName);
+        if (!key || !BUDGET_DATA) return;
+        const mb = BUDGET_DATA.sites[key]?.[mk];
+        if (mb?.occupancy_pct === null || mb?.occupancy_pct === undefined) return;
+        // Sqm weighting: prefer FILTERED_DATA (live), else last known historical total_sqm
+        const liveRow = FILTERED_DATA.find(d => d.site_name === siteName);
+        let sqm = liveRow?.occupancy?.total_sqm || 0;
+        if (!sqm) {
+          const histSite = HISTORY_DATA?.sites?.[key];
+          if (histSite?.series?.length) {
+            sqm = histSite.series[histSite.series.length - 1]?.occupancy?.total_sqm || 0;
+          }
+        }
+        if (sqm <= 0) return;
+        weighted += (mb.occupancy_pct / 100) * sqm;
+        totSqm += sqm;
+      });
+      budgetByMonth[mk] = totSqm > 0 ? (weighted / totSqm * 100) : null;
+    });
+
+    const monthLabels = months.map(mk => {
+      const [yy, mm] = mk.split('-');
+      const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const label = names[parseInt(mm, 10) - 1];
+      const isMTD = (mk === currentMonthKey);
+      return isMTD ? `${label} '${yy.slice(2)} MTD` : `${label} '${yy.slice(2)}`;
+    });
+
+    const actualData = months.map(mk => actualByMonth[mk]);
+    const budgetData = months.map(mk => budgetByMonth[mk]);
+
+    // Bar colors per performance bucket
+    const barColors = actualData.map(v => {
+      if (v === null || v === undefined) return '#e5e7eb';
+      if (v >= 80) return '#16a34a';
+      if (v >= 50) return '#f97316';
+      return '#ef4444';
+    });
+
+    mkOccVsBudgetChart('ch-occ-vs-budget', monthLabels, actualData, budgetData, barColors);
   });
 }
+
+// Bar chart of actual occupancy % per month (colored by bucket) with a dashed
+// budget line overlay. Budget rendered as a thin segment-line at the bar's top edge.
+function mkOccVsBudgetChart(id, labels, actualData, budgetData, barColors) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  // Per-month "budget marker" — a tiny horizontal bar drawn as a line at the budget level.
+  // Implemented as a line dataset with thick top borders and no fill. We render it as a
+  // dashed line connecting the budget points so you can see the trajectory too.
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Actual',
+          data: actualData,
+          backgroundColor: barColors,
+          borderRadius: 4,
+          borderSkipped: false,
+          maxBarThickness: 56,
+          order: 2
+        },
+        {
+          type: 'line',
+          label: 'Budget',
+          data: budgetData,
+          borderColor: '#1a1a1a',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          backgroundColor: 'transparent',
+          pointRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#1a1a1a',
+          pointBorderWidth: 2,
+          tension: 0,
+          spanGaps: true,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          borderColor: '#e5e7eb',
+          borderWidth: 1,
+          titleColor: '#1a1a1a',
+          bodyColor: '#1a1a1a',
+          titleFont: { family: 'Inter', size: 11, weight: '600' },
+          bodyFont: { family: 'Inter', size: 11 },
+          padding: 10,
+          callbacks: {
+            label: (ctx) => {
+              const v = ctx.parsed.y;
+              if (v === null || v === undefined) return `${ctx.dataset.label}: —`;
+              return `${ctx.dataset.label}: ${v.toFixed(1)}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          ticks: {
+            color: '#9ca3af',
+            font: { family: 'Inter', size: 10 },
+            stepSize: 25,
+            callback: v => v + '%'
+          },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        }
+      }
+    }
+  });
+}
+
 
 // ─────────────────────────────────────────────
 // RENTALS TAB
