@@ -1186,25 +1186,23 @@ function aggPct(num, den) {
   return d ? (n / d * 100) : 0;
 }
 
-// Net-of-transfers helpers. Move-ins and vacates from PDFs are GROSS — they
-// include unit-to-unit transfers within the same store. For revenue / customer-
-// acquisition reporting we want NET numbers. PDF labels:
-//   "New transfer"    -> transfers_in_<period>
-//   "Vacate transfer" -> transfers_out_<period>
-// Sites where transfer fields are missing/null are treated as zero, so the
-// math gracefully degrades to gross values when transfer data isn't available.
+// IMPORTANT: Claude extracts the MIS PDF rental rows so that move_ins_<period>
+// is already NET of transfers (i.e., "New total" - "New transfer"). Per-site
+// verification: Nijmegen-Wijchen PDF showed "New total month=17, New transfer
+// month=1"; the extracted JSON has move_ins_month=16. So the subtraction has
+// already happened during extraction. The transfers_in_<period> /
+// transfers_out_<period> fields are kept for reference but MUST NOT be
+// subtracted again here, or we double-subtract. Sum across 29 NL sites:
+// 434 MI / 414 MO / 20 Net -- matches Power BI exactly.
 function netMIFromRow(row, period) {
-  const r = row?.rentals || {};
-  return (r['move_ins_' + period] || 0) - (r['transfers_in_' + period] || 0);
+  return row?.rentals?.['move_ins_' + period] || 0;
 }
 function netMOFromRow(row, period) {
-  const r = row?.rentals || {};
-  return (r['vacates_' + period] || 0) - (r['transfers_out_' + period] || 0);
+  return row?.rentals?.['vacates_' + period] || 0;
 }
 function netNetFromRow(row, period) {
   return netMIFromRow(row, period) - netMOFromRow(row, period);
 }
-// Aggregations across FILTERED_DATA (current scope)
 function aggNetMI(period) {
   return FILTERED_DATA.reduce((s, d) => s + netMIFromRow(d, period), 0);
 }
@@ -1214,14 +1212,11 @@ function aggNetMO(period) {
 function aggNetNet(period) {
   return FILTERED_DATA.reduce((s, d) => s + netNetFromRow(d, period), 0);
 }
-// Same idea for a history series entry (one month of one site)
 function netMIFromHist(entry) {
-  const r = entry?.rentals || {};
-  return (r.move_ins_month || 0) - (r.transfers_in_month || 0);
+  return entry?.rentals?.move_ins_month || 0;
 }
 function netMOFromHist(entry) {
-  const r = entry?.rentals || {};
-  return (r.vacates_month || 0) - (r.transfers_out_month || 0);
+  return entry?.rentals?.vacates_month || 0;
 }
 function netNetFromHist(entry) {
   return netMIFromHist(entry) - netMOFromHist(entry);
@@ -1454,19 +1449,17 @@ function buildSiteContext(siteKey) {
       const ren = r.rentals || {};
       const rev = r.revenue || {};
       const arr = r.arrears || {};
-      // Net-of-transfers values for rental fields. Site-level transfers come from
-      // the MIS PDF "New transfer" / "Vacate transfer" rows.
-      const miNet = (ren.move_ins_month || 0) - (ren.transfers_in_month || 0);
-      const moNet = (ren.vacates_month || 0) - (ren.transfers_out_month || 0);
+      // move_ins_month is already net of transfers from extraction (see comment
+      // by netMIFromRow). Don't subtract transfers again.
       return {
         month: r.month,
         occupancy_unit_pct: occ.unit_pct,
         occupancy_sqm_pct: occ.surface_pct,
         rented_units: occ.rented_units,
         total_units: occ.total_units,
-        move_ins_month: miNet,
-        vacates_month: moNet,
-        net_rentals_month: miNet - moNet,
+        move_ins_month: ren.move_ins_month,
+        vacates_month: ren.vacates_month,
+        net_rentals_month: ren.net_month,
         revenue_net: rev.net_total,
         avg_rate_per_sqm: rev.avg_rate_per_sqm,
         arrears_outstanding: arr.outstanding_total,
