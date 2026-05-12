@@ -1222,6 +1222,37 @@ function netNetFromHist(entry) {
   return netMIFromHist(entry) - netMOFromHist(entry);
 }
 
+// Returns {monthKeys, monthNames, currentMonthKey} from Jan 2026 through today's
+// month. monthNames are short labels with the current month suffixed " MTD".
+// Used by all "history through current MTD" charts so they stay in sync as the
+// calendar advances. Once Jan 2027 rolls around, the list grows to include all
+// of 2026 + Jan 2027.
+function getDashboardMonths() {
+  const monthNamesShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
+  const currentMonthKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+  const monthKeys = [];
+  const monthNames = [];
+  let y = 2026, m = 1;
+  while (true) {
+    const mk = `${y}-${String(m).padStart(2, '0')}`;
+    monthKeys.push(mk);
+    const isCurrent = (mk === currentMonthKey);
+    const label = monthNamesShort[m - 1];
+    // Include the year only if we've crossed into 2027+
+    const yearSuffix = y > 2026 ? ` '${String(y).slice(2)}` : '';
+    monthNames.push(isCurrent ? `${label}${yearSuffix} MTD` : `${label}${yearSuffix}`);
+    if (mk === currentMonthKey) break;
+    m++;
+    if (m > 12) { m = 1; y++; }
+    if (monthKeys.length > 36) break; // safety
+  }
+  return { monthKeys, monthNames, currentMonthKey };
+}
+
 // ─────────────────────────────────────────────
 // RENDER ALL
 // ─────────────────────────────────────────────
@@ -1857,7 +1888,7 @@ function renderOverview() {
   // Variance now shown per-month inline (Revenue + Occupancy charts)
 
   // Move-Ins vs Move-Outs + Net Rentals (Portfolio view)
-  // Both are 4-month line charts: Jan-Mar historicals + Apr MTD dashed
+  // Both are dynamic-month line charts: history months solid + current MTD dashed
   const totalMI = aggNetMI('month');
   const totalMO = aggNetMO('month');
 
@@ -1971,12 +2002,12 @@ function renderOverview() {
 
   nextTick(() => {
     if (isAllSites && FILTERED_DATA.length > 1) {
-      // Revenue vs Budget — Jan/Feb/Mar/Apr/YTD grouped bars (Actual + Budget)
-      // with per-month variance shown under each bar group
+      // Revenue vs Budget — dynamic monthly grouped bars (history + current MTD) + YTD
+      // Variance shown under each bar group
       if (!revBudgetEmpty) {
         const revActualByMonth = {};
         const revBudgetByMonth = {};
-        const monthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
+        const { monthKeys, monthNames, currentMonthKey } = getDashboardMonths();
 
         if (HISTORY_DATA && HISTORY_DATA.sites) {
           const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
@@ -1985,7 +2016,7 @@ function renderOverview() {
             if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
             return true;
           });
-          monthKeys.slice(0, 3).forEach(mk => {
+          monthKeys.filter(mk => mk !== currentMonthKey).forEach(mk => {
             let sum = 0;
             histSites.forEach(s => {
               const e = (s.series || []).find(x => x.month === mk);
@@ -1995,7 +2026,7 @@ function renderOverview() {
           });
         }
 
-        revActualByMonth['2026-04'] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.net_total || 0), 0);
+        revActualByMonth[currentMonthKey] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.net_total || 0), 0);
 
         monthKeys.forEach(mk => {
           let sum = 0;
@@ -2021,7 +2052,6 @@ function renderOverview() {
           return sign + '€' + fmt(absVal, 0);
         };
 
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
         const labels = [
           ...monthKeys.map((mk, i) => [monthNames[i], fmtVar(revActualByMonth[mk] || 0, revBudgetByMonth[mk] || 0)]),
           ['YTD', fmtVar(ytdActual, ytdBudget)]
@@ -2033,14 +2063,14 @@ function renderOverview() {
         mkRevVarChart('ch-rev-budget', labels, actualData, budgetData);
       }
 
-      // Total Occupancy Actual vs Budget — 4-month grouped bars (Jan/Feb/Mar/Apr MTD)
+      // Total Occupancy Actual vs Budget — dynamic monthly grouped bars (history + current MTD)
       // No YTD column since occupancy is a point-in-time metric that doesn't aggregate
       if (!occBudgetEmpty) {
         const occActualByMonth = {};
         const occBudgetByMonth = {};
-        const occMonthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
+        const { monthKeys: occMonthKeys, monthNames: occMonthNames, currentMonthKey: occCurrentKey } = getDashboardMonths();
 
-        // Historical actuals (Jan/Feb/Mar) from history.json — weighted average
+        // Historical actuals from history.json — weighted average per month
         if (HISTORY_DATA && HISTORY_DATA.sites) {
           const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
             if (s.is_rollup) return false;
@@ -2048,7 +2078,7 @@ function renderOverview() {
             if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
             return true;
           });
-          occMonthKeys.slice(0, 3).forEach(mk => {
+          occMonthKeys.filter(mk => mk !== occCurrentKey).forEach(mk => {
             let rSqm = 0, tSqm = 0;
             histSites.forEach(s => {
               const e = (s.series || []).find(x => x.month === mk);
@@ -2061,10 +2091,10 @@ function renderOverview() {
           });
         }
 
-        // April Actual from live FILTERED_DATA — weighted average
-        const aprRentedSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.rented_sqm || 0), 0);
-        const aprTotalSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.total_sqm || 0), 0);
-        occActualByMonth['2026-04'] = aprTotalSqm > 0 ? (aprRentedSqm / aprTotalSqm * 100) : 0;
+        // Current month MTD from live FILTERED_DATA — weighted average
+        const currRentedSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.rented_sqm || 0), 0);
+        const currTotalSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.total_sqm || 0), 0);
+        occActualByMonth[occCurrentKey] = currTotalSqm > 0 ? (currRentedSqm / currTotalSqm * 100) : 0;
 
         // Budgets: weight each site's budget % by its total_sqm to get portfolio-weighted budget
         occMonthKeys.forEach(mk => {
@@ -2090,7 +2120,6 @@ function renderOverview() {
           return sign + fmt(Math.abs(v), 1) + ' pp';
         };
 
-        const occMonthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
         const occLabels = occMonthKeys.map((mk, i) => [
           occMonthNames[i],
           fmtOccVar(occActualByMonth[mk] || 0, occBudgetByMonth[mk] || 0)
@@ -2554,8 +2583,8 @@ function renderRentals() {
   `;
 
   nextTick(() => {
-    // Pull Jan/Feb/Mar historicals for MI/MO/Net; April from live FILTERED_DATA
-    const monthKeys = ['2026-01', '2026-02', '2026-03', '2026-04'];
+    // Pull historical months from history.json; current month MTD from live FILTERED_DATA
+    const { monthKeys, monthNames, currentMonthKey } = getDashboardMonths();
     const miByMonth = {};
     const moByMonth = {};
     const netByMonth = {};
@@ -2567,12 +2596,12 @@ function renderRentals() {
         if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
         return true;
       });
-      // Filter further by current site if single-site view
       const scopedSites = CURRENT_SITE === 'all'
         ? histSites
         : histSites.filter(s => s.name === CURRENT_SITE);
 
-      monthKeys.slice(0, 3).forEach(mk => {
+      // All months EXCEPT the current month come from history
+      monthKeys.filter(mk => mk !== currentMonthKey).forEach(mk => {
         let miSum = 0, moSum = 0, netSum = 0;
         scopedSites.forEach(s => {
           const e = (s.series || []).find(x => x.month === mk);
@@ -2588,10 +2617,10 @@ function renderRentals() {
       });
     }
 
-    // April MTD from live FILTERED_DATA (already filtered by country + site)
-    miByMonth['2026-04'] = aggNetMI('month');
-    moByMonth['2026-04'] = aggNetMO('month');
-    netByMonth['2026-04'] = miByMonth['2026-04'] - moByMonth['2026-04'];
+    // Current month MTD from live FILTERED_DATA
+    miByMonth[currentMonthKey] = aggNetMI('month');
+    moByMonth[currentMonthKey] = aggNetMO('month');
+    netByMonth[currentMonthKey] = miByMonth[currentMonthKey] - moByMonth[currentMonthKey];
 
     // YTD totals
     const ytdMI = monthKeys.reduce((s, mk) => s + (miByMonth[mk] || 0), 0);
@@ -2599,7 +2628,6 @@ function renderRentals() {
     const ytdNet = ytdMI - ytdMO;
 
     // Build labels with "Net: ±N" underneath each month
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr MTD'];
     const labels = [
       ...monthKeys.map((mk, i) => [
         monthNames[i],
