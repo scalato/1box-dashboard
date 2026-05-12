@@ -2622,22 +2622,14 @@ function renderRentals() {
     moByMonth[currentMonthKey] = aggNetMO('month');
     netByMonth[currentMonthKey] = miByMonth[currentMonthKey] - moByMonth[currentMonthKey];
 
-    // YTD totals
-    const ytdMI = monthKeys.reduce((s, mk) => s + (miByMonth[mk] || 0), 0);
-    const ytdMO = monthKeys.reduce((s, mk) => s + (moByMonth[mk] || 0), 0);
-    const ytdNet = ytdMI - ytdMO;
-
     // Build labels with "Net: ±N" underneath each month
-    const labels = [
-      ...monthKeys.map((mk, i) => [
-        monthNames[i],
-        (netByMonth[mk] >= 0 ? '+' : '') + netByMonth[mk]
-      ]),
-      ['YTD', (ytdNet >= 0 ? '+' : '') + ytdNet]
-    ];
+    const labels = monthKeys.map((mk, i) => [
+      monthNames[i],
+      (netByMonth[mk] >= 0 ? '+' : '') + netByMonth[mk]
+    ]);
 
-    const miData = [...monthKeys.map(mk => miByMonth[mk] || 0), ytdMI];
-    const moData = [...monthKeys.map(mk => moByMonth[mk] || 0), ytdMO];
+    const miData = monthKeys.map(mk => miByMonth[mk] || 0);
+    const moData = monthKeys.map(mk => moByMonth[mk] || 0);
 
     mkRentalActivityChart('ch-rental-activity', labels, miData, moData);
   });
