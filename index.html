@@ -3492,11 +3492,14 @@ function renderStoragePilot() {
     avgPerDay = daysInMonth > 0 ? (totalConv / daysInMonth) : 0;
   }
 
-  // Total escalations for current month (for the subtitle under the escalations chart)
+  // Total escalations for current month (for the subtitle under the escalations chart
+  // AND for the new Escalation Rate KPI card)
   let totalEsc = 0;
   if (escBucket && currentMonth && escBucket.byMonth[currentMonth]) {
     escBucket.catHeaders.forEach(h => { totalEsc += escBucket.byMonth[currentMonth][h] || 0; });
   }
+
+  const escRate = totalConv > 0 ? (totalEsc / totalConv * 100) : 0;
 
   const currentMonthDisplay = currentMonth ? monthLabel(currentMonth) : '—';
 
@@ -3513,9 +3516,9 @@ function renderStoragePilot() {
         <div class="sub">${topCount > 0 ? fmt(topCount) + ' conversations' : ''}</div>
       </div>
       <div class="stat-card" style="text-align:center">
-        <div class="label">AVG PER DAY</div>
-        <div class="value">${fmt(avgPerDay, 1)}</div>
-        <div class="sub">${currentMonthDisplay}</div>
+        <div class="label">ESCALATION RATE</div>
+        <div class="value ${escRate >= 60 ? 'red' : (escRate >= 40 ? 'amber' : 'green')}">${escBucket ? fmt(escRate, 1) + '%' : '—'}</div>
+        <div class="sub">${escBucket ? fmt(totalEsc) + ' of ' + fmt(totalConv) + ' calls' : 'Escalation data not loaded'}</div>
       </div>
     </div>
 
