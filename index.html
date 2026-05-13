@@ -3539,6 +3539,14 @@ function renderStoragePilot() {
         : `<div style="display:flex;align-items:center;justify-content:center;height:380px;color:var(--muted-2);font-size:12px">No escalation data available</div>`
       }
     </div>
+
+    ${escBucket ? `
+    <div class="section-gap"></div>
+    <div class="card" style="max-width:560px">
+      <div class="card-title">Escalation Rate by Month</div>
+      <div style="position:relative;height:240px"><canvas id="ch-sp-esc-rate"></canvas></div>
+    </div>
+    ` : ''}
   `;
 
   nextTick(() => {
@@ -3546,6 +3554,108 @@ function renderStoragePilot() {
     if (escMonths.length > 0 && escBucket) {
       mkMomCategoryChart('ch-sp-escalations-mom', escBucket, escMonths, prettyCategory, monthLabel);
     }
+    // Escalation rate per month: total escalations / total conversations (full
+    // totals including 'ignore' for both, to keep the rate apples-to-apples)
+    if (escBucket) {
+      const ratesByMonth = convMonths.map(mk => {
+        let conv = 0, esc = 0;
+        convBucket.catHeaders.forEach(h => { conv += convBucket.byMonth[mk]?.[h] || 0; });
+        if (escBucket.byMonth[mk]) {
+          escBucket.catHeaders.forEach(h => { esc += escBucket.byMonth[mk][h] || 0; });
+        }
+        return { mk, conv, esc, rate: conv > 0 ? (esc / conv * 100) : 0 };
+      });
+      mkEscRateChart('ch-sp-esc-rate', ratesByMonth, monthLabel);
+    }
+  });
+}
+
+// Small vertical bar chart of monthly escalation rates. Bars colored by rate
+// (green <40%, amber 40-60%, red ≥60%) with the % shown above each bar.
+function mkEscRateChart(canvasId, ratesByMonth, monthLabel) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (CHARTS[canvasId]) CHARTS[canvasId].destroy();
+
+  const labels = ratesByMonth.map(r => monthLabel(r.mk));
+  const data = ratesByMonth.map(r => r.rate);
+  const colors = ratesByMonth.map(r =>
+    r.rate >= 60 ? '#ef4444' : r.rate >= 40 ? '#f97316' : '#16a34a'
+  );
+
+  // Compute y-max with some headroom but cap at 100
+  const maxVal = Math.max(...data, 0);
+  const yMax = Math.min(100, Math.ceil((maxVal + 10) / 10) * 10);
+
+  CHARTS[canvasId] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderRadius: 4,
+        maxBarThickness: 64
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          borderColor: '#e5e7eb',
+          borderWidth: 1,
+          titleColor: '#1a1a1a',
+          bodyColor: '#1a1a1a',
+          titleFont: { family: 'Inter', size: 11, weight: '600' },
+          bodyFont: { family: 'Inter', size: 11 },
+          padding: 10,
+          callbacks: {
+            label: (ctx) => {
+              const r = ratesByMonth[ctx.dataIndex];
+              return [`Rate: ${r.rate.toFixed(1)}%`, `${r.esc} escalations of ${r.conv} conversations`];
+            }
+          }
+        },
+        // Custom label-above-bar plugin via afterDatasetsDraw
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 12 } },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          max: yMax,
+          ticks: {
+            color: '#9ca3af',
+            font: { family: 'Inter', size: 10 },
+            callback: v => v + '%'
+          },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        }
+      },
+      animation: { duration: 600 }
+    },
+    plugins: [{
+      id: 'rateLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.font = '600 13px Inter, sans-serif';
+        ctx.fillStyle = '#1a1a1a';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        meta.data.forEach((bar, i) => {
+          const val = data[i];
+          ctx.fillText(val.toFixed(1) + '%', bar.x, bar.y - 6);
+        });
+        ctx.restore();
+      }
+    }]
   });
 }
 
