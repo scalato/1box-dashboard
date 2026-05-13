@@ -3420,9 +3420,11 @@ function renderStoragePilot() {
     return;
   }
 
-  // Helper: group rows by month, summing category columns
+  // Helper: group rows by month, summing category columns. Includes ALL categories
+  // (including 'ignore') so KPI totals and escalation-rate denominators are complete.
+  // The bar chart filters out 'ignore' separately because it would dwarf other bars.
   function bucketByMonth(rows, headers) {
-    const catHeaders = headers.filter(h => h !== 'date' && h !== 'total' && h !== 'ignore');
+    const catHeaders = headers.filter(h => h !== 'date' && h !== 'total');
     const byMonth = {};  // {'2026-04': {category: total, ...}, '2026-05': {...}}
     rows.forEach(r => {
       const d = parseSpDate(r.date);
@@ -3473,8 +3475,10 @@ function renderStoragePilot() {
   if (currentMonth) {
     const monthData = convBucket.byMonth[currentMonth];
     convBucket.catHeaders.forEach(h => { totalConv += monthData[h] || 0; });
-    // Top category for current month
+    // Top category for current month — exclude 'ignore' since it dominates
+    // and isn't a meaningful "top topic"
     const sorted = convBucket.catHeaders
+      .filter(h => h !== 'ignore')
       .map(h => ({ h, total: monthData[h] || 0 }))
       .sort((a, b) => b.total - a.total);
     if (sorted[0] && sorted[0].total > 0) {
@@ -3553,8 +3557,12 @@ function mkMomCategoryChart(canvasId, bucket, months, prettyCategory, monthLabel
   if (!canvas) return;
   if (CHARTS[canvasId]) CHARTS[canvasId].destroy();
 
+  // Exclude 'ignore' from the displayed bars — it represents auto-resolved /
+  // non-meaningful conversations and dwarfs the real categories visually.
+  const displayCats = bucket.catHeaders.filter(h => h !== 'ignore');
+
   // Order categories by total across all months (highest first)
-  const catTotals = bucket.catHeaders.map(h => ({
+  const catTotals = displayCats.map(h => ({
     raw: h,
     total: months.reduce((s, m) => s + (bucket.byMonth[m]?.[h] || 0), 0)
   })).filter(c => c.total > 0).sort((a, b) => b.total - a.total);
