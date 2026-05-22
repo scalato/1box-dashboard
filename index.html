@@ -649,6 +649,7 @@
     <button class="tab-btn" onclick="switchTab('rentals')" id="tab-rentals">Rentals</button>
     <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
     <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
+    <button class="tab-btn" onclick="switchTab('misc')" id="tab-misc">Misc</button>
     <button class="tab-btn" onclick="switchTab('trends')" id="tab-trends">Trends</button>
     <button class="tab-btn" onclick="switchTab('storagepilot')" id="tab-storagepilot">StoragePilot</button>
     <button class="tab-btn" onclick="switchTab('siteware')" id="tab-siteware">SiteWare</button>
@@ -660,6 +661,7 @@
     <div id="panel-rentals" class="tab-panel"></div>
     <div id="panel-revenue" class="tab-panel"></div>
     <div id="panel-details" class="tab-panel"></div>
+    <div id="panel-misc" class="tab-panel"></div>
     <div id="panel-trends" class="tab-panel"></div>
     <div id="panel-storagepilot" class="tab-panel"></div>
     <div id="panel-siteware" class="tab-panel"></div>
@@ -1267,6 +1269,7 @@ function renderAll() {
   renderRentals();
   renderRevenue();
   renderDetails();
+  renderMisc();
   renderStoragePilot();
   renderTrends();
   renderSiteWare();
@@ -2788,7 +2791,32 @@ function renderDetails() {
     </tr>`;
   }).join('');
 
-  // Aggregates
+  document.getElementById('panel-details').innerHTML = `
+    <div class="card details-site-table">
+      <div class="card-title">Site Details</div>
+      <table class="data-table">
+        <thead><tr>
+          <th>SITE</th>
+          <th class="num">SQM OCC</th>
+          <th class="num">RENTALS</th>
+          <th class="num">VACATES</th>
+          <th class="num">NET</th>
+          <th class="num">PROJ. RENT</th>
+          <th class="num">GPI</th>
+          <th class="num">TOTAL SQM</th>
+          <th class="num">OCC SQM</th>
+          <th class="num">AR >30</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// MISC TAB — AR, Insurance, Discounts, Property Summary
+// ─────────────────────────────────────────────
+function renderMisc() {
   const arOutstanding = agg('arrears.outstanding_total');
   const arArrears30 = agg('arrears.arrears_30_plus');
   const arCount = agg('arrears.arrears_count');
@@ -2821,26 +2849,7 @@ function renderDetails() {
   const revenueCapture = maxRent > 0 ? (currentRent / maxRent * 100) : 0;
   const rentGap = maxRent - currentRent;
 
-  document.getElementById('panel-details').innerHTML = `
-    <div class="card details-site-table">
-      <div class="card-title">Site Details</div>
-      <table class="data-table">
-        <thead><tr>
-          <th>SITE</th>
-          <th class="num">SQM OCC</th>
-          <th class="num">RENTALS</th>
-          <th class="num">VACATES</th>
-          <th class="num">NET</th>
-          <th class="num">PROJ. RENT</th>
-          <th class="num">GPI</th>
-          <th class="num">TOTAL SQM</th>
-          <th class="num">OCC SQM</th>
-          <th class="num">AR >30</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-
+  document.getElementById('panel-misc').innerHTML = `
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Accounts Receivable</div>
