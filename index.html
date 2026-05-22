@@ -1922,41 +1922,31 @@ function renderOverview() {
   let revVarText = '', occVarText = '';
   // Variance now shown per-month inline (Revenue + Occupancy charts)
 
-  // Move-Ins vs Move-Outs + Net Rentals (Portfolio view)
-  // Both are dynamic-month line charts: history months solid + current MTD dashed
+  // Move-Ins vs Move-Outs + Net Rentals — shown for both All Sites and single store
   const totalMI = aggNetMI('month');
   const totalMO = aggNetMO('month');
 
-  let activityHTML = '';
-  if (isAllSites && FILTERED_DATA.length > 1) {
-    activityHTML = `
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">Move-Ins vs Move-Outs (YTD)</div>
-          <div class="chart-wrap-sm"><canvas id="ch-mi-mo"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Net Rentals (YTD)</div>
-          <div class="chart-wrap-sm"><canvas id="ch-net-rentals-ov"></canvas></div>
-        </div>
+  const activityHTML = `
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Move-Ins vs Move-Outs (YTD)</div>
+        <div class="chart-wrap-sm"><canvas id="ch-mi-mo"></canvas></div>
       </div>
-      <div class="section-gap"></div>
-    `;
-  }
+      <div class="card">
+        <div class="card-title">Net Rentals (YTD)</div>
+        <div class="chart-wrap-sm"><canvas id="ch-net-rentals-ov"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+  `;
 
-  // Single-site view (unchanged)
+  // Single-site view — Rent Breakdown only (MI/MO + Net now shown above for all views)
   let singleSiteHTML = '';
   if (!(isAllSites && FILTERED_DATA.length > 1)) {
     singleSiteHTML = `
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">Rental Activity</div>
-          <div class="chart-wrap"><canvas id="ch-rental-activity-ov"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Rent Breakdown</div>
-          <div class="chart-wrap"><canvas id="ch-rent-breakdown"></canvas></div>
-        </div>
+      <div class="card">
+        <div class="card-title">Rent Breakdown</div>
+        <div class="chart-wrap"><canvas id="ch-rent-breakdown"></canvas></div>
       </div>
     `;
   }
@@ -2124,22 +2114,26 @@ function renderOverview() {
       }
     }
 
-    if (isAllSites && FILTERED_DATA.length > 1) {
-      // Pull Jan/Feb/Mar from history.json; April from live FILTERED_DATA
+    // Move-Ins vs Move-Outs + Net Rentals — runs for BOTH views.
+    // History scoped by country and, for single-store, by store name.
+    {
       const miMoMonths = [];
       const miSeries = [];
       const moSeries = [];
       const netSeries = [];
       const currentMonth = getCurrentMonthKey();
 
-      if (HISTORY_DATA && HISTORY_DATA.sites) {
-        const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
-          if (s.is_rollup) return false;
-          if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
-          if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
-          return true;
-        });
+      const histSites = (HISTORY_DATA && HISTORY_DATA.sites)
+        ? Object.values(HISTORY_DATA.sites).filter(s => {
+            if (s.is_rollup) return false;
+            if (CURRENT_COUNTRY === 'fr' && s.country !== 'FR') return false;
+            if (CURRENT_COUNTRY === 'nl' && s.country !== 'NL') return false;
+            if (CURRENT_SITE !== 'all' && s.name !== CURRENT_SITE) return false;
+            return true;
+          })
+        : [];
 
+      if (histSites.length) {
         const monthSet = new Set();
         histSites.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
         const histMonths = [...monthSet].sort();
@@ -2189,20 +2183,12 @@ function renderOverview() {
       mkLineChart('ch-net-rentals-ov', miMoLabels, [
         { label: 'Net Rentals', data: netSeries, color: '#f97316' }
       ], { yFmt: v => v, mtdMonths: mtdMonthsSet, months: miMoMonths });
+    }
+
+    if (isAllSites && FILTERED_DATA.length > 1) {
+      // (All Sites-specific charts (if any) would go here)
     } else {
-      // Single site view — revenue + occupancy charts already drawn above
-
-      const periods = ['Today', 'Week', 'Month', 'Year'];
-      const miVals = ['today','week','month','year'].map(p => aggNetMI(p));
-      const vaVals = ['today','week','month','year'].map(p => aggNetMO(p));
-      const netVals = miVals.map((v,i) => v - vaVals[i]);
-
-      mkVBarChart('ch-rental-activity-ov', periods, [
-        { label: 'Move-Ins', data: miVals, color: '#16a34a' },
-        { label: 'Vacates', data: vaVals, color: '#f97316' },
-        { label: 'Net', data: netVals, color: '#1f2937' }
-      ]);
-
+      // Single site view — Rent Breakdown chart
       const currRent = agg('revenue.current_rent_amount');
       const maxPotential = agg('revenue.max_rent_potential');
       const maxRent = Math.max(maxPotential, currRent * 1.5);
