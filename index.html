@@ -2035,6 +2035,117 @@ function pushChatMessage(role, content) {
   renderChatMessages();
 }
 
+// ─────────────────────────────────────────────
+// ATTENTION NEEDED PANEL
+// ─────────────────────────────────────────────
+// Scans all sites and surfaces issues + a couple of wins. Shown atop Overview.
+// Thresholds: occupancy >3pp below budget, AR>30 over €5k, audit grade D/F,
+// revenue >5% under budget, move-outs up >40% MoM.
+function buildAttentionPanel() {
+  if (!RAW_DATA || !RAW_DATA.length) return '';
+
+  const monthKey = getCurrentMonthKey();
+  const { monthKeys } = getDashboardMonths();
+  const priorMonthKey = monthKeys.length >= 2 ? monthKeys[monthKeys.length - 2] : null;
+
+  const issues = [];
+  const wins = [];
+
+  RAW_DATA.forEach(d => {
+    const site = siteShort(d.site_name);
+    const siteKey = siteKeyFromName(d.site_name);
+    const budgets = (siteKey && BUDGET_DATA) ? BUDGET_DATA.sites[siteKey]?.[monthKey] : null;
+
+    // Occupancy vs budget
+    const occActual = d.occupancy?.surface_pct;
+    if (budgets && budgets.occupancy_pct != null && occActual != null) {
+      const gap = occActual - budgets.occupancy_pct;
+      if (gap < -3) {
+        issues.push({ sev: gap < -7 ? 'high' : 'med', site,
+          text: `${site} occupancy ${fmt(occActual,1)}% — ${fmt(Math.abs(gap),1)} pp below budget` });
+      } else if (gap > 4) {
+        wins.push({ site, text: `${site} occupancy ${fmt(occActual,1)}% — ${fmt(gap,1)} pp above budget` });
+      }
+    }
+
+    // Revenue vs budget
+    const revActual = d.revenue?.net_total;
+    if (budgets && budgets.revenue && revActual != null) {
+      const pctOff = (revActual - budgets.revenue) / budgets.revenue * 100;
+      if (pctOff < -5) {
+        issues.push({ sev: pctOff < -12 ? 'high' : 'med', site,
+          text: `${site} revenue ${fmt(Math.abs(pctOff),1)}% under budget` });
+      }
+    }
+
+    // Arrears > 30 days
+    const ar30 = d.arrears?.arrears_30_plus;
+    if (ar30 != null && ar30 > 5000) {
+      issues.push({ sev: ar30 > 15000 ? 'high' : 'med', site,
+        text: `${site} arrears over 30 days: ${fmtEur(ar30)}` });
+    }
+
+    // Move-outs MoM swing
+    if (priorMonthKey && HISTORY_DATA) {
+      const histEntry = (HISTORY_DATA.sites[siteKey]?.series || [])
+        .find(x => x.month === priorMonthKey);
+      const priorMO = histEntry?.rentals?.vacates_month;
+      const currMO = d.rentals?.vacates_month;
+      if (priorMO && priorMO >= 5 && currMO != null) {
+        const swing = (currMO - priorMO) / priorMO * 100;
+        if (swing > 40) {
+          issues.push({ sev: 'med', site,
+            text: `${site} move-outs up ${fmt(swing,0)}% vs last month (${currMO} vs ${priorMO})` });
+        }
+      }
+    }
+  });
+
+  // Audit grades D/F from SiteWare
+  if (SW_DATA && SW_DATA.audits && SW_DATA.audits.rows) {
+    SW_DATA.audits.rows.forEach(r => {
+      const grade = parseSwGrade(r['Audit Grade']);
+      if (grade === 'D' || grade === 'F') {
+        issues.push({ sev: grade === 'F' ? 'high' : 'med', site: r['Site Name'],
+          text: `${r['Site Name']} audit grade ${grade}` });
+      }
+    });
+  }
+
+  if (!issues.length && !wins.length) return '';
+
+  issues.sort((a, b) => (a.sev === 'high' ? 0 : 1) - (b.sev === 'high' ? 0 : 1));
+
+  const issueRows = issues.map(it => {
+    const dotColor = it.sev === 'high' ? '#dc2626' : '#d97706';
+    return `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:${dotColor};margin-top:5px"></span>
+      <span style="font-size:13px;color:var(--text)">${it.text}</span>
+    </div>`;
+  }).join('');
+
+  const winRows = wins.slice(0, 2).map(w =>
+    `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-top:5px"></span>
+      <span style="font-size:13px;color:var(--text)">${w.text}</span>
+    </div>`).join('');
+
+  const highCount = issues.filter(i => i.sev === 'high').length;
+  const summary = `${issues.length} item${issues.length !== 1 ? 's' : ''} need attention` +
+    (highCount > 0 ? ` · ${highCount} high priority` : '');
+
+  return `
+    <div class="card" style="margin-bottom:12px;border-left:3px solid ${highCount > 0 ? '#dc2626' : '#d97706'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="card-title" style="margin-bottom:0">⚠ Attention Needed</div>
+        <span style="font-size:11px;color:var(--muted-2)">${summary}</span>
+      </div>
+      ${issueRows || '<div style="font-size:13px;color:var(--muted-2);padding:6px 0">No issues flagged.</div>'}
+      ${winRows ? `<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted-2);margin-top:12px;margin-bottom:2px">Highlights</div>${winRows}` : ''}
+    </div>
+  `;
+}
+
 function renderOverview() {
   const actualRev = agg('revenue.net_total');
   const actualOcc = aggPct('occupancy.rented_sqm', 'occupancy.total_sqm');
@@ -2104,6 +2215,7 @@ function renderOverview() {
 
   document.getElementById('panel-overview').innerHTML = `
     ${exportBtnHtml('exportOverview')}
+    ${isAllSites ? buildAttentionPanel() : ''}
     <div class="grid-2">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
