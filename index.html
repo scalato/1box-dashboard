@@ -1298,11 +1298,46 @@ function renderKPIs() {
   const maxRate = Math.max(0, ...FILTERED_DATA.map(d => d.revenue?.avg_rate_per_sqm || 0));
   const maxPotential = agg('revenue.max_rent_potential');
 
+  // Occupied revenue per square metre — current rent / rented sqm
+  const occupRPSM = rentedSqm ? (currRent / rentedSqm) : 0;
+
+  // Prior-month occupancy % from history.json, scoped to the same country/site
+  // filter as the live view, for the "vs prior month" delta on the SQM card.
+  let priorOccPct = null, priorMonthName = '';
+  {
+    const { monthKeys } = getDashboardMonths();
+    if (monthKeys.length >= 2 && HISTORY_DATA && HISTORY_DATA.sites) {
+      const priorMK = monthKeys[monthKeys.length - 2];
+      const monthNamesShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      priorMonthName = monthNamesShort[parseInt(priorMK.split('-')[1], 10) - 1];
+      const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
+        if (s.is_rollup) return false;
+        if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
+        if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
+        return true;
+      });
+      const scoped = CURRENT_SITE === 'all' ? histSites : histSites.filter(s => s.name === CURRENT_SITE);
+      let rS = 0, tS = 0;
+      scoped.forEach(s => {
+        const e = (s.series || []).find(x => x.month === priorMK);
+        if (e?.occupancy) {
+          rS += e.occupancy.rented_sqm || 0;
+          tS += e.occupancy.total_sqm || 0;
+        }
+      });
+      if (tS > 0) priorOccPct = rS / tS * 100;
+    }
+  }
+  const occDelta = (priorOccPct !== null) ? (sqmPct - priorOccPct) : null;
+  const occDeltaStr = (occDelta !== null)
+    ? `${occDelta >= 0 ? '+' : ''}${fmt(occDelta, 1)} pp vs ${priorMonthName}`
+    : '&nbsp;';
+
   document.getElementById('kpi-grid').innerHTML = `
     <div class="kpi-card red">
       <div class="kpi-label">SQM OCCUPANCY</div>
       <div class="kpi-value">${fmt(sqmPct, 1)}<span class="unit">%</span></div>
-      <div class="kpi-sub">${fmt(rentedSqm)} m² of ${fmt(totalSqm)} m²</div>
+      <div class="kpi-sub">${occDeltaStr}</div>
     </div>
     <div class="kpi-card green">
       <div class="kpi-label">NET RENTALS (MTD)</div>
@@ -1335,9 +1370,9 @@ function renderKPIs() {
       <div class="kpi-sub">+${netMTD} net contracts</div>
     </div>
     <div class="kpi-card green">
-      <div class="kpi-label">MAX RENT RATE</div>
-      <div class="kpi-value">${fmtRate(maxRate)}</div>
-      <div class="kpi-sub">${fmt(maxPotential)} € max</div>
+      <div class="kpi-label">OCCUP. RPSM</div>
+      <div class="kpi-value">${fmtRate(occupRPSM)}</div>
+      <div class="kpi-sub">Rent per occupied m²</div>
     </div>
   `;
 }
@@ -1912,27 +1947,7 @@ function renderOverview() {
   // Single-site view (unchanged)
   let singleSiteHTML = '';
   if (!(isAllSites && FILTERED_DATA.length > 1)) {
-    const rentedSqm = agg('occupancy.rented_sqm');
-    const currRent = agg('revenue.current_rent_amount');
-    const maxPotential = agg('revenue.max_rent_potential');
-    const avgRate = rentedSqm ? (currRent / rentedSqm) : 0;
-    const potentialRate = rentedSqm ? (maxPotential / rentedSqm) : 0;
-    const maxRate = Math.max(0, ...FILTERED_DATA.map(d => d.revenue?.max_rate_per_sqm || 0));
-
     singleSiteHTML = `
-      <div class="card">
-        <div class="card-title">Average Rate per m² Rented</div>
-        <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap">
-          <div style="font-size:40px;font-weight:700;color:var(--purple);line-height:1">
-            ${fmt(avgRate, 2)}<span style="font-size:16px;color:var(--muted-2);font-weight:500">/m²</span>
-          </div>
-          <div style="color:var(--muted-2);font-size:12px;line-height:1.8">
-            Potential: ${fmt(potentialRate, 2)} €/m²<br>
-            Max: ${fmt(maxRate, 2)} €/m²
-          </div>
-        </div>
-      </div>
-      <div class="section-gap"></div>
       <div class="grid-2">
         <div class="card">
           <div class="card-title">Rental Activity</div>
@@ -1946,17 +1961,7 @@ function renderOverview() {
     `;
   }
 
-  // Rate per m² trend — 4-month line chart for Portfolio view
-  let ratePerSqmHTML = '';
-  if (isAllSites && FILTERED_DATA.length > 1) {
-    ratePerSqmHTML = `
-      <div class="card">
-        <div class="card-title">Average Rate per m² — YTD</div>
-        <div class="chart-wrap-sm"><canvas id="ch-rate-sqm-ov"></canvas></div>
-      </div>
-      <div class="section-gap"></div>
-    `;
-  }
+  // Rate per m² trend chart removed per request
 
   document.getElementById('panel-overview').innerHTML = `
     <div class="grid-2">
@@ -1985,7 +1990,6 @@ function renderOverview() {
     </div>
     <div class="section-gap"></div>
     ${activityHTML}
-    ${ratePerSqmHTML}
     ${singleSiteHTML}
   `;
 
@@ -2196,67 +2200,6 @@ function renderOverview() {
       mkLineChart('ch-net-rentals-ov', miMoLabels, [
         { label: 'Net Rentals', data: netSeries, color: '#f97316' }
       ], { yFmt: v => v, mtdMonths: mtdMonthsSet, months: miMoMonths });
-
-      // Rate per m² trend — 4-month portfolio weighted average line
-      const rateMonths = [];
-      const rateSeries = [];
-
-      if (HISTORY_DATA && HISTORY_DATA.sites) {
-        const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
-          if (s.is_rollup) return false;
-          if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
-          if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
-          return true;
-        });
-        const monthSet = new Set();
-        histSites.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
-        const histMonths = [...monthSet].sort();
-
-        histMonths.forEach(m => {
-          let rateNum = 0, rateDen = 0;
-          histSites.forEach(s => {
-            const e = (s.series || []).find(x => x.month === m);
-            if (e?.revenue?.avg_rate_per_sqm && e?.occupancy?.rented_sqm) {
-              rateNum += e.revenue.avg_rate_per_sqm * e.occupancy.rented_sqm;
-              rateDen += e.occupancy.rented_sqm;
-            }
-          });
-          rateMonths.push(m);
-          rateSeries.push(rateDen > 0 ? (rateNum / rateDen) : null);
-        });
-
-        if (!rateMonths.includes(currentMonth)) {
-          // Portfolio weighted avg for live data
-          let num = 0, den = 0;
-          FILTERED_DATA.forEach(d => {
-            const rate = d.revenue?.avg_rate_per_sqm || 0;
-            const sqm = d.occupancy?.rented_sqm || 0;
-            if (rate && sqm) { num += rate * sqm; den += sqm; }
-          });
-          rateMonths.push(currentMonth);
-          rateSeries.push(den > 0 ? (num / den) : null);
-        }
-      } else {
-        // Live-only fallback
-        let num = 0, den = 0;
-        FILTERED_DATA.forEach(d => {
-          const rate = d.revenue?.avg_rate_per_sqm || 0;
-          const sqm = d.occupancy?.rented_sqm || 0;
-          if (rate && sqm) { num += rate * sqm; den += sqm; }
-        });
-        rateMonths.push(currentMonth);
-        rateSeries.push(den > 0 ? (num / den) : null);
-      }
-
-      const rateLabels = rateMonths.map(m => {
-        const [y, mo] = m.split('-');
-        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return names[parseInt(mo,10)-1] + ' ' + y;
-      });
-
-      mkLineChart('ch-rate-sqm-ov', rateLabels, [
-        { label: 'Avg Rate/m²', data: rateSeries, color: '#8b5cf6' }
-      ], { yFmt: v => '€' + fmt(v, 2), yMin: 0, mtdMonths: mtdMonthsSet, months: rateMonths });
     } else {
       // Single site view
       if (!revBudgetEmpty) {
@@ -4392,12 +4335,35 @@ function mkRevVarChart(id, labels, actualData, budgetData) {
   const varLabels = labels.map(l => l[1]);
 
   CHARTS[id] = new Chart(canvas, {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: monthLabels,
       datasets: [
-        { label: 'Actual', data: actualData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
-        { label: 'Budget', data: budgetData, backgroundColor: '#d1d5db', borderRadius: 2, borderWidth: 0 }
+        {
+          label: 'Actual',
+          data: actualData,
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22,163,74,0.08)',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#16a34a',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.3
+        },
+        {
+          label: 'Budget',
+          data: budgetData,
+          borderColor: '#9ca3af',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          pointBackgroundColor: '#9ca3af',
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          fill: false,
+          tension: 0.3
+        }
       ]
     },
     options: {
