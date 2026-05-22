@@ -3095,10 +3095,10 @@ function filterToAprilMTD(rows) {
 
 async function loadStoragePilotData() {
   const files = [
-    { key: 'byLocation', path: 'data/storagepilot/conversations_by_location.csv' },
-    { key: 'byCategory', path: 'data/storagepilot/conversations_by_category.csv' },
-    { key: 'escalationsByCategory', path: 'data/storagepilot/escalations_by_category.csv' },
-    { key: 'escalationsByLocation', path: 'data/storagepilot/escalations_by_location.csv' }
+    { key: 'byLocation', path: 'data/sp/conversations_by_location.csv' },
+    { key: 'byCategory', path: 'data/sp/conversations_by_category.csv' },
+    { key: 'escalationsByCategory', path: 'data/sp/escalations_by_category.csv' },
+    { key: 'escalationsByLocation', path: 'data/sp/escalations_by_location.csv' }
   ];
 
   await Promise.all(files.map(async (f) => {
@@ -3449,7 +3449,7 @@ function renderStoragePilot() {
       <div class="empty-state">
         <div class="big">💬</div>
         <p>StoragePilot data not yet loaded.<br>
-        Upload CSVs to <code>data/storagepilot/</code> in the repo.</p>
+        Upload CSVs to <code>data/sp/</code> in the repo.</p>
       </div>
     `;
     return;
@@ -3801,7 +3801,7 @@ function renderStoragePilotStore(panel) {
       <div class="empty-state">
         <div class="big">💬</div>
         <p>Per-store StoragePilot data not yet loaded.<br>
-        Upload daily CSVs to <code>data/storagepilot/</code>.</p>
+        Upload daily CSVs to <code>data/sp/</code>.</p>
       </div>
     `;
     return;
