@@ -616,7 +616,6 @@
     </div>
     <div class="header-right">
       <span id="last-updated"></span>
-      <button class="btn-refresh" onclick="exportToCsv()">⬇ Export</button>
       <button class="btn-refresh" onclick="refreshData()">↻ Refresh</button>
       <button class="btn-settings" onclick="showConfig()" title="Settings">⚙</button>
     </div>
@@ -985,64 +984,19 @@ async function refreshData() {
   }
 }
 
-function updateLastUpdatedLabel() {
-  const el = document.getElementById('last-updated');
-  if (window._dashDataDate && window._dashDaysOld > 0) {
-    const d = new Date(window._dashDataDate + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'});
-    el.textContent = 'Data from ' + d + ' (' + window._dashDaysOld + ' day' + (window._dashDaysOld>1?'s':'') + ' old)';
-  } else {
-    el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
-  }
+// ─────────────────────────────────────────────
+// CSV EXPORT (per-tab)
+// ─────────────────────────────────────────────
+// CSV-escape one value
+function csvEsc(val) {
+  if (val === null || val === undefined) return '';
+  const s = String(val);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
-// Export all site data to a flat CSV — one row per site, nested metric objects
-// flattened to dotted column names (e.g. occupancy.unit_pct).
-function exportToCsv() {
-  const sites = (typeof RAW_DATA !== 'undefined' && RAW_DATA.length) ? RAW_DATA : [];
-  if (!sites.length) {
-    alert('No data loaded to export.');
-    return;
-  }
-
-  // Flatten one site object to a flat {col: value} map
-  const flatten = (obj, prefix = '') => {
-    const out = {};
-    for (const [k, v] of Object.entries(obj)) {
-      if (k.startsWith('_')) continue; // skip internal fields like _source_file
-      const key = prefix ? `${prefix}.${k}` : k;
-      if (v && typeof v === 'object' && !Array.isArray(v)) {
-        Object.assign(out, flatten(v, key));
-      } else {
-        out[key] = v;
-      }
-    }
-    return out;
-  };
-
-  const flatRows = sites.map(s => flatten(s));
-
-  // Union of all columns, preserving first-seen order
-  const cols = [];
-  flatRows.forEach(r => Object.keys(r).forEach(c => { if (!cols.includes(c)) cols.push(c); }));
-
-  // CSV-escape: wrap in quotes if contains comma, quote, or newline
-  const esc = (val) => {
-    if (val === null || val === undefined) return '';
-    const s = String(val);
-    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-  };
-
-  const lines = [cols.join(',')];
-  flatRows.forEach(r => {
-    lines.push(cols.map(c => esc(r[c])).join(','));
-  });
-  const csv = lines.join('\r\n');
-
-  // Filename includes the data date
-  const dateTag = window._dashDataDate || new Date().toISOString().slice(0, 10);
-  const filename = `1box-portfolio-${dateTag}.csv`;
-
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+// Trigger a browser download of CSV text
+function downloadCsv(filename, csvText) {
+  const blob = new Blob(['\ufeff' + csvText], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -1051,6 +1005,139 @@ function exportToCsv() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// Build CSV from an array of column names + array of row objects
+function rowsToCsv(cols, rows) {
+  const lines = [cols.map(csvEsc).join(',')];
+  rows.forEach(r => lines.push(cols.map(c => csvEsc(r[c])).join(',')));
+  return lines.join('\r\n');
+}
+
+// Date tag + scope tag for filenames
+function exportTags() {
+  const dateTag = window._dashDataDate || new Date().toISOString().slice(0, 10);
+  let scope = 'all-sites';
+  if (CURRENT_SITE && CURRENT_SITE !== 'all') {
+    scope = CURRENT_SITE.replace(/^1BOX\s*/i, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  } else if (CURRENT_COUNTRY === 'nl') {
+    scope = 'netherlands';
+  } else if (CURRENT_COUNTRY === 'fr') {
+    scope = 'france';
+  }
+  return { dateTag, scope };
+}
+
+// Small Export button HTML — drop at the top of each tab panel
+function exportBtnHtml(fnName) {
+  return `<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+    <button class="btn-refresh" onclick="${fnName}()">⬇ Export</button>
+  </div>`;
+}
+
+// Flatten a site object to dotted keys (skips _internal fields)
+function flattenSite(obj, prefix = '') {
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (k.startsWith('_')) continue;
+    const key = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      Object.assign(out, flattenSite(v, key));
+    } else {
+      out[key] = v;
+    }
+  }
+  return out;
+}
+
+// ── Per-tab export functions ──
+// Each uses FILTERED_DATA so it respects the current country/site filter.
+
+// Generic per-site export for a given top-level section (occupancy/rentals/revenue)
+function exportSection(section, tabName) {
+  if (!FILTERED_DATA.length) { alert('No data to export.'); return; }
+  const rows = FILTERED_DATA.map(d => {
+    const flat = flattenSite(d[section] || {}, section);
+    return Object.assign({ site_name: d.site_name, country: d.country }, flat);
+  });
+  const cols = ['site_name', 'country'];
+  rows.forEach(r => Object.keys(r).forEach(c => { if (!cols.includes(c)) cols.push(c); }));
+  const { dateTag, scope } = exportTags();
+  downloadCsv(`1box-${tabName}-${scope}-${dateTag}.csv`, rowsToCsv(cols, rows));
+}
+
+function exportOccupancy() { exportSection('occupancy', 'occupancy'); }
+function exportRentals()   { exportSection('rentals', 'rentals'); }
+function exportRevenue()   { exportSection('revenue', 'revenue'); }
+
+// Details — full per-site flat dump (every section)
+function exportDetails() {
+  if (!FILTERED_DATA.length) { alert('No data to export.'); return; }
+  const rows = FILTERED_DATA.map(d => flattenSite(d));
+  const cols = [];
+  rows.forEach(r => Object.keys(r).forEach(c => { if (!cols.includes(c)) cols.push(c); }));
+  const { dateTag, scope } = exportTags();
+  downloadCsv(`1box-details-${scope}-${dateTag}.csv`, rowsToCsv(cols, rows));
+}
+
+// Overview — label/value pairs of the KPI cards
+function exportOverview() {
+  const grid = document.getElementById('kpi-grid');
+  if (!grid) { alert('No data to export.'); return; }
+  const rows = [];
+  grid.querySelectorAll('.kpi-card').forEach(card => {
+    const label = card.querySelector('.kpi-label')?.textContent.trim() || '';
+    const value = card.querySelector('.kpi-value')?.textContent.trim() || '';
+    const sub = card.querySelector('.kpi-sub')?.textContent.trim() || '';
+    if (label) rows.push({ Metric: label, Value: value, Detail: sub });
+  });
+  const { dateTag, scope } = exportTags();
+  downloadCsv(`1box-overview-${scope}-${dateTag}.csv`, rowsToCsv(['Metric', 'Value', 'Detail'], rows));
+}
+
+// Misc — label/value pairs from all kv-tables on the Misc panel
+function exportMisc() {
+  const panel = document.getElementById('panel-misc');
+  if (!panel) { alert('No data to export.'); return; }
+  const rows = [];
+  panel.querySelectorAll('.card').forEach(card => {
+    const section = card.querySelector('.card-title')?.textContent.trim() || '';
+    card.querySelectorAll('tr').forEach(tr => {
+      const cells = [...tr.querySelectorAll('td')].map(td => td.textContent.trim());
+      if (cells.length >= 2) {
+        rows.push({ Section: section, Metric: cells[0], Value: cells.slice(1).join(' / ') });
+      }
+    });
+  });
+  const { dateTag, scope } = exportTags();
+  downloadCsv(`1box-misc-${scope}-${dateTag}.csv`, rowsToCsv(['Section', 'Metric', 'Value'], rows));
+}
+
+// StoragePilot — conversations + escalations by category, by month
+function exportStoragePilot() {
+  if (!SP_DATA || !SP_DATA.byCategory) { alert('No StoragePilot data to export.'); return; }
+  const { dateTag } = exportTags();
+  const cv = SP_DATA.byCategory;
+  const cols = cv.headers;
+  downloadCsv(`1box-storagepilot-conversations-${dateTag}.csv`, rowsToCsv(cols, cv.rows));
+}
+
+// SiteWare — the audit table
+function exportSiteWare() {
+  if (!SW_DATA || !SW_DATA.audits || !SW_DATA.audits.rows.length) { alert('No SiteWare data to export.'); return; }
+  const cols = SW_DATA.audits.headers;
+  const { dateTag } = exportTags();
+  downloadCsv(`1box-siteware-audits-${dateTag}.csv`, rowsToCsv(cols, SW_DATA.audits.rows));
+}
+
+function updateLastUpdatedLabel() {
+  const el = document.getElementById('last-updated');
+  if (window._dashDataDate && window._dashDaysOld > 0) {
+    const d = new Date(window._dashDataDate + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+    el.textContent = 'Data from ' + d + ' (' + window._dashDaysOld + ' day' + (window._dashDaysOld>1?'s':'') + ' old)';
+  } else {
+    el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+  }
 }
 
 function getTodaysFiles(files) {
@@ -2005,6 +2092,7 @@ function renderOverview() {
   // Rate per m² trend chart removed per request
 
   document.getElementById('panel-overview').innerHTML = `
+    ${exportBtnHtml('exportOverview')}
     <div class="grid-2">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -2256,6 +2344,7 @@ function renderOccupancy() {
   const rentedSqm = agg('occupancy.rented_sqm');
 
   document.getElementById('panel-occupancy').innerHTML = `
+    ${exportBtnHtml('exportOccupancy')}
     <div class="grid-3" style="margin-bottom:12px">
       <div class="stat-card" style="text-align:center">
         <div class="label">UNIT OCCUPANCY</div>
@@ -2490,6 +2579,7 @@ function renderRentals() {
   const netT = miT - vaT, netW = miW - vaW, netM = miM - vaM, netY = miY - vaY;
 
   document.getElementById('panel-rentals').innerHTML = `
+    ${exportBtnHtml('exportRentals')}
     <div class="grid-3" style="margin-bottom:12px">
       <div class="card">
         <div class="card-title">Move-Ins</div>
@@ -2598,6 +2688,7 @@ function renderRevenue() {
   const advance = agg('revenue.invoiced_in_advance');
 
   document.getElementById('panel-revenue').innerHTML = `
+    ${exportBtnHtml('exportRevenue')}
     <div class="grid-4" style="margin-bottom:12px">
       <div class="stat-card" style="text-align:center">
         <div class="label">GROSS REVENUE</div>
@@ -2848,6 +2939,7 @@ function renderDetails() {
   }).join('');
 
   document.getElementById('panel-details').innerHTML = `
+    ${exportBtnHtml('exportDetails')}
     <div class="card details-site-table">
       <div class="card-title">Site Details</div>
       <table class="data-table">
@@ -2906,6 +2998,7 @@ function renderMisc() {
   const rentGap = maxRent - currentRent;
 
   document.getElementById('panel-misc').innerHTML = `
+    ${exportBtnHtml('exportMisc')}
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Accounts Receivable</div>
@@ -3228,6 +3321,7 @@ function renderSiteWare() {
   `).join('');
 
   panel.innerHTML = `
+    ${exportBtnHtml('exportSiteWare')}
     <div class="grid-4" style="margin-bottom:12px">
       <div class="stat-card" style="text-align:center">
         <div class="label">AUDITS COMPLETE</div>
@@ -3498,6 +3592,7 @@ function renderStoragePilot() {
   const currentMonthDisplay = currentMonth ? monthLabel(currentMonth) : '—';
 
   panel.innerHTML = `
+    ${exportBtnHtml('exportStoragePilot')}
     <div class="grid-3" style="margin-bottom:12px">
       <div class="stat-card" style="text-align:center">
         <div class="label">TOTAL CONVERSATIONS</div>
