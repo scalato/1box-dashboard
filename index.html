@@ -616,6 +616,7 @@
     </div>
     <div class="header-right">
       <span id="last-updated"></span>
+      <button class="btn-refresh" onclick="exportToCsv()">⬇ Export</button>
       <button class="btn-refresh" onclick="refreshData()">↻ Refresh</button>
       <button class="btn-settings" onclick="showConfig()" title="Settings">⚙</button>
     </div>
@@ -992,6 +993,64 @@ function updateLastUpdatedLabel() {
   } else {
     el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
   }
+}
+
+// Export all site data to a flat CSV — one row per site, nested metric objects
+// flattened to dotted column names (e.g. occupancy.unit_pct).
+function exportToCsv() {
+  const sites = (typeof RAW_DATA !== 'undefined' && RAW_DATA.length) ? RAW_DATA : [];
+  if (!sites.length) {
+    alert('No data loaded to export.');
+    return;
+  }
+
+  // Flatten one site object to a flat {col: value} map
+  const flatten = (obj, prefix = '') => {
+    const out = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (k.startsWith('_')) continue; // skip internal fields like _source_file
+      const key = prefix ? `${prefix}.${k}` : k;
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        Object.assign(out, flatten(v, key));
+      } else {
+        out[key] = v;
+      }
+    }
+    return out;
+  };
+
+  const flatRows = sites.map(s => flatten(s));
+
+  // Union of all columns, preserving first-seen order
+  const cols = [];
+  flatRows.forEach(r => Object.keys(r).forEach(c => { if (!cols.includes(c)) cols.push(c); }));
+
+  // CSV-escape: wrap in quotes if contains comma, quote, or newline
+  const esc = (val) => {
+    if (val === null || val === undefined) return '';
+    const s = String(val);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+
+  const lines = [cols.join(',')];
+  flatRows.forEach(r => {
+    lines.push(cols.map(c => esc(r[c])).join(','));
+  });
+  const csv = lines.join('\r\n');
+
+  // Filename includes the data date
+  const dateTag = window._dashDataDate || new Date().toISOString().slice(0, 10);
+  const filename = `1box-portfolio-${dateTag}.csv`;
+
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function getTodaysFiles(files) {
