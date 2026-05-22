@@ -3749,9 +3749,29 @@ function renderStoragePilot() {
 
     ${escBucket ? `
     <div class="section-gap"></div>
-    <div class="card" style="max-width:560px">
-      <div class="card-title">Escalation Rate by Month</div>
-      <div style="position:relative;height:240px"><canvas id="ch-sp-esc-rate"></canvas></div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">Escalation Rate by Month</div>
+        <div style="position:relative;height:240px"><canvas id="ch-sp-esc-rate"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top 5 Conversation Categories</div>
+        <div style="position:relative;height:240px"><canvas id="ch-sp-top-conv"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top 5 Escalation Categories</div>
+        <div style="position:relative;height:240px"><canvas id="ch-sp-top-esc"></canvas></div>
+      </div>
+    </div>
+    <div class="section-gap"></div>
+    <div class="card">
+      <div class="card-title">Escalation Rate by Category — ${currentMonthDisplay}</div>
+      <div style="position:relative;height:300px"><canvas id="ch-sp-cat-rate"></canvas></div>
+      <div style="font-size:11px;color:var(--muted-2);margin-top:8px">
+        Note: rates above 100% occur because StoragePilot can log multiple escalations per conversation,
+        or classify escalations under different categories than the originating conversation. Treat
+        per-category rates as directional pending reconciliation with StoragePilot.
+      </div>
     </div>
     ` : ''}
   `;
@@ -3773,7 +3793,152 @@ function renderStoragePilot() {
         return { mk, conv, esc, rate: conv > 0 ? (esc / conv * 100) : 0 };
       });
       mkEscRateChart('ch-sp-esc-rate', ratesByMonth, monthLabel);
+
+      // Top 5 categories by share of total — current month, excluding 'ignore'
+      const cm = currentMonth;
+      const topShare = (bucket) => {
+        const cats = bucket.catHeaders.filter(h => h !== 'ignore');
+        const total = cats.reduce((s, h) => s + (bucket.byMonth[cm]?.[h] || 0), 0);
+        return cats
+          .map(h => ({ name: prettyCategory(h), val: bucket.byMonth[cm]?.[h] || 0 }))
+          .filter(x => x.val > 0)
+          .sort((a, b) => b.val - a.val)
+          .slice(0, 5)
+          .map(x => ({ name: x.name, pct: total > 0 ? (x.val / total * 100) : 0 }));
+      };
+      mkTopCategoryChart('ch-sp-top-conv', topShare(convBucket), '#3b82f6');
+      mkTopCategoryChart('ch-sp-top-esc', topShare(escBucket), '#f97316');
+
+      // Escalation rate by category — current month: esc / conv per category
+      const cats = convBucket.catHeaders.filter(h => h !== 'ignore');
+      const catRates = cats.map(h => {
+        const conv = convBucket.byMonth[cm]?.[h] || 0;
+        const esc = escBucket.byMonth[cm]?.[h] || 0;
+        return { name: prettyCategory(h), conv, esc, rate: conv > 0 ? (esc / conv * 100) : 0 };
+      }).filter(x => x.conv > 0).sort((a, b) => b.rate - a.rate);
+      mkCatRateChart('ch-sp-cat-rate', catRates);
     }
+  });
+}
+
+// Horizontal bar chart — Top N categories by % share. data: [{name, pct}]
+function mkTopCategoryChart(canvasId, data, color) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (CHARTS[canvasId]) CHARTS[canvasId].destroy();
+
+  CHARTS[canvasId] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.name),
+      datasets: [{
+        data: data.map(d => d.pct),
+        backgroundColor: color,
+        borderRadius: 3,
+        maxBarThickness: 26
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmt(ctx.parsed.x, 1) + '% of total' } }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 }, callback: v => v + '%' },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        },
+        y: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'pctLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.font = '600 11px Inter';
+        ctx.fillStyle = '#1a1a1a';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        meta.data.forEach((bar, i) => {
+          ctx.fillText(fmt(data[i].pct, 1) + '%', bar.x + 6, bar.y);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+// Horizontal bar — escalation rate by category. data: [{name, rate, conv, esc}]
+function mkCatRateChart(canvasId, data) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (CHARTS[canvasId]) CHARTS[canvasId].destroy();
+
+  const colors = data.map(d =>
+    d.rate >= 100 ? '#7c3aed' : d.rate >= 60 ? '#ef4444' : d.rate >= 40 ? '#f97316' : '#16a34a'
+  );
+
+  CHARTS[canvasId] = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.name),
+      datasets: [{
+        data: data.map(d => d.rate),
+        backgroundColor: colors,
+        borderRadius: 3,
+        maxBarThickness: 24
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const d = data[ctx.dataIndex];
+              return `${fmt(d.rate, 1)}% — ${d.esc} esc / ${d.conv} conv`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 }, callback: v => v + '%' },
+          grid: { color: '#f3f4f6', drawBorder: false }
+        },
+        y: {
+          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
+          grid: { display: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'rateLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.font = '600 11px Inter';
+        ctx.fillStyle = '#1a1a1a';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        meta.data.forEach((bar, i) => {
+          ctx.fillText(fmt(data[i].rate, 0) + '%', bar.x + 6, bar.y);
+        });
+        ctx.restore();
+      }
+    }]
   });
 }
 
