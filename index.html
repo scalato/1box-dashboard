@@ -3763,16 +3763,6 @@ function renderStoragePilot() {
         <div style="position:relative;height:240px"><canvas id="ch-sp-top-esc"></canvas></div>
       </div>
     </div>
-    <div class="section-gap"></div>
-    <div class="card">
-      <div class="card-title">Escalation Rate by Category — ${currentMonthDisplay}</div>
-      <div style="position:relative;height:300px"><canvas id="ch-sp-cat-rate"></canvas></div>
-      <div style="font-size:11px;color:var(--muted-2);margin-top:8px">
-        Note: rates above 100% occur because StoragePilot can log multiple escalations per conversation,
-        or classify escalations under different categories than the originating conversation. Treat
-        per-category rates as directional pending reconciliation with StoragePilot.
-      </div>
-    </div>
     ` : ''}
   `;
 
@@ -3808,15 +3798,6 @@ function renderStoragePilot() {
       };
       mkTopCategoryChart('ch-sp-top-conv', topShare(convBucket), '#3b82f6');
       mkTopCategoryChart('ch-sp-top-esc', topShare(escBucket), '#f97316');
-
-      // Escalation rate by category — current month: esc / conv per category
-      const cats = convBucket.catHeaders.filter(h => h !== 'ignore');
-      const catRates = cats.map(h => {
-        const conv = convBucket.byMonth[cm]?.[h] || 0;
-        const esc = escBucket.byMonth[cm]?.[h] || 0;
-        return { name: prettyCategory(h), conv, esc, rate: conv > 0 ? (esc / conv * 100) : 0 };
-      }).filter(x => x.conv > 0).sort((a, b) => b.rate - a.rate);
-      mkCatRateChart('ch-sp-cat-rate', catRates);
     }
   });
 }
