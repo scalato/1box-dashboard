@@ -1940,16 +1940,8 @@ function renderOverview() {
     <div class="section-gap"></div>
   `;
 
-  // Single-site view — Rent Breakdown only (MI/MO + Net now shown above for all views)
+  // Single-site view — no extra charts (MI/MO + Net shown above for all views)
   let singleSiteHTML = '';
-  if (!(isAllSites && FILTERED_DATA.length > 1)) {
-    singleSiteHTML = `
-      <div class="card">
-        <div class="card-title">Rent Breakdown</div>
-        <div class="chart-wrap"><canvas id="ch-rent-breakdown"></canvas></div>
-      </div>
-    `;
-  }
 
   // Rate per m² trend chart removed per request
 
@@ -2187,16 +2179,6 @@ function renderOverview() {
 
     if (isAllSites && FILTERED_DATA.length > 1) {
       // (All Sites-specific charts (if any) would go here)
-    } else {
-      // Single site view — Rent Breakdown chart
-      const currRent = agg('revenue.current_rent_amount');
-      const maxPotential = agg('revenue.max_rent_potential');
-      const maxRent = Math.max(maxPotential, currRent * 1.5);
-      mkHBarChart('ch-rent-breakdown',
-        ['Current Rent', 'Potential Rent', 'Max Rent'],
-        [{ label: '', data: [currRent, maxPotential, maxRent], color: ['#16a34a', '#8b5cf6', '#d1d5db'] }],
-        v => fmt(v/1000, 0) + 'k'
-      );
     }
   });
 }
@@ -4158,7 +4140,7 @@ function siteShort(name) {
 }
 
 function mkRentalActivityChart(id, labels, miData, moData) {
-  // MI/MO grouped bars with "Net: ±N" shown per month (green if positive, red if negative).
+  // MI/MO as two lines with "Net: ±N" shown per month (green if positive, red if negative).
   const canvas = document.getElementById(id);
   if (!canvas) return;
   if (CHARTS[id]) CHARTS[id].destroy();
@@ -4167,12 +4149,38 @@ function mkRentalActivityChart(id, labels, miData, moData) {
   const netLabels = labels.map(l => l[1]);
 
   CHARTS[id] = new Chart(canvas, {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: monthLabels,
       datasets: [
-        { label: 'Move-Ins', data: miData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
-        { label: 'Move-Outs', data: moData, backgroundColor: '#f97316', borderRadius: 2, borderWidth: 0 }
+        {
+          label: 'Move-Ins',
+          data: miData,
+          borderColor: '#16a34a',
+          backgroundColor: '#16a34a',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#16a34a',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: false,
+          tension: 0.3
+        },
+        {
+          label: 'Move-Outs',
+          data: moData,
+          borderColor: '#f97316',
+          backgroundColor: '#f97316',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#f97316',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: false,
+          tension: 0.3
+        }
       ]
     },
     options: {
@@ -4191,6 +4199,7 @@ function mkRentalActivityChart(id, labels, miData, moData) {
           grid: { display: false }
         },
         y: {
+          beginAtZero: true,
           ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } },
           grid: { color: '#f3f4f6', drawBorder: false }
         }
