@@ -158,6 +158,17 @@
     cursor: pointer;
   }
   .btn-refresh:hover { background: rgba(255,255,255,0.16); }
+  .btn-export {
+    background: #fff;
+    border: 1.5px solid #111;
+    border-radius: 6px;
+    padding: 5px 14px;
+    color: #111;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-export:hover { background: #111; color: #fff; }
   .btn-settings {
     background: transparent; border: none;
     color: rgba(255,255,255,0.6); cursor: pointer; font-size: 14px;
@@ -1031,7 +1042,7 @@ function exportTags() {
 // Small Export button HTML — drop at the top of each tab panel
 function exportBtnHtml(fnName) {
   return `<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-    <button class="btn-refresh" onclick="${fnName}()">⬇ Export</button>
+    <button class="btn-export" onclick="${fnName}()">⬇ Export</button>
   </div>`;
 }
 
