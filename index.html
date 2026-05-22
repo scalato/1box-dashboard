@@ -664,7 +664,7 @@
     <div id="panel-storagepilot" class="tab-panel"></div>
     <div id="panel-siteware" class="tab-panel"></div>
   </main>
-  <footer class="page-footer">
+  <footer class="page-footer" id="page-footer">
     Data sourced from 1Box MIS Reports
   </footer>
 </div>
@@ -4684,6 +4684,16 @@ function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
+
+  // Footer data-source attribution varies by tab
+  const footer = document.getElementById('page-footer');
+  if (footer) {
+    const sources = {
+      storagepilot: 'Data sourced from StoragePilot',
+      siteware: 'Data sourced from SiteWare'
+    };
+    footer.textContent = sources[name] || 'Data sourced from 1Box MIS Reports';
+  }
 }
 
 function setStatus(type, msg) {
