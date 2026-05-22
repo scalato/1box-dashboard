@@ -2005,30 +2005,37 @@ function renderOverview() {
   }
 
   nextTick(() => {
-    if (isAllSites && FILTERED_DATA.length > 1) {
-      // Revenue vs Budget — dynamic monthly grouped bars (history + current MTD) + YTD
-      // Variance shown under each bar group
+    // Revenue vs Budget + Occupancy vs Budget — month-over-month, runs for BOTH
+    // All Sites and single-store views. History scoped by country AND, when a
+    // single store is selected, by that store name.
+    {
+      // Helper: history sites in scope (country + optional single-site)
+      const scopedHistSites = () => {
+        if (!HISTORY_DATA || !HISTORY_DATA.sites) return [];
+        return Object.values(HISTORY_DATA.sites).filter(s => {
+          if (s.is_rollup) return false;
+          if (CURRENT_COUNTRY === 'fr' && s.country !== 'FR') return false;
+          if (CURRENT_COUNTRY === 'nl' && s.country !== 'NL') return false;
+          if (CURRENT_SITE !== 'all' && s.name !== CURRENT_SITE) return false;
+          return true;
+        });
+      };
+
+      // Revenue vs Budget
       if (!revBudgetEmpty) {
         const revActualByMonth = {};
         const revBudgetByMonth = {};
         const { monthKeys, monthNames, currentMonthKey } = getDashboardMonths();
+        const histSites = scopedHistSites();
 
-        if (HISTORY_DATA && HISTORY_DATA.sites) {
-          const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
-            if (s.is_rollup) return false;
-            if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
-            if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
-            return true;
+        monthKeys.filter(mk => mk !== currentMonthKey).forEach(mk => {
+          let sum = 0;
+          histSites.forEach(s => {
+            const e = (s.series || []).find(x => x.month === mk);
+            if (e?.revenue?.net_total) sum += e.revenue.net_total;
           });
-          monthKeys.filter(mk => mk !== currentMonthKey).forEach(mk => {
-            let sum = 0;
-            histSites.forEach(s => {
-              const e = (s.series || []).find(x => x.month === mk);
-              if (e?.revenue?.net_total) sum += e.revenue.net_total;
-            });
-            revActualByMonth[mk] = sum;
-          });
-        }
+          revActualByMonth[mk] = sum;
+        });
 
         revActualByMonth[currentMonthKey] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.net_total || 0), 0);
 
@@ -2043,7 +2050,6 @@ function renderOverview() {
           revBudgetByMonth[mk] = sum;
         });
 
-        // Build multi-line x-axis labels: month name + variance string
         const fmtVar = (actual, budget) => {
           if (!budget) return '';
           const v = actual - budget;
@@ -2053,52 +2059,38 @@ function renderOverview() {
           return sign + '€' + fmt(absVal, 0);
         };
 
-        // No YTD column — it's a cumulative sum that dwarfs the monthly values
-        // and flattens the line. Monthly-only keeps the y-axis readable.
         const labels = monthKeys.map((mk, i) =>
           [monthNames[i], fmtVar(revActualByMonth[mk] || 0, revBudgetByMonth[mk] || 0)]
         );
-
         const actualData = monthKeys.map(mk => revActualByMonth[mk] || 0);
         const budgetData = monthKeys.map(mk => revBudgetByMonth[mk] || 0);
 
         mkRevVarChart('ch-rev-budget', labels, actualData, budgetData);
       }
 
-      // Total Occupancy Actual vs Budget — dynamic monthly grouped bars (history + current MTD)
-      // No YTD column since occupancy is a point-in-time metric that doesn't aggregate
+      // Occupancy vs Budget
       if (!occBudgetEmpty) {
         const occActualByMonth = {};
         const occBudgetByMonth = {};
         const { monthKeys: occMonthKeys, monthNames: occMonthNames, currentMonthKey: occCurrentKey } = getDashboardMonths();
+        const histSites = scopedHistSites();
 
-        // Historical actuals from history.json — weighted average per month
-        if (HISTORY_DATA && HISTORY_DATA.sites) {
-          const histSites = Object.values(HISTORY_DATA.sites).filter(s => {
-            if (s.is_rollup) return false;
-            if (CURRENT_COUNTRY === 'fr') return s.country === 'FR';
-            if (CURRENT_COUNTRY === 'nl') return s.country === 'NL';
-            return true;
+        occMonthKeys.filter(mk => mk !== occCurrentKey).forEach(mk => {
+          let rSqm = 0, tSqm = 0;
+          histSites.forEach(s => {
+            const e = (s.series || []).find(x => x.month === mk);
+            if (e?.occupancy) {
+              rSqm += e.occupancy.rented_sqm || 0;
+              tSqm += e.occupancy.total_sqm || 0;
+            }
           });
-          occMonthKeys.filter(mk => mk !== occCurrentKey).forEach(mk => {
-            let rSqm = 0, tSqm = 0;
-            histSites.forEach(s => {
-              const e = (s.series || []).find(x => x.month === mk);
-              if (e?.occupancy) {
-                rSqm += e.occupancy.rented_sqm || 0;
-                tSqm += e.occupancy.total_sqm || 0;
-              }
-            });
-            occActualByMonth[mk] = tSqm > 0 ? (rSqm / tSqm * 100) : 0;
-          });
-        }
+          occActualByMonth[mk] = tSqm > 0 ? (rSqm / tSqm * 100) : 0;
+        });
 
-        // Current month MTD from live FILTERED_DATA — weighted average
         const currRentedSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.rented_sqm || 0), 0);
         const currTotalSqm = FILTERED_DATA.reduce((s, d) => s + (d.occupancy?.total_sqm || 0), 0);
         occActualByMonth[occCurrentKey] = currTotalSqm > 0 ? (currRentedSqm / currTotalSqm * 100) : 0;
 
-        // Budgets: weight each site's budget % by its total_sqm to get portfolio-weighted budget
         occMonthKeys.forEach(mk => {
           let weightedSqm = 0, totalSqm = 0;
           FILTERED_DATA.forEach(d => {
@@ -2114,7 +2106,6 @@ function renderOverview() {
           occBudgetByMonth[mk] = totalSqm > 0 ? (weightedSqm / totalSqm * 100) : 0;
         });
 
-        // Build variance labels (percentage points, not euros)
         const fmtOccVar = (actual, budget) => {
           if (!budget) return '';
           const v = actual - budget;
@@ -2126,14 +2117,14 @@ function renderOverview() {
           occMonthNames[i],
           fmtOccVar(occActualByMonth[mk] || 0, occBudgetByMonth[mk] || 0)
         ]);
-
         const occActualData = occMonthKeys.map(mk => occActualByMonth[mk] || 0);
         const occBudgetData = occMonthKeys.map(mk => occBudgetByMonth[mk] || 0);
 
         mkPctVarChart('ch-occ-budget', occLabels, occActualData, occBudgetData);
       }
+    }
 
-      // Move-Ins vs Move-Outs + Net Rentals — both 4-month line charts
+    if (isAllSites && FILTERED_DATA.length > 1) {
       // Pull Jan/Feb/Mar from history.json; April from live FILTERED_DATA
       const miMoMonths = [];
       const miSeries = [];
@@ -2199,17 +2190,7 @@ function renderOverview() {
         { label: 'Net Rentals', data: netSeries, color: '#f97316' }
       ], { yFmt: v => v, mtdMonths: mtdMonthsSet, months: miMoMonths });
     } else {
-      // Single site view
-      if (!revBudgetEmpty) {
-        mkHBarChart('ch-rev-budget', ['Actual', 'Budget'], [{
-          label: '', data: [actualRev, budgetTotals.revenue], color: ['#16a34a', '#d1d5db']
-        }], v => fmt(v/1000, 0) + 'k');
-      }
-      if (!occBudgetEmpty) {
-        mkHBarChart('ch-occ-budget', ['Actual', 'Budget'], [{
-          label: '', data: [actualOcc, budgetTotals.occupancy_pct], color: ['#16a34a', '#d1d5db']
-        }], v => v + '%', 100);
-      }
+      // Single site view — revenue + occupancy charts already drawn above
 
       const periods = ['Today', 'Week', 'Month', 'Year'];
       const miVals = ['today','week','month','year'].map(p => aggNetMI(p));
