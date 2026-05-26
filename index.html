@@ -3711,20 +3711,62 @@ function renderStoragePilot() {
 
   const escRate = totalConv > 0 ? (totalEsc / totalConv * 100) : 0;
 
+  // Per-store escalation rate for the current month, from the by-location files.
+  // Only stores with >= 20 conversations are ranked, so tiny samples (e.g. a
+  // store with 3 calls) don't distort the highest/lowest figures.
+  const MIN_CONV_FOR_RANK = 20;
+  let highEscStore = null, lowEscStore = null;
+  if (currentMonth && SP_DATA.byLocation && SP_DATA.escalationsByLocation) {
+    // sum each store's conversations + escalations for the current month
+    const sumByStore = (data) => {
+      const stores = data.headers.filter(h => h !== 'date' && h !== 'total' && h !== 'Company');
+      const totals = {};
+      stores.forEach(s => { totals[s] = 0; });
+      data.rows.forEach(r => {
+        const d = parseSpDate(r.date);
+        if (!d) return;
+        const mk = `${d.year}-${String(d.month).padStart(2, '0')}`;
+        if (mk !== currentMonth) return;
+        stores.forEach(s => { totals[s] += (Number(r[s]) || 0); });
+      });
+      return totals;
+    };
+    const convByStore = sumByStore(SP_DATA.byLocation);
+    const escByStore = sumByStore(SP_DATA.escalationsByLocation);
+    const ranked = Object.keys(convByStore)
+      .filter(s => convByStore[s] >= MIN_CONV_FOR_RANK && escByStore[s] !== undefined)
+      .map(s => ({
+        store: s,
+        conv: convByStore[s],
+        esc: escByStore[s] || 0,
+        rate: convByStore[s] > 0 ? (escByStore[s] || 0) / convByStore[s] * 100 : 0,
+      }))
+      .sort((a, b) => b.rate - a.rate);
+    if (ranked.length > 0) {
+      highEscStore = ranked[0];
+      lowEscStore = ranked[ranked.length - 1];
+    }
+  }
+
   const currentMonthDisplay = currentMonth ? monthLabel(currentMonth) : '—';
 
   panel.innerHTML = `
     ${exportBtnHtml('exportStoragePilot')}
-    <div class="grid-3" style="margin-bottom:12px">
+    <div class="grid-4" style="margin-bottom:12px">
       <div class="stat-card" style="text-align:center">
         <div class="label">TOTAL CONVERSATIONS</div>
         <div class="value">${fmt(totalConv)}</div>
         <div class="sub">${currentMonthDisplay} • ${daysInMonth} days</div>
       </div>
       <div class="stat-card" style="text-align:center">
-        <div class="label">TOP CATEGORY</div>
-        <div class="value" style="font-size:20px">${topCategory}</div>
-        <div class="sub">${topCount > 0 ? fmt(topCount) + ' conversations' : ''}</div>
+        <div class="label">HIGHEST ESCALATION %</div>
+        <div class="value red" style="font-size:20px">${highEscStore ? highEscStore.store : '—'}</div>
+        <div class="sub">${highEscStore ? fmt(highEscStore.rate, 1) + '% • ' + fmt(highEscStore.esc) + ' of ' + fmt(highEscStore.conv) : 'No data'}</div>
+      </div>
+      <div class="stat-card" style="text-align:center">
+        <div class="label">LOWEST ESCALATION %</div>
+        <div class="value green" style="font-size:20px">${lowEscStore ? lowEscStore.store : '—'}</div>
+        <div class="sub">${lowEscStore ? fmt(lowEscStore.rate, 1) + '% • ' + fmt(lowEscStore.esc) + ' of ' + fmt(lowEscStore.conv) : 'No data'}</div>
       </div>
       <div class="stat-card" style="text-align:center">
         <div class="label">ESCALATION RATE</div>
