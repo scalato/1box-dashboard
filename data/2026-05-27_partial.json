@@ -1,6 +1,6 @@
 {
   "date": "2026-05-27",
-  "updated_at": "2026-05-27T19:57:48.243194",
+  "updated_at": "2026-05-27T20:14:31.886870",
   "site_count": 3,
   "files_processed": 3,
   "sites": [
@@ -57,7 +57,7 @@
         "arrears_30_plus": 5748.57,
         "arrears_count": 35,
         "payment_without_inv": 245.81,
-        "doubtful_debtors": 0
+        "doubtful_debtors": 0.0
       },
       "insurance": {
         "policies_count": 288,
@@ -66,7 +66,7 @@
         "pct_insured": 87.5
       },
       "_source_file": "2026-05-27_MIS 1BOX FR-01-Six-Fours-639155253084539269.pdf",
-      "_processed_at": "2026-05-27T19:57:18.681207"
+      "_processed_at": "2026-05-27T20:14:03.039396"
     },
     {
       "site_name": "1BOX Colomiers",
@@ -130,7 +130,7 @@
         "pct_insured": 77.4
       },
       "_source_file": "2026-05-27_MIS 1BOX FR-02-Colomiers-639155253092351860.pdf",
-      "_processed_at": "2026-05-27T19:57:32.984827"
+      "_processed_at": "2026-05-27T20:14:17.774967"
     },
     {
       "site_name": "1BOX Mérignac",
@@ -185,7 +185,7 @@
         "arrears_30_plus": 1714.98,
         "arrears_count": 17,
         "payment_without_inv": 1520.8,
-        "doubtful_debtors": 0
+        "doubtful_debtors": 0.0
       },
       "insurance": {
         "policies_count": 277,
@@ -194,7 +194,7 @@
         "pct_insured": 88.8
       },
       "_source_file": "2026-05-27_MIS 1BOX FR-03-Mérignac-639155253095633186.pdf",
-      "_processed_at": "2026-05-27T19:57:48.243172"
+      "_processed_at": "2026-05-27T20:14:31.886843"
     }
   ]
 }
