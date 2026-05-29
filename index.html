@@ -811,7 +811,10 @@ async function tryLoadFromGitHub() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const daysOld = Math.floor((today - dataDate) / (1000 * 60 * 60 * 24));
-    if (daysOld > 5) return null;
+    // Was 5 days -- raised to 30 so a temporary email-delivery outage doesn't
+    // block the dashboard. The "Data from X (N days old)" label in the header
+    // already tells the user when data is stale; hard-blocking adds little.
+    if (daysOld > 30) return null;
 
     window._dashDataDate = data.date;
     window._dashDaysOld = daysOld;
