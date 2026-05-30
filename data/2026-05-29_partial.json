@@ -1,6 +1,6 @@
 {
   "date": "2026-05-29",
-  "updated_at": "2026-05-29T19:14:26.384628",
+  "updated_at": "2026-05-29T19:27:07.453321",
   "site_count": 6,
   "files_processed": 6,
   "sites": [
@@ -66,7 +66,7 @@
         "pct_insured": 87.8
       },
       "_source_file": "2026-05-29_MIS 1BOX FR-01-Six-Fours-639156588747546821.pdf",
-      "_processed_at": "2026-05-29T19:13:16.335266"
+      "_processed_at": "2026-05-29T19:25:55.903715"
     },
     {
       "site_name": "1BOX Six-Fours",
@@ -130,7 +130,7 @@
         "pct_insured": 87.7
       },
       "_source_file": "2026-05-29_MIS 1BOX FR-01-Six-Fours-639156981128673064.pdf",
-      "_processed_at": "2026-05-29T19:13:30.180689"
+      "_processed_at": "2026-05-29T19:26:10.722955"
     },
     {
       "site_name": "1BOX Colomiers",
@@ -194,7 +194,7 @@
         "pct_insured": 78.8
       },
       "_source_file": "2026-05-29_MIS 1BOX FR-02-Colomiers-639156588774422520.pdf",
-      "_processed_at": "2026-05-29T19:13:44.371730"
+      "_processed_at": "2026-05-29T19:26:25.166893"
     },
     {
       "site_name": "1BOX Colomiers",
@@ -258,7 +258,7 @@
         "pct_insured": 77.2
       },
       "_source_file": "2026-05-29_MIS 1BOX FR-02-Colomiers-639156981150235721.pdf",
-      "_processed_at": "2026-05-29T19:13:58.541907"
+      "_processed_at": "2026-05-29T19:26:39.294006"
     },
     {
       "site_name": "1BOX Mérignac",
@@ -322,7 +322,7 @@
         "pct_insured": 88.2
       },
       "_source_file": "2026-05-29_MIS 1BOX FR-03-Mérignac-639156588779110042.pdf",
-      "_processed_at": "2026-05-29T19:14:12.566845"
+      "_processed_at": "2026-05-29T19:26:53.163460"
     },
     {
       "site_name": "1BOX Mérignac",
@@ -386,7 +386,7 @@
         "pct_insured": 88.5
       },
       "_source_file": "2026-05-29_MIS 1BOX FR-03-Mérignac-639156981154142097.pdf",
-      "_processed_at": "2026-05-29T19:14:26.384619"
+      "_processed_at": "2026-05-29T19:27:07.453310"
     }
   ]
 }
