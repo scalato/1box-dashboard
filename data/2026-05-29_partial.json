@@ -1,0 +1,392 @@
+{
+  "date": "2026-05-29",
+  "updated_at": "2026-05-29T19:14:26.384628",
+  "site_count": 6,
+  "files_processed": 6,
+  "sites": [
+    {
+      "site_name": "1BOX Six-Fours",
+      "country": "FR",
+      "date": "2026-05-28",
+      "occupancy": {
+        "unit_pct": 85.6,
+        "surface_pct": 86.3,
+        "total_units": 382,
+        "rented_units": 327,
+        "vacant_units": 45,
+        "total_sqm": 2325.12,
+        "rented_sqm": 2005.64,
+        "vacant_sqm": 273.46,
+        "locked_units": 20,
+        "terminated_units": 9,
+        "reserved_units": 1,
+        "out_of_order_units": 0,
+        "business_units": 95,
+        "private_units": 232
+      },
+      "rentals": {
+        "move_ins_today": 0,
+        "move_ins_week": 2,
+        "move_ins_month": 21,
+        "move_ins_year": 135,
+        "vacates_today": 2,
+        "vacates_week": 8,
+        "vacates_month": 20,
+        "vacates_year": 117,
+        "net_today": -2,
+        "net_week": -6,
+        "net_month": 1,
+        "net_year": 18
+      },
+      "revenue": {
+        "gross_rent": 48805.84,
+        "discounts": 4998.58,
+        "net_rent": 43807.26,
+        "gross_insurance": 5705.47,
+        "net_insurance": 5705.47,
+        "gross_total": 55133.85,
+        "net_total": 50135.27,
+        "invoiced_in_advance": 65783.88,
+        "current_rent_amount": 43206.79,
+        "max_rent_potential": 67227.25,
+        "avg_rate_per_sqm": 21.54,
+        "max_rate_per_sqm": 28.91
+      },
+      "arrears": {
+        "outstanding_total": 65437.99,
+        "arrears_30_plus": 5452.87,
+        "arrears_count": 30,
+        "payment_without_inv": 248.81,
+        "doubtful_debtors": 0
+      },
+      "insurance": {
+        "policies_count": 287,
+        "insured_value": 1386000.0,
+        "premium_total": 5600.0,
+        "pct_insured": 87.8
+      },
+      "_source_file": "2026-05-29_MIS 1BOX FR-01-Six-Fours-639156588747546821.pdf",
+      "_processed_at": "2026-05-29T19:13:16.335266"
+    },
+    {
+      "site_name": "1BOX Six-Fours",
+      "country": "FR",
+      "date": "2026-05-29",
+      "occupancy": {
+        "unit_pct": 85.1,
+        "surface_pct": 85.7,
+        "total_units": 382,
+        "rented_units": 325,
+        "vacant_units": 46,
+        "total_sqm": 2325.12,
+        "rented_sqm": 1993.39,
+        "vacant_sqm": 282.67,
+        "locked_units": 13,
+        "terminated_units": 7,
+        "reserved_units": 1,
+        "out_of_order_units": 0,
+        "business_units": 94,
+        "private_units": 231
+      },
+      "rentals": {
+        "move_ins_today": 0,
+        "move_ins_week": 2,
+        "move_ins_month": 21,
+        "move_ins_year": 135,
+        "vacates_today": 2,
+        "vacates_week": 10,
+        "vacates_month": 22,
+        "vacates_year": 119,
+        "net_today": -2,
+        "net_week": -8,
+        "net_month": -1,
+        "net_year": 16
+      },
+      "revenue": {
+        "gross_rent": 48805.84,
+        "discounts": 4998.58,
+        "net_rent": 43807.26,
+        "gross_insurance": 5705.47,
+        "net_insurance": 5705.47,
+        "gross_total": 55133.85,
+        "net_total": 50135.27,
+        "invoiced_in_advance": 65612.28,
+        "current_rent_amount": 42884.13,
+        "max_rent_potential": 67227.25,
+        "avg_rate_per_sqm": 21.51,
+        "max_rate_per_sqm": 28.91
+      },
+      "arrears": {
+        "outstanding_total": 64009.17,
+        "arrears_30_plus": 4352.45,
+        "arrears_count": 24,
+        "payment_without_inv": 317.21,
+        "doubtful_debtors": 0
+      },
+      "insurance": {
+        "policies_count": 285,
+        "insured_value": 1376000.0,
+        "premium_total": 5560.0,
+        "pct_insured": 87.7
+      },
+      "_source_file": "2026-05-29_MIS 1BOX FR-01-Six-Fours-639156981128673064.pdf",
+      "_processed_at": "2026-05-29T19:13:30.180689"
+    },
+    {
+      "site_name": "1BOX Colomiers",
+      "country": "FR",
+      "date": "2026-05-28",
+      "occupancy": {
+        "unit_pct": 61.4,
+        "surface_pct": 64.3,
+        "total_units": 577,
+        "rented_units": 354,
+        "vacant_units": 208,
+        "total_sqm": 3424.77,
+        "rented_sqm": 2203.12,
+        "vacant_sqm": 1112.06,
+        "locked_units": 9,
+        "terminated_units": 4,
+        "reserved_units": 2,
+        "out_of_order_units": 4,
+        "business_units": 52,
+        "private_units": 302
+      },
+      "rentals": {
+        "move_ins_today": 1,
+        "move_ins_week": 4,
+        "move_ins_month": 18,
+        "move_ins_year": 99,
+        "vacates_today": 6,
+        "vacates_week": 7,
+        "vacates_month": 19,
+        "vacates_year": 97,
+        "net_today": -5,
+        "net_week": -3,
+        "net_month": -1,
+        "net_year": 2
+      },
+      "revenue": {
+        "gross_rent": 29913.83,
+        "discounts": 2001.29,
+        "net_rent": 27912.54,
+        "gross_insurance": 5551.28,
+        "net_insurance": 5551.28,
+        "gross_total": 36195.53,
+        "net_total": 34194.24,
+        "invoiced_in_advance": 40701.04,
+        "current_rent_amount": 27280.5,
+        "max_rent_potential": 51561.93,
+        "avg_rate_per_sqm": 12.38,
+        "max_rate_per_sqm": 15.06
+      },
+      "arrears": {
+        "outstanding_total": 44775.63,
+        "arrears_30_plus": 6200.08,
+        "arrears_count": 91,
+        "payment_without_inv": 468.65,
+        "doubtful_debtors": 0
+      },
+      "insurance": {
+        "policies_count": 279,
+        "insured_value": 1337300.0,
+        "premium_total": 5435.0,
+        "pct_insured": 78.8
+      },
+      "_source_file": "2026-05-29_MIS 1BOX FR-02-Colomiers-639156588774422520.pdf",
+      "_processed_at": "2026-05-29T19:13:44.371730"
+    },
+    {
+      "site_name": "1BOX Colomiers",
+      "country": "FR",
+      "date": "2026-05-29",
+      "occupancy": {
+        "unit_pct": 61.5,
+        "surface_pct": 64.6,
+        "total_units": 577,
+        "rented_units": 355,
+        "vacant_units": 208,
+        "total_sqm": 3424.77,
+        "rented_sqm": 2211.77,
+        "vacant_sqm": 1105.85,
+        "locked_units": 9,
+        "terminated_units": 3,
+        "reserved_units": 1,
+        "out_of_order_units": 4,
+        "business_units": 52,
+        "private_units": 303
+      },
+      "rentals": {
+        "move_ins_today": 2,
+        "move_ins_week": 6,
+        "move_ins_month": 20,
+        "move_ins_year": 101,
+        "vacates_today": 1,
+        "vacates_week": 8,
+        "vacates_month": 20,
+        "vacates_year": 98,
+        "net_today": 1,
+        "net_week": -2,
+        "net_month": 0,
+        "net_year": 3
+      },
+      "revenue": {
+        "gross_rent": 29917.3,
+        "discounts": 2004.76,
+        "net_rent": 27912.54,
+        "gross_insurance": 5552.73,
+        "net_insurance": 5552.73,
+        "gross_total": 36252.44,
+        "net_total": 34247.68,
+        "invoiced_in_advance": 40847.04,
+        "current_rent_amount": 27215.33,
+        "max_rent_potential": 51561.93,
+        "avg_rate_per_sqm": 12.3,
+        "max_rate_per_sqm": 15.06
+      },
+      "arrears": {
+        "outstanding_total": 44977.33,
+        "arrears_30_plus": 6309.75,
+        "arrears_count": 85,
+        "payment_without_inv": 376.62,
+        "doubtful_debtors": 0.0
+      },
+      "insurance": {
+        "policies_count": 274,
+        "insured_value": 1312300.0,
+        "premium_total": 5335.0,
+        "pct_insured": 77.2
+      },
+      "_source_file": "2026-05-29_MIS 1BOX FR-02-Colomiers-639156981150235721.pdf",
+      "_processed_at": "2026-05-29T19:13:58.541907"
+    },
+    {
+      "site_name": "1BOX Mérignac",
+      "country": "FR",
+      "date": "2026-05-28",
+      "occupancy": {
+        "unit_pct": 47.4,
+        "surface_pct": 51.7,
+        "total_units": 661,
+        "rented_units": 313,
+        "vacant_units": 335,
+        "total_sqm": 4560.64,
+        "rented_sqm": 2357.85,
+        "vacant_sqm": 2113.02,
+        "locked_units": 5,
+        "terminated_units": 3,
+        "reserved_units": 1,
+        "out_of_order_units": 11,
+        "business_units": 62,
+        "private_units": 251
+      },
+      "rentals": {
+        "move_ins_today": 1,
+        "move_ins_week": 4,
+        "move_ins_month": 27,
+        "move_ins_year": 146,
+        "vacates_today": 0,
+        "vacates_week": 8,
+        "vacates_month": 18,
+        "vacates_year": 89,
+        "net_today": 1,
+        "net_week": -4,
+        "net_month": 9,
+        "net_year": 57
+      },
+      "revenue": {
+        "gross_rent": 32589.76,
+        "discounts": 3953.42,
+        "net_rent": 28636.34,
+        "gross_insurance": 5702.28,
+        "net_insurance": 5702.28,
+        "gross_total": 39987.86,
+        "net_total": 36034.44,
+        "invoiced_in_advance": 46026.37,
+        "current_rent_amount": 28114.09,
+        "max_rent_potential": 62933.26,
+        "avg_rate_per_sqm": 11.92,
+        "max_rate_per_sqm": 13.8
+      },
+      "arrears": {
+        "outstanding_total": 39255.46,
+        "arrears_30_plus": 1714.98,
+        "arrears_count": 17,
+        "payment_without_inv": 1520.8,
+        "doubtful_debtors": 0
+      },
+      "insurance": {
+        "policies_count": 276,
+        "insured_value": 1417000.0,
+        "premium_total": 5600.0,
+        "pct_insured": 88.2
+      },
+      "_source_file": "2026-05-29_MIS 1BOX FR-03-Mérignac-639156588779110042.pdf",
+      "_processed_at": "2026-05-29T19:14:12.566845"
+    },
+    {
+      "site_name": "1BOX Mérignac",
+      "country": "FR",
+      "date": "2026-05-29",
+      "occupancy": {
+        "unit_pct": 47.5,
+        "surface_pct": 51.7,
+        "total_units": 661,
+        "rented_units": 314,
+        "vacant_units": 334,
+        "total_sqm": 4560.64,
+        "rented_sqm": 2359.66,
+        "vacant_sqm": 2111.22,
+        "locked_units": 4,
+        "terminated_units": 2,
+        "reserved_units": 1,
+        "out_of_order_units": 11,
+        "business_units": 62,
+        "private_units": 252
+      },
+      "rentals": {
+        "move_ins_today": 2,
+        "move_ins_week": 6,
+        "move_ins_month": 29,
+        "move_ins_year": 148,
+        "vacates_today": 1,
+        "vacates_week": 9,
+        "vacates_month": 19,
+        "vacates_year": 90,
+        "net_today": 1,
+        "net_week": -3,
+        "net_month": 10,
+        "net_year": 58
+      },
+      "revenue": {
+        "gross_rent": 32591.3,
+        "discounts": 3961.41,
+        "net_rent": 28629.89,
+        "gross_insurance": 5704.87,
+        "net_insurance": 5704.87,
+        "gross_total": 40032.32,
+        "net_total": 36070.91,
+        "invoiced_in_advance": 46155.87,
+        "current_rent_amount": 28014.09,
+        "max_rent_potential": 62933.26,
+        "avg_rate_per_sqm": 11.87,
+        "max_rate_per_sqm": 13.8
+      },
+      "arrears": {
+        "outstanding_total": 38984.43,
+        "arrears_30_plus": 1443.95,
+        "arrears_count": 17,
+        "payment_without_inv": 1520.8,
+        "doubtful_debtors": 0
+      },
+      "insurance": {
+        "policies_count": 278,
+        "insured_value": 1427000.0,
+        "premium_total": 5640.0,
+        "pct_insured": 88.5
+      },
+      "_source_file": "2026-05-29_MIS 1BOX FR-03-Mérignac-639156981154142097.pdf",
+      "_processed_at": "2026-05-29T19:14:26.384619"
+    }
+  ]
+}
