@@ -2499,6 +2499,18 @@ function renderOccupancy() {
       </div>
       <div class="chart-wrap-lg"><canvas id="ch-occ-vs-budget"></canvas></div>
     </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px">
+        <div class="card-title" style="margin-bottom:0">Monthly Churn</div>
+        <div style="display:flex;gap:14px;font-size:11px;color:var(--muted-2);align-items:center;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:50%"></span>&lt;6%</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#f97316;border-radius:50%"></span>6–9%</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:50%"></span>&gt;9%</span>
+        </div>
+      </div>
+      <div class="chart-wrap-lg"><canvas id="ch-churn"></canvas></div>
+      <div style="font-size:11px;color:var(--muted-2);margin-top:8px">Churn = vacates ÷ start-of-month occupied units. Requires the prior month's EOM snapshot, so the earliest month plotted is the second month for which data exists.</div>
+    </div>
   `;
 
   nextTick(() => {
@@ -2604,6 +2616,109 @@ function renderOccupancy() {
     });
 
     mkOccVsBudgetChart('ch-occ-vs-budget', monthLabels, actualData, budgetData, barColors);
+
+    // ----- Monthly Churn -----
+    // Churn % per month = vacates ÷ start-of-month occupied units.
+    //   numerator   = sum of rentals.vacates_month across sites in scope
+    //   denominator = sum of occupancy.rented_units from the PRIOR month's
+    //                 EOM snapshot (in history.json), for the same sites.
+    // The earliest month plotted is the one immediately after the earliest
+    // history snapshot, since the prior month's data is required.
+    const churnByMonth = {};
+    months.forEach(mk => {
+      // Previous month key
+      const [yy, mm] = mk.split('-').map(Number);
+      const pm = mm === 1 ? 12 : mm - 1;
+      const py = mm === 1 ? yy - 1 : yy;
+      const prevKey = `${py}-${String(pm).padStart(2, '0')}`;
+
+      let vacates = 0;
+      let startOccupied = 0;
+
+      // Numerator: vacates_month for the month mk
+      if (mk === currentMonthKey) {
+        // Live MTD figures
+        FILTERED_DATA.forEach(d => {
+          vacates += (d.rentals?.vacates_month || 0);
+        });
+      } else {
+        histSites.forEach(s => {
+          const e = (s.series || []).find(x => x.month === mk);
+          if (e?.rentals) vacates += (e.rentals.vacates_month || 0);
+        });
+      }
+
+      // Denominator: rented_units at the END of the PRIOR month
+      histSites.forEach(s => {
+        const e = (s.series || []).find(x => x.month === prevKey);
+        if (e?.occupancy) startOccupied += (e.occupancy.rented_units || 0);
+      });
+
+      churnByMonth[mk] = (startOccupied > 0)
+        ? (vacates / startOccupied * 100)
+        : null;
+    });
+
+    const churnData = months.map(mk => churnByMonth[mk]);
+    const churnColors = churnData.map(v => {
+      if (v === null || v === undefined) return '#e5e7eb';
+      if (v < 6) return '#16a34a';
+      if (v <= 9) return '#f97316';
+      return '#ef4444';
+    });
+
+    mkChurnChart('ch-churn', monthLabels, churnData, churnColors);
+  });
+}
+
+// Line chart of monthly churn % with color-coded points by threshold band.
+function mkChurnChart(id, labels, data, pointColors) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (CHARTS[id]) CHARTS[id].destroy();
+
+  CHARTS[id] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Churn',
+        data,
+        borderColor: '#475569',
+        borderWidth: 2,
+        pointBackgroundColor: pointColors,
+        pointBorderColor: pointColors,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        tension: 0.25,
+        fill: false,
+        spanGaps: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const v = ctx.parsed.y;
+              return v === null || v === undefined ? 'No data' : `Churn: ${v.toFixed(2)}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (v) => v + '%'
+          },
+          title: { display: true, text: 'Churn %' }
+        }
+      }
+    }
   });
 }
 
@@ -4276,900 +4391,4 @@ function injectCompetitorChart(siteKey) {
       card.style.opacity = '1';
       card.innerHTML = `
         <div class="card-title">Competitor Rates — €/m² by Store (5 km radius)</div>
-        <div class="chart-wrap-lg" style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px;text-align:center;padding:20px">
-          <div style="font-size:32px;margin-bottom:10px;opacity:0.4">📊</div>
-          <div>No competitor data yet for this site.</div>
-          <div style="margin-top:6px">Run <code>fetch_competitor_rates.py</code> daily; chart appears once data accumulates.</div>
-        </div>
-      `;
-      return;
-    }
-
-    // Long-format rows: { date, brand, store_label, store_id, rate, unit_count }
-    // Build:
-    //   - Sorted unique dates (x-axis)
-    //   - Per-store time series (y-values keyed by date)
-    const allDates = [...new Set(data.rows.map(r => String(r.date)))].sort();
-
-    // Group rows by store_id (preferred — labels can drift, ids are stable)
-    const stores = {};
-    for (const r of data.rows) {
-      const id = String(r.store_id || r.store_label || '');
-      if (!id) continue;
-      const rate = Number(r.rate);
-      if (!Number.isFinite(rate)) continue;
-      if (!stores[id]) {
-        stores[id] = {
-          brand: String(r.brand || 'other').toLowerCase(),
-          // Use the most recent label seen for this store id
-          label: String(r.store_label || id),
-          byDate: {}
-        };
-      } else {
-        stores[id].label = String(r.store_label || stores[id].label);
-      }
-      stores[id].byDate[String(r.date)] = rate;
-    }
-
-    // Drop "other" entirely (puller already filters, but defensive)
-    const storeList = Object.entries(stores)
-      .map(([id, s]) => ({ id, ...s }))
-      .filter(s => s.brand === '1box' || s.brand === 'shurgard' || s.brand === 'allsafe');
-
-    if (!storeList.length) {
-      card.style.opacity = '1';
-      card.innerHTML = `
-        <div class="card-title">Competitor Rates — €/m² by Store (5 km radius)</div>
-        <div class="chart-wrap-lg" style="display:flex;align-items:center;justify-content:center;color:var(--muted-2);font-size:12px">No 1Box / Shurgard / AllSafe data parsed.</div>
-      `;
-      return;
-    }
-
-    // Sort: 1box first, then shurgard, then allsafe; within each, alphabetical by label
-    const brandOrder = { '1box': 0, 'shurgard': 1, 'allsafe': 2 };
-    storeList.sort((a, b) =>
-      (brandOrder[a.brand] - brandOrder[b.brand]) || a.label.localeCompare(b.label)
-    );
-
-    // Color palettes per brand. 1BOX = thick green; Shurgard = blues; AllSafe = oranges.
-    const SHURGARD_PALETTE = ['#1d4ed8', '#3b82f6', '#60a5fa', '#93c5fd', '#1e40af'];
-    const ALLSAFE_PALETTE  = ['#c2410c', '#ea580c', '#f97316', '#fb923c', '#fdba74'];
-    const ONE_BOX_COLOR    = '#16a34a';
-
-    let shurgardIdx = 0, allsafeIdx = 0;
-    const datasets = storeList.map(s => {
-      const data = allDates.map(d => (d in s.byDate ? s.byDate[d] : null));
-      let color, lineWidth;
-      if (s.brand === '1box') {
-        color = ONE_BOX_COLOR;
-        lineWidth = 3;
-      } else if (s.brand === 'shurgard') {
-        color = SHURGARD_PALETTE[shurgardIdx++ % SHURGARD_PALETTE.length];
-        lineWidth = 1.5;
-      } else {
-        color = ALLSAFE_PALETTE[allsafeIdx++ % ALLSAFE_PALETTE.length];
-        lineWidth = 1.5;
-      }
-      return { label: s.label, data, color, lineWidth };
-    });
-
-    // Build x-axis labels from dates
-    const labels = allDates.map(d => {
-      const parts = d.split('-');
-      if (parts.length === 3) {
-        const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return names[parseInt(parts[1],10)-1] + ' ' + parseInt(parts[2],10);
-      }
-      return d;
-    });
-
-    const dayCount = allDates.length;
-    const dayWord = dayCount === 1 ? 'day' : 'days';
-    const storeWord = storeList.length === 1 ? 'store' : 'stores';
-
-    card.style.opacity = '1';
-    card.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-        <div class="card-title" style="margin-bottom:0">Competitor Rates — €/m² by Store (5 km radius)</div>
-        <div style="font-size:11px;color:var(--muted-2)">${storeList.length} ${storeWord} · ${dayCount} ${dayWord} of history</div>
-      </div>
-      <div style="max-width:760px;margin:0 auto">
-        <div class="chart-wrap-lg"><canvas id="ch-comp-rate"></canvas></div>
-      </div>
-    `;
-
-    nextTick(() => {
-      mkLineChart('ch-comp-rate', labels, datasets, {
-        yFmt: v => '€' + fmt(v, 2),
-        yMin: 0
-      });
-    });
-  });
-}
-
-function renderTrends() {
-  const panel = document.getElementById('panel-trends');
-  if (!panel) return;
-
-  let scopeLabel;
-  if (CURRENT_SITE !== 'all') scopeLabel = siteShort(CURRENT_SITE);
-  else if (CURRENT_COUNTRY === 'fr') scopeLabel = 'France';
-  else if (CURRENT_COUNTRY === 'nl') scopeLabel = 'Netherlands';
-  else scopeLabel = 'Portfolio';
-
-  if (!HISTORY_DATA || !HISTORY_DATA.sites) {
-    panel.innerHTML = `
-      <div class="trends-header">
-        <div class="trends-scope">${scopeLabel} — no data</div>
-      </div>
-      <div class="empty-state">
-        <div class="big">📈</div>
-        <p>No historical data available.<br>Run <code>backfill_historicals.py</code> to generate <code>data/history.json</code>.</p>
-      </div>
-    `;
-    return;
-  }
-
-  const isAllSites = (CURRENT_SITE === 'all');
-  const filteredSiteEntries = Object.values(HISTORY_DATA.sites).filter(site => {
-    if (site.is_rollup) {
-      if (!isAllSites && site.name === CURRENT_SITE) return true;
-      return false;
-    }
-    if (!isAllSites) return site.name === CURRENT_SITE;
-    if (CURRENT_COUNTRY === 'fr') return site.country === 'FR';
-    if (CURRENT_COUNTRY === 'nl') return site.country === 'NL';
-    return true;
-  });
-
-  if (filteredSiteEntries.length === 0) {
-    panel.innerHTML = `
-      <div class="trends-header">
-        <div class="trends-scope">${scopeLabel} — no data</div>
-      </div>
-      <div class="empty-state">
-        <div class="big">📈</div>
-        <p>No historical data for this selection.</p>
-      </div>
-    `;
-    return;
-  }
-
-  const monthSet = new Set();
-  filteredSiteEntries.forEach(s => (s.series || []).forEach(e => monthSet.add(e.month)));
-
-  // Add current month from latest.json as a provisional MTD data point,
-  // but only if history.json doesn't already have an entry for it
-  const currentMonth = getCurrentMonthKey();
-  const currentMonthInHistory = monthSet.has(currentMonth);
-  if (!currentMonthInHistory && RAW_DATA.length > 0) {
-    monthSet.add(currentMonth);
-  }
-
-  const months = [...monthSet].sort();
-  const monthLabels = months.map(m => {
-    const [y, mo] = m.split('-');
-    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return names[parseInt(mo,10)-1] + ' ' + y;
-  });
-
-  // Which months are MTD (incomplete)? Only the current month when pulled from live data.
-  const mtdMonths = new Set();
-  if (!currentMonthInHistory) mtdMonths.add(currentMonth);
-
-  panel.innerHTML = `
-    <div class="trends-header">
-      <div class="trends-scope">${scopeLabel} — ${months.length} data point${months.length === 1 ? '' : 's'} (monthly${mtdMonths.size > 0 ? ', current MTD' : ''})</div>
-      <div class="toggle-group">
-        <button class="toggle-btn ${TRENDS_VIEW === 'portfolio' ? 'active' : ''}" onclick="setTrendsView('portfolio')">Portfolio</button>
-        <button class="toggle-btn ${TRENDS_VIEW === 'bystore' ? 'active' : ''}" onclick="setTrendsView('bystore')">By Store</button>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Occupancy</div>
-        <div class="chart-wrap-lg"><canvas id="ch-trend-occ"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Revenue</div>
-        <div class="chart-wrap-lg"><canvas id="ch-trend-rev"></canvas></div>
-      </div>
-    </div>
-    <div class="section-gap"></div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Net Rentals</div>
-        <div class="chart-wrap-lg"><canvas id="ch-trend-net"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Avg Rate/m²</div>
-        <div class="chart-wrap-lg"><canvas id="ch-trend-rate"></canvas></div>
-      </div>
-    </div>
-    <div id="trends-competitor-slot"></div>
-  `;
-
-  // Per-site NL: async-load competitor rates and inject below the 4 trend charts
-  if (!isAllSites && filteredSiteEntries.length === 1 && filteredSiteEntries[0].country === 'NL') {
-    const siteKey = filteredSiteEntries[0].site_key;
-    if (siteKey) injectCompetitorChart(siteKey);
-  }
-
-  nextTick(() => {
-    if (TRENDS_VIEW === 'portfolio') {
-      // Aggregated series
-      const occSeries = [], revSeries = [], netSeries = [], rateSeries = [];
-      months.forEach(m => {
-        // For the current month (MTD), pull from live FILTERED_DATA
-        if (m === currentMonth && !currentMonthInHistory) {
-          let rSqm = 0, tSqm = 0, rev = 0, net = 0, rateNum = 0, rateDen = 0;
-          FILTERED_DATA.forEach(d => {
-            rSqm += d.occupancy?.rented_sqm || 0;
-            tSqm += d.occupancy?.total_sqm || 0;
-            rev += d.revenue?.net_total || 0;
-            net += netNetFromRow(d, 'month');
-            const rate = d.revenue?.avg_rate_per_sqm || 0;
-            const sqm = d.occupancy?.rented_sqm || 0;
-            if (rate && sqm) { rateNum += rate * sqm; rateDen += sqm; }
-          });
-          occSeries.push(tSqm > 0 ? (rSqm/tSqm*100) : null);
-          revSeries.push(rev);
-          netSeries.push(net);
-          rateSeries.push(rateDen > 0 ? (rateNum/rateDen) : null);
-          return;
-        }
-
-        let rSqm = 0, tSqm = 0, rev = 0, net = 0, rateNum = 0, rateDen = 0;
-        filteredSiteEntries.forEach(s => {
-          const e = (s.series || []).find(x => x.month === m);
-          if (!e) return;
-          rSqm += e.occupancy?.rented_sqm || 0;
-          tSqm += e.occupancy?.total_sqm || 0;
-          rev += e.revenue?.net_total || 0;
-          net += netNetFromHist(e);
-          if (e.revenue?.avg_rate_per_sqm && e.occupancy?.rented_sqm) {
-            rateNum += e.revenue.avg_rate_per_sqm * e.occupancy.rented_sqm;
-            rateDen += e.occupancy.rented_sqm;
-          }
-        });
-        occSeries.push(tSqm > 0 ? (rSqm/tSqm*100) : null);
-        revSeries.push(rev);
-        netSeries.push(net);
-        rateSeries.push(rateDen > 0 ? (rateNum/rateDen) : null);
-      });
-
-      mkLineChart('ch-trend-occ', monthLabels, [{ label: scopeLabel, data: occSeries, color: '#16a34a' }],
-        { yFmt: v => v + '%', yMin: 0, yMax: 100, stepSize: 25, mtdMonths, months });
-      mkLineChart('ch-trend-rev', monthLabels, [{ label: scopeLabel, data: revSeries, color: '#16a34a' }],
-        { yFmt: v => '€' + (v/1000).toFixed(0) + 'k', yMin: 0, mtdMonths, months });
-      mkLineChart('ch-trend-net', monthLabels, [{ label: scopeLabel, data: netSeries, color: '#f97316' }],
-        { yFmt: v => v, mtdMonths, months });
-      mkLineChart('ch-trend-rate', monthLabels, [{ label: scopeLabel, data: rateSeries, color: '#8b5cf6' }],
-        { yFmt: v => '€' + fmt(v, 0), yMin: 0, mtdMonths, months });
-    } else {
-      // By Store: one line per site
-      const palette = ['#16a34a', '#f97316', '#8b5cf6', '#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6'];
-      const occDatasets = [], revDatasets = [], netDatasets = [], rateDatasets = [];
-
-      filteredSiteEntries.forEach((s, i) => {
-        const color = palette[i % palette.length];
-
-        // For current month, find matching live site data
-        const liveSite = !currentMonthInHistory
-          ? FILTERED_DATA.find(d => d.site_name === s.name)
-          : null;
-
-        const occData = months.map(m => {
-          if (m === currentMonth && liveSite) {
-            const ts = liveSite.occupancy?.total_sqm || 0;
-            return ts > 0 ? ((liveSite.occupancy.rented_sqm / ts) * 100) : null;
-          }
-          const e = (s.series || []).find(x => x.month === m);
-          if (!e || !e.occupancy) return null;
-          const ts = e.occupancy.total_sqm || 0;
-          return ts > 0 ? ((e.occupancy.rented_sqm / ts) * 100) : null;
-        });
-        const revData = months.map(m => {
-          if (m === currentMonth && liveSite) return liveSite.revenue?.net_total || null;
-          const e = (s.series || []).find(x => x.month === m);
-          return e?.revenue?.net_total || null;
-        });
-        const netData = months.map(m => {
-          if (m === currentMonth && liveSite) return netNetFromRow(liveSite, 'month');
-          const e = (s.series || []).find(x => x.month === m);
-          return e ? netNetFromHist(e) : null;
-        });
-        const rateData = months.map(m => {
-          if (m === currentMonth && liveSite) return liveSite.revenue?.avg_rate_per_sqm || null;
-          const e = (s.series || []).find(x => x.month === m);
-          return e?.revenue?.avg_rate_per_sqm || null;
-        });
-
-        occDatasets.push({ label: siteShort(s.name), data: occData, color });
-        revDatasets.push({ label: siteShort(s.name), data: revData, color });
-        netDatasets.push({ label: siteShort(s.name), data: netData, color });
-        rateDatasets.push({ label: siteShort(s.name), data: rateData, color });
-      });
-
-      mkLineChart('ch-trend-occ', monthLabels, occDatasets, { yFmt: v => v + '%', yMin: 0, yMax: 100, stepSize: 25, mtdMonths, months });
-      mkLineChart('ch-trend-rev', monthLabels, revDatasets, { yFmt: v => '€' + (v/1000).toFixed(0) + 'k', yMin: 0, mtdMonths, months });
-      mkLineChart('ch-trend-net', monthLabels, netDatasets, { yFmt: v => v, mtdMonths, months });
-      mkLineChart('ch-trend-rate', monthLabels, rateDatasets, { yFmt: v => '€' + fmt(v, 0), yMin: 0, mtdMonths, months });
-    }
-  });
-}
-
-function setTrendsView(v) {
-  TRENDS_VIEW = v;
-  renderTrends();
-}
-
-// ─────────────────────────────────────────────
-// CHART HELPERS
-// ─────────────────────────────────────────────
-function siteShort(name) {
-  if (!name) return '';
-  return name.replace(/^1BOX\s+/i, '').replace(/^1Box\s+/i, '');
-}
-
-function mkRentalActivityChart(id, labels, miData, moData) {
-  // MI/MO as two lines with "Net: ±N" shown per month (green if positive, red if negative).
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-
-  const monthLabels = labels.map(l => l[0]);
-  const netLabels = labels.map(l => l[1]);
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: monthLabels,
-      datasets: [
-        {
-          label: 'Move-Ins',
-          data: miData,
-          borderColor: '#16a34a',
-          backgroundColor: '#16a34a',
-          borderWidth: 2.5,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#16a34a',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          fill: false,
-          tension: 0.3
-        },
-        {
-          label: 'Move-Outs',
-          data: moData,
-          borderColor: '#f97316',
-          backgroundColor: '#f97316',
-          borderWidth: 2.5,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#f97316',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          fill: false,
-          tension: 0.3
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: { bottom: 20 } },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
-          grid: { display: false }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } },
-          grid: { color: '#f3f4f6', drawBorder: false }
-        }
-      }
-    },
-    plugins: [{
-      id: 'netLabels',
-      afterDraw(chart) {
-        const x = chart.scales.x;
-        if (!x) return;
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.font = '600 11px Inter';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        x.ticks.forEach((tick, i) => {
-          const netStr = netLabels[i];
-          if (netStr === undefined || netStr === null || netStr === '') return;
-          const isPos = !netStr.startsWith('-') && !netStr.startsWith('−');
-          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
-          const px = x.getPixelForTick(i);
-          const py = x.bottom + 4;
-          ctx.fillText('Net: ' + netStr, px, py);
-        });
-        ctx.restore();
-      }
-    }]
-  });
-}
-
-function mkPctVarChart(id, labels, actualData, budgetData) {
-  // Occupancy % grouped bars with inline per-month variance (in pp).
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-
-  const monthLabels = labels.map(l => l[0]);
-  const varLabels = labels.map(l => l[1]);
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: monthLabels,
-      datasets: [
-        { label: 'Actual', data: actualData, backgroundColor: '#16a34a', borderRadius: 2, borderWidth: 0 },
-        { label: 'Budget', data: budgetData, backgroundColor: '#d1d5db', borderRadius: 2, borderWidth: 0 }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: { bottom: 20 } },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.y, 1) + '%' }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
-          grid: { display: false }
-        },
-        y: {
-          min: 0,
-          max: 100,
-          ticks: {
-            color: '#9ca3af',
-            font: { family: 'Inter', size: 10 },
-            callback: v => v + '%'
-          },
-          grid: { color: '#f3f4f6', drawBorder: false }
-        }
-      }
-    },
-    plugins: [{
-      id: 'varianceLabelsPct',
-      afterDraw(chart) {
-        const x = chart.scales.x;
-        if (!x) return;
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.font = '600 11px Inter';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        x.ticks.forEach((tick, i) => {
-          const varStr = varLabels[i];
-          if (!varStr) return;
-          const isPos = varStr.startsWith('+');
-          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
-          const px = x.getPixelForTick(i);
-          const py = x.bottom + 4;
-          ctx.fillText(varStr, px, py);
-        });
-        ctx.restore();
-      }
-    }]
-  });
-}
-
-function mkRevVarChart(id, labels, actualData, budgetData) {
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-
-  const monthLabels = labels.map(l => l[0]);
-  const varLabels = labels.map(l => l[1]);
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: monthLabels,
-      datasets: [
-        {
-          label: 'Actual',
-          data: actualData,
-          borderColor: '#16a34a',
-          backgroundColor: '#16a34a',
-          borderWidth: 2.5,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#16a34a',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          fill: false,
-          tension: 0.3
-        },
-        {
-          label: 'Budget',
-          data: budgetData,
-          borderColor: '#9ca3af',
-          backgroundColor: '#9ca3af',
-          borderWidth: 2,
-          borderDash: [6, 4],
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#9ca3af',
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          fill: false,
-          tension: 0.3
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: { bottom: 20 } },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ctx.dataset.label + ': €' + fmt(ctx.parsed.y/1000, 0) + 'k' }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
-          grid: { display: false }
-        },
-        y: {
-          ticks: {
-            color: '#9ca3af',
-            font: { family: 'Inter', size: 10 },
-            callback: v => '€' + fmt(v/1000, 0) + 'k'
-          },
-          grid: { color: '#f3f4f6', drawBorder: false }
-        }
-      }
-    },
-    plugins: [{
-      id: 'varianceLabels',
-      afterDraw(chart) {
-        const x = chart.scales.x;
-        if (!x) return;
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.font = '600 11px Inter';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        x.ticks.forEach((tick, i) => {
-          const varStr = varLabels[i];
-          if (!varStr) return;
-          const isPos = varStr.startsWith('+');
-          ctx.fillStyle = isPos ? '#16a34a' : '#ef4444';
-          const px = x.getPixelForTick(i);
-          const py = x.bottom + 4;
-          ctx.fillText(varStr, px, py);
-        });
-        ctx.restore();
-      }
-    }]
-  });
-}
-
-function mkHBarChart(id, labels, datasets, fmtFn, maxVal) {
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-
-  // Handle per-bar coloring when data array length differs from dataset count
-  const ds = datasets.map(d => ({
-    label: d.label,
-    data: d.data,
-    backgroundColor: Array.isArray(d.color) ? d.color : d.color,
-    borderRadius: 3,
-    borderWidth: 0
-  }));
-
-  const xScale = {
-    ticks: {
-      color: '#9ca3af',
-      font: { family: 'Inter', size: 10 },
-      callback: fmtFn ? (v => fmtFn(v)) : undefined
-    },
-    grid: { color: '#f3f4f6', drawBorder: false }
-  };
-  if (maxVal !== undefined) xScale.max = maxVal;
-  xScale.min = 0;
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'bar',
-    data: { labels, datasets: ds },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      indexAxis: 'y',
-      plugins: {
-        legend: {
-          display: datasets.length > 1,
-          position: 'bottom',
-          labels: { color: '#6b7280', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 8 }
-        }
-      },
-      scales: {
-        x: xScale,
-        y: {
-          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
-          grid: { display: false }
-        }
-      }
-    }
-  });
-}
-
-function mkVBarChart(id, labels, datasets, opts) {
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-  opts = opts || {};
-
-  const yTicks = {
-    color: '#9ca3af',
-    font: { family: 'Inter', size: 10 }
-  };
-  if (opts.yFmt) yTicks.callback = v => opts.yFmt(v);
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: datasets.map(d => ({
-        label: d.label,
-        data: d.data,
-        backgroundColor: d.color,
-        borderRadius: 2,
-        borderWidth: 0
-      }))
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: datasets.length > 1,
-          position: 'bottom',
-          labels: { color: '#6b7280', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 8 }
-        },
-        tooltip: opts.yFmt ? {
-          callbacks: { label: ctx => (ctx.dataset.label ? ctx.dataset.label + ': ' : '') + opts.yFmt(ctx.parsed.y) }
-        } : {}
-      },
-      scales: {
-        x: {
-          ticks: { color: '#6b7280', font: { family: 'Inter', size: 11 } },
-          grid: { display: false }
-        },
-        y: {
-          ticks: yTicks,
-          grid: { color: '#f3f4f6', drawBorder: false }
-        }
-      }
-    }
-  });
-}
-
-function mkDonut(id, labels, data, colors) {
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: '#4b5563',
-            font: { family: 'Inter', size: 11 },
-            boxWidth: 10,
-            padding: 10,
-            generateLabels: (chart) => {
-              const ds = chart.data.datasets[0];
-              return chart.data.labels.map((l, i) => ({
-                text: `${l} (${ds.data[i]})`,
-                fillStyle: ds.backgroundColor[i],
-                strokeStyle: ds.backgroundColor[i],
-                index: i
-              }));
-            }
-          }
-        }
-      },
-      cutout: '60%'
-    }
-  });
-}
-
-function mkLineChart(id, labels, datasets, opts) {
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
-  if (CHARTS[id]) CHARTS[id].destroy();
-  opts = opts || {};
-
-  const yScale = {
-    ticks: {
-      color: '#9ca3af',
-      font: { family: 'Inter', size: 10 },
-      callback: v => opts.yFmt ? opts.yFmt(v) : v
-    },
-    grid: { color: '#f3f4f6', drawBorder: false }
-  };
-  if (opts.yMin !== undefined) yScale.min = opts.yMin;
-  if (opts.yMax !== undefined) yScale.max = opts.yMax;
-  if (opts.stepSize) yScale.ticks.stepSize = opts.stepSize;
-
-  const mtdMonths = opts.mtdMonths;
-  const months = opts.months || [];
-
-  // Helper: is the data point at this index MTD (current incomplete month)?
-  const isMTDIndex = (i) => mtdMonths && months[i] && mtdMonths.has(months[i]);
-
-  const chartDatasets = datasets.map(d => ({
-    label: d.label,
-    data: d.data,
-    borderColor: d.color,
-    backgroundColor: 'transparent',
-    pointBackgroundColor: (ctx) => isMTDIndex(ctx.dataIndex) ? '#fff' : '#fff',
-    pointBorderColor: (ctx) => isMTDIndex(ctx.dataIndex) ? d.color : d.color,
-    pointBorderWidth: (ctx) => isMTDIndex(ctx.dataIndex) ? 2 : 2,
-    pointRadius: (ctx) => isMTDIndex(ctx.dataIndex) ? 5 : 3,
-    pointStyle: (ctx) => isMTDIndex(ctx.dataIndex) ? 'rectRot' : 'circle',
-    pointHoverRadius: 6,
-    borderWidth: d.lineWidth || 2,
-    tension: 0.35,
-    spanGaps: true,
-    segment: {
-      borderDash: (ctx) => {
-        // Dash the segment going INTO the MTD point
-        if (isMTDIndex(ctx.p1DataIndex)) return [4, 4];
-        return undefined;
-      }
-    }
-  }));
-
-  CHARTS[id] = new Chart(canvas, {
-    type: 'line',
-    data: { labels, datasets: chartDatasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: datasets.length > 1,
-          position: 'bottom',
-          labels: { color: '#6b7280', font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 8 }
-        },
-        tooltip: {
-          backgroundColor: '#fff',
-          borderColor: '#e5e7eb',
-          borderWidth: 1,
-          titleColor: '#1a1a1a',
-          bodyColor: '#1a1a1a',
-          titleFont: { family: 'Inter', size: 11, weight: '600' },
-          bodyFont: { family: 'Inter', size: 11 },
-          padding: 10,
-          callbacks: {
-            title: (items) => {
-              if (!items.length) return '';
-              const label = items[0].label;
-              if (isMTDIndex(items[0].dataIndex)) return label + ' (MTD, incomplete)';
-              return label;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } },
-          grid: { display: false }
-        },
-        y: yScale
-      }
-    }
-  });
-}
-
-// ─────────────────────────────────────────────
-// TABS / STATUS / UTILS
-// ─────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  document.getElementById('panel-' + name).classList.add('active');
-
-  // Footer data-source attribution varies by tab
-  const footer = document.getElementById('page-footer');
-  if (footer) {
-    const sources = {
-      storagepilot: 'Data sourced from StoragePilot',
-      siteware: 'Data sourced from SiteWare'
-    };
-    footer.textContent = sources[name] || 'Data sourced from 1Box MIS Reports';
-  }
-}
-
-function setStatus(type, msg) {
-  const el = document.getElementById('status-banner');
-  const sp = document.getElementById('status-spinner');
-  const tx = document.getElementById('status-text');
-  el.className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
-  sp.style.display = type === 'loading' ? 'block' : 'none';
-  tx.textContent = msg;
-  el.classList.remove('hidden');
-}
-function hideStatus() { document.getElementById('status-banner').classList.add('hidden'); }
-function setProgress(pct) { document.getElementById('loading-bar').style.width = pct + '%'; }
-function nextTick(fn) { setTimeout(fn, 50); }
-
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-window.addEventListener('load', async () => {
-  // Try to load from GitHub (the production deploy)
-  const [cached, hist, budgets] = await Promise.all([tryLoadFromGitHub(), tryLoadHistory(), tryLoadBudgets()]);
-  if (hist) HISTORY_DATA = hist;
-  if (budgets) BUDGET_DATA = budgets;
-
-  // StoragePilot CSVs (best-effort; tab handles missing files gracefully)
-  loadStoragePilotData();
-
-  // SiteWare audit CSV (best-effort; tab handles missing file gracefully)
-  loadSiteWareData();
-
-  if (cached) {
-    IS_DEMO = false;
-    RAW_DATA = cached;
-    document.getElementById('config-modal').classList.add('hidden');
-    document.getElementById('app').classList.add('visible');
-    renderAll();
-    updateLastUpdatedLabel();
-    return;
-  }
-
-  // If no cached data, check for stored config
-  const saved = localStorage.getItem('1box_config');
-  if (saved) {
-    CONFIG = JSON.parse(saved);
-    document.getElementById('cfg-client-id').value = CONFIG.clientId || '';
-    document.getElementById('cfg-folder').value = CONFIG.folder || '/1Box MIS Reports';
-    document.getElementById('cfg-api-key').value = CONFIG.apiKey || '';
-    if (window.location.hash.includes('access_token')) {
-      document.getElementById('config-modal').classList.add('hidden');
-      document.getElementById('app').classList.add('visible');
-      startAuth();
-    }
-  }
-
-  // Auto-load demo if we're in a preview environment (no data, no config)
-  if (!cached && !saved) {
-    // Keep modal open, but make demo easy to try
-  }
-});
-</script>
-</body>
-</html>
+        <div class="chart
