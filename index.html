@@ -2622,10 +2622,22 @@ function renderOccupancy() {
     //   numerator   = sum of rentals.vacates_month across sites in scope
     //   denominator = sum of occupancy.rented_units from the PRIOR month's
     //                 EOM snapshot (in history.json), for the same sites.
-    // The earliest month plotted is the one immediately after the earliest
-    // history snapshot, since the prior month's data is required.
+    //
+    // Important: this chart deliberately uses the date in latest.json (the
+    // "live data month") instead of the calendar month. On e.g. June 1st,
+    // latest.json still holds the May 31 EOM snapshot, so May is the rightmost
+    // point on this chart -- not June, which has no real data yet. As June
+    // accumulates data and overwrites latest.json, June becomes the live
+    // month and starts plotting against May's end-of-month occupied units.
+    const liveDateStr = window._dashDataDate || null;
+    const liveMonthKey = liveDateStr ? liveDateStr.slice(0, 7) : null;
+    // Months to plot for churn: everything in `months` up to and including liveMonthKey
+    const churnMonths = liveMonthKey
+      ? months.filter(mk => mk <= liveMonthKey)
+      : months.filter(mk => mk !== currentMonthKey);
+
     const churnByMonth = {};
-    months.forEach(mk => {
+    churnMonths.forEach(mk => {
       // Previous month key
       const [yy, mm] = mk.split('-').map(Number);
       const pm = mm === 1 ? 12 : mm - 1;
@@ -2635,9 +2647,11 @@ function renderOccupancy() {
       let vacates = 0;
       let startOccupied = 0;
 
-      // Numerator: vacates_month for the month mk
-      if (mk === currentMonthKey) {
-        // Live MTD figures
+      // Numerator: vacates_month for month mk
+      if (mk === liveMonthKey) {
+        // Live snapshot in latest.json. This is the MTD vacates count for
+        // whatever the live month is. Once the month is finalized into
+        // history.json, the same number is read from history below.
         FILTERED_DATA.forEach(d => {
           vacates += (d.rentals?.vacates_month || 0);
         });
@@ -2659,7 +2673,10 @@ function renderOccupancy() {
         : null;
     });
 
-    const churnData = months.map(mk => churnByMonth[mk]);
+    // Plot the same `months` series so the x-axis aligns with the occupancy
+    // chart above. Months without live data (i.e. after liveMonthKey) plot
+    // as gaps -- spanGaps:true in the chart joins the line across them.
+    const churnData = months.map(mk => churnByMonth[mk] ?? null);
     const churnColors = churnData.map(v => {
       if (v === null || v === undefined) return '#e5e7eb';
       if (v < 6) return '#16a34a';
