@@ -802,7 +802,7 @@ function startAuth() {
 // ─────────────────────────────────────────────
 async function tryLoadFromGitHub() {
   try {
-    const resp = await fetch('data/latest.json?t=' + Date.now(), { cache: 'no-store' });
+    const resp = await fetch('data/latest.json?t=' + Date.now(), { cache: 'no-store', credentials: 'include' });
     if (!resp.ok) return null;
     const data = await resp.json();
     if (!Array.isArray(data.sites) || data.sites.length === 0) return null;
@@ -824,7 +824,7 @@ async function tryLoadFromGitHub() {
 
 async function tryLoadHistory() {
   try {
-    const resp = await fetch('data/history.json?t=' + Date.now(), { cache: 'no-store' });
+    const resp = await fetch('data/history.json?t=' + Date.now(), { cache: 'no-store', credentials: 'include' });
     if (!resp.ok) return null;
     const data = await resp.json();
     if (!data || !data.sites) return null;
@@ -834,7 +834,7 @@ async function tryLoadHistory() {
 
 async function tryLoadBudgets() {
   try {
-    const resp = await fetch('data/budgets.json?t=' + Date.now(), { cache: 'no-store' });
+    const resp = await fetch('data/budgets.json?t=' + Date.now(), { cache: 'no-store', credentials: 'include' });
     if (!resp.ok) return null;
     const data = await resp.json();
     if (!data || !data.sites) return null;
@@ -1575,7 +1575,7 @@ async function loadSiteSummary(siteKey) {
 
   // Fetch fresh
   try {
-    const resp = await fetch(`data/summaries/${siteKey}.txt?t=${Date.now()}`, { cache: 'no-store' });
+    const resp = await fetch(`data/summaries/${siteKey}.txt?t=${Date.now()}`, { cache: 'no-store', credentials: 'include' });
     if (!resp.ok) {
       SUMMARY_CACHE[siteKey] = null;
       return null;
@@ -3408,7 +3408,7 @@ async function loadStoragePilotData() {
 
   await Promise.all(files.map(async (f) => {
     try {
-      const resp = await fetch(f.path + '?t=' + Date.now(), { cache: 'no-store' });
+      const resp = await fetch(f.path + '?t=' + Date.now(), { cache: 'no-store', credentials: 'include' });
       if (!resp.ok) { SP_DATA[f.key] = null; return; }
       const text = await resp.text();
       SP_DATA[f.key] = parseCSV(text);
@@ -3428,7 +3428,7 @@ let SW_DATA = {
 
 async function loadSiteWareData() {
   try {
-    const resp = await fetch('data/siteware/siteware_audits.csv?t=' + Date.now(), { cache: 'no-store' });
+    const resp = await fetch('data/siteware/siteware_audits.csv?t=' + Date.now(), { cache: 'no-store', credentials: 'include' });
     if (!resp.ok) { SW_DATA.audits = null; return; }
     const text = await resp.text();
     SW_DATA.audits = parseCSV(text);
@@ -4369,7 +4369,7 @@ async function loadCompetitorCsv(siteKey) {
   if (COMPETITOR_CACHE[siteKey] !== undefined) return COMPETITOR_CACHE[siteKey];
 
   try {
-    const resp = await fetch(`data/competitors/${siteKey}.csv?t=${Date.now()}`, { cache: 'no-store' });
+    const resp = await fetch(`data/competitors/${siteKey}.csv?t=${Date.now()}`, { cache: 'no-store', credentials: 'include' });
     if (!resp.ok) {
       COMPETITOR_CACHE[siteKey] = null;
       return null;
