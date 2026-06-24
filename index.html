@@ -660,7 +660,6 @@
     <button class="tab-btn" onclick="switchTab('rentals')" id="tab-rentals">Rentals</button>
     <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue">Revenue</button>
     <button class="tab-btn" onclick="switchTab('details')" id="tab-details">Details</button>
-    <button class="tab-btn" onclick="switchTab('misc')" id="tab-misc">Misc</button>
     <button class="tab-btn" onclick="switchTab('storagepilot')" id="tab-storagepilot">StoragePilot</button>
     <button class="tab-btn" onclick="switchTab('siteware')" id="tab-siteware">SiteWare</button>
   </div>
@@ -671,7 +670,6 @@
     <div id="panel-rentals" class="tab-panel"></div>
     <div id="panel-revenue" class="tab-panel"></div>
     <div id="panel-details" class="tab-panel"></div>
-    <div id="panel-misc" class="tab-panel"></div>
     <div id="panel-storagepilot" class="tab-panel"></div>
     <div id="panel-siteware" class="tab-panel"></div>
   </main>
@@ -1109,24 +1107,6 @@ function exportOverview() {
   downloadCsv(`1box-overview-${scope}-${dateTag}.csv`, rowsToCsv(['Metric', 'Value', 'Detail'], rows));
 }
 
-// Misc — label/value pairs from all kv-tables on the Misc panel
-function exportMisc() {
-  const panel = document.getElementById('panel-misc');
-  if (!panel) { alert('No data to export.'); return; }
-  const rows = [];
-  panel.querySelectorAll('.card').forEach(card => {
-    const section = card.querySelector('.card-title')?.textContent.trim() || '';
-    card.querySelectorAll('tr').forEach(tr => {
-      const cells = [...tr.querySelectorAll('td')].map(td => td.textContent.trim());
-      if (cells.length >= 2) {
-        rows.push({ Section: section, Metric: cells[0], Value: cells.slice(1).join(' / ') });
-      }
-    });
-  });
-  const { dateTag, scope } = exportTags();
-  downloadCsv(`1box-misc-${scope}-${dateTag}.csv`, rowsToCsv(['Section', 'Metric', 'Value'], rows));
-}
-
 // StoragePilot — conversations + escalations by category, by month
 function exportStoragePilot() {
   if (!SP_DATA || !SP_DATA.byCategory) { alert('No StoragePilot data to export.'); return; }
@@ -1427,7 +1407,6 @@ function renderAll() {
   renderRentals();
   renderRevenue();
   renderDetails();
-  renderMisc();
   renderStoragePilot();
   renderSiteWare();
 }
@@ -3222,104 +3201,6 @@ function renderDetails() {
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
-    </div>
-  `;
-}
-
-// ─────────────────────────────────────────────
-// MISC TAB — AR, Insurance, Discounts, Property Summary
-// ─────────────────────────────────────────────
-function renderMisc() {
-  const arOutstanding = agg('arrears.outstanding_total');
-  const arArrears30 = agg('arrears.arrears_30_plus');
-  const arCount = agg('arrears.arrears_count');
-  const arPaidAdvance = agg('arrears.payment_without_inv');
-  const arDoubtful = agg('arrears.doubtful_debtors');
-
-  const policies = agg('insurance.policies_count');
-  const premium = agg('insurance.premium_total');
-  const insuredValue = agg('insurance.insured_value');
-  const totalRented = agg('occupancy.rented_units');
-  const insuranceRate = totalRented > 0 ? (policies / totalRented * 100) : 0;
-  let covNum = 0, covDen = 0;
-  FILTERED_DATA.forEach(d => {
-    const p = d.insurance?.policies_count || 0;
-    const r = d.insurance?.pct_insured || 0;
-    if (p > 0) { covNum += r * p; covDen += p; }
-  });
-  const coverageRate = covDen > 0 ? (covNum / covDen) : insuranceRate;
-
-  const discounts = agg('revenue.discounts');
-  const totalSqm = agg('occupancy.total_sqm');
-  const rentedSqm = agg('occupancy.rented_sqm');
-  const maxRent = agg('revenue.max_rent_potential');
-  const currentRent = agg('revenue.current_rent_amount');
-  const totalDiscRate = rentedSqm > 0 ? (discounts / rentedSqm) : 0;
-  const discountPctOfMax = maxRent > 0 ? (discounts / maxRent * 100) : 0;
-
-  const totalUnits = agg('occupancy.total_units');
-  const avgUnitSize = totalUnits > 0 ? (totalSqm / totalUnits) : 0;
-  const revenueCapture = maxRent > 0 ? (currentRent / maxRent * 100) : 0;
-  const rentGap = maxRent - currentRent;
-
-  document.getElementById('panel-misc').innerHTML = `
-    ${exportBtnHtml('exportMisc')}
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Accounts Receivable</div>
-        <table class="kv-table">
-          <thead><tr><th>CATEGORY</th><th class="num">COUNT</th><th class="num">AMOUNT</th></tr></thead>
-          <tbody>
-            <tr><td class="label">Outstanding Invoices</td><td class="value">${arCount > 0 ? fmt(arCount) : 'NaN'}</td><td class="value">${arOutstanding > 0 ? fmtEur(arOutstanding) : 'NaN €'}</td></tr>
-            <tr><td class="label">In Arrears</td><td class="value">—</td><td class="value" style="color:${arArrears30>0?'var(--red)':'var(--text)'}">${arArrears30 > 0 ? fmtEur(arArrears30) : 'NaN €'}</td></tr>
-            <tr><td class="label">Paid in Advance</td><td class="value">—</td><td class="value">${arPaidAdvance > 0 ? fmtEur(arPaidAdvance) : 'NaN €'}</td></tr>
-            <tr><td class="label">Invoiced Not Due</td><td class="value">—</td><td class="value">${arDoubtful > 0 ? fmtEur(arDoubtful) : 'NaN €'}</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="card">
-        <div class="card-title">Insurance Details</div>
-        <table class="kv-table">
-          <tbody>
-            <tr><td class="label">Active Policies</td><td class="value">${fmt(policies)}</td></tr>
-            <tr><td class="label">Monthly Premium</td><td class="value">${fmtEurDec(premium)}</td></tr>
-            <tr><td class="label">Total Insured Value</td><td class="value">${fmtEur(insuredValue)}</td></tr>
-            <tr><td class="label">Insurance Rate</td><td class="value">${fmt(insuranceRate, 1)} %</td></tr>
-            <tr><td class="label">Coverage Rate</td><td class="value">${fmt(coverageRate, 1)} %</td></tr>
-          </tbody>
-        </table>
-        <div class="progress-bar"><div class="progress-bar-fill green" style="width:${Math.min(100, coverageRate)}%"></div></div>
-      </div>
-    </div>
-    <div class="section-gap"></div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Current Discounts & Liabilities</div>
-        <table class="kv-table">
-          <tbody>
-            <tr><td class="label">Total Discounts</td><td class="value">${fmtEurDec(discounts)} <span class="sub">${fmt(totalDiscRate, 2)} €/m²</span></td></tr>
-          </tbody>
-        </table>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px">
-          <span style="color:var(--muted-2)">Discount % of Max Rent</span>
-          <span style="font-weight:600">${fmt(discountPctOfMax, 1)}%</span>
-        </div>
-        <div class="progress-bar"><div class="progress-bar-fill amber" style="width:${Math.min(100, discountPctOfMax * 5)}%"></div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Property Summary</div>
-        <table class="kv-table">
-          <tbody>
-            <tr><td class="label">Total Units</td><td class="value">${fmt(totalUnits)}</td></tr>
-            <tr><td class="label">Total Surface</td><td class="value">${fmt(totalSqm)} m²</td></tr>
-            <tr><td class="label">Avg Unit Size</td><td class="value">${fmt(avgUnitSize, 1)} m²</td></tr>
-            <tr><td class="label">Max Monthly Rent</td><td class="value">${fmtEur(maxRent)}</td></tr>
-            <tr><td class="label">Current Monthly Rent</td><td class="value">${fmtEur(currentRent)}</td></tr>
-            <tr><td class="label">Revenue Capture Rate</td><td class="value">${fmt(revenueCapture, 1)} %</td></tr>
-            <tr><td class="label">Potential Rent Gap</td><td class="value" style="color:${rentGap>0?'var(--amber)':'var(--text)'}">${fmtEur(rentGap)}</td></tr>
-          </tbody>
-        </table>
-      </div>
     </div>
   `;
 }
