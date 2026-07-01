@@ -2273,12 +2273,12 @@ function renderOverview() {
           let sum = 0;
           histSites.forEach(s => {
             const e = (s.series || []).find(x => x.month === mk);
-            if (e?.revenue?.net_total) sum += e.revenue.net_total;
+            if (e?.revenue?.gross_total) sum += e.revenue.gross_total;
           });
           revActualByMonth[mk] = sum;
         });
 
-        revActualByMonth[currentMonthKey] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.net_total || 0), 0);
+        revActualByMonth[currentMonthKey] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.gross_total || 0), 0);
 
         monthKeys.forEach(mk => {
           let sum = 0;
@@ -2966,7 +2966,7 @@ function renderRevenue() {
     <div class="section-gap"></div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px">
-        <div class="card-title" style="margin-bottom:0">Net Revenue vs Budget</div>
+        <div class="card-title" style="margin-bottom:0">Gross Revenue vs Budget</div>
         <div style="display:flex;gap:14px;font-size:11px;color:var(--muted-2);align-items:center;flex-wrap:wrap">
           <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>≥100% of budget</span>
           <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#f97316;border-radius:2px"></span>80–100%</span>
@@ -3011,12 +3011,12 @@ function renderRevenue() {
     const actualByMonth = {};
     months.forEach(mk => {
       if (mk === currentMonthKey) {
-        actualByMonth[mk] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.net_total || 0), 0);
+        actualByMonth[mk] = FILTERED_DATA.reduce((s, d) => s + (d.revenue?.gross_total || 0), 0);
       } else {
         let sum = 0;
         histSites.forEach(s => {
           const e = (s.series || []).find(x => x.month === mk);
-          if (e?.revenue?.net_total) sum += e.revenue.net_total;
+          if (e?.revenue?.gross_total) sum += e.revenue.gross_total;
         });
         actualByMonth[mk] = sum;
       }
