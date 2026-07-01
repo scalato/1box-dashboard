@@ -2055,7 +2055,7 @@ function buildAttentionPanel() {
     }
 
     // Revenue vs budget
-    const revActual = d.revenue?.net_total;
+    const revActual = d.revenue?.gross_total;
     if (budgets && budgets.revenue && revActual != null) {
       const pctOff = (revActual - budgets.revenue) / budgets.revenue * 100;
       if (pctOff < -5) {
@@ -2137,7 +2137,7 @@ function buildAttentionPanel() {
 }
 
 function renderOverview() {
-  const actualRev = agg('revenue.net_total');
+  const actualRev = agg('revenue.gross_total');
   const actualOcc = aggPct('occupancy.rented_sqm', 'occupancy.total_sqm');
   const budgetTotals = getBudgetTotals();
   const monthName = new Date().toLocaleDateString('en-GB', { month: 'long' });
