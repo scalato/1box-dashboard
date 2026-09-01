@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01T12:41:08.077386",
+  "generated_at": "2026-09-01T09:52:47.441193",
   "months": [
     "2026-01",
     "2026-02",
@@ -7,7 +7,8 @@
     "2026-04",
     "2026-05",
     "2026-06",
-    "2026-07"
+    "2026-07",
+    "2026-08"
   ],
   "site_count": 34,
   "pdf_count": 102,
@@ -485,6 +486,76 @@
             "pct_insured": 86.9
           },
           "_source_file": "2026-07-31_MIS 1BOX FR-01-Six-Fours-639211413111338816.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 81.3,
+            "surface_pct": 83.6,
+            "total_units": 386,
+            "rented_units": 314,
+            "vacant_units": 64,
+            "total_sqm": 2349.5,
+            "rented_sqm": 1964.2,
+            "vacant_sqm": 331.94,
+            "locked_units": 19,
+            "terminated_units": 5,
+            "reserved_units": 1,
+            "out_of_order_units": 0,
+            "business_units": 91,
+            "private_units": 223
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 19,
+            "move_ins_year": 189,
+            "vacates_today": 6,
+            "vacates_week": 6,
+            "vacates_month": 25,
+            "vacates_year": 182,
+            "net_today": -6,
+            "net_week": -6,
+            "net_month": -5,
+            "net_year": 5,
+            "transfers_in_today": 1,
+            "transfers_in_week": 1,
+            "transfers_in_month": 6,
+            "transfers_in_year": 21,
+            "transfers_out_today": 1,
+            "transfers_out_week": 1,
+            "transfers_out_month": 5,
+            "transfers_out_year": 23
+          },
+          "revenue": {
+            "gross_rent": 51413.55,
+            "discounts": 4447.22,
+            "net_rent": 46966.33,
+            "gross_insurance": 5443.98,
+            "net_insurance": 5443.98,
+            "gross_total": 57954.53,
+            "net_total": 53507.31,
+            "invoiced_in_advance": 68704.31,
+            "current_rent_amount": 45420.71,
+            "max_rent_potential": 61186.33,
+            "avg_rate_per_sqm": 23.12,
+            "max_rate_per_sqm": 26.04
+          },
+          "arrears": {
+            "outstanding_total": 66409.21,
+            "arrears_30_plus": 9194.63,
+            "arrears_count": 44,
+            "payment_without_inv": 624.67,
+            "doubtful_debtors": 0
+          },
+          "insurance": {
+            "policies_count": 274,
+            "insured_value": 1352000.0,
+            "premium_total": 5385.0,
+            "pct_insured": 87.3
+          },
+          "_source_file": "2026-08-31_MIS 1BOX FR-01-Six-Fours-639238197115986666.pdf"
         }
       ]
     },
@@ -959,6 +1030,76 @@
             "pct_insured": 79.5
           },
           "_source_file": "2026-07-31_MIS 1BOX FR-02-Colomiers-639211413132745366.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 67.8,
+            "surface_pct": 71.9,
+            "total_units": 578,
+            "rented_units": 392,
+            "vacant_units": 181,
+            "total_sqm": 3414.5,
+            "rented_sqm": 2454.04,
+            "vacant_sqm": 924.73,
+            "locked_units": 11,
+            "terminated_units": 6,
+            "reserved_units": 0,
+            "out_of_order_units": 3,
+            "business_units": 53,
+            "private_units": 339
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 37,
+            "move_ins_year": 181,
+            "vacates_today": 0,
+            "vacates_week": 0,
+            "vacates_month": 21,
+            "vacates_year": 140,
+            "net_today": 1,
+            "net_week": 1,
+            "net_month": 16,
+            "net_year": 40,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 2,
+            "transfers_in_year": 25,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 2,
+            "transfers_out_year": 26
+          },
+          "revenue": {
+            "gross_rent": 35113.83,
+            "discounts": 3781.16,
+            "net_rent": 31332.67,
+            "gross_insurance": 6031.58,
+            "net_insurance": 6031.58,
+            "gross_total": 41971.17,
+            "net_total": 38190.01,
+            "invoiced_in_advance": 45098.0,
+            "current_rent_amount": 30458.2,
+            "max_rent_potential": 49171.0,
+            "avg_rate_per_sqm": 12.41,
+            "max_rate_per_sqm": 14.4
+          },
+          "arrears": {
+            "outstanding_total": 48253.3,
+            "arrears_30_plus": 6254.27,
+            "arrears_count": 66,
+            "payment_without_inv": 391.2,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 316,
+            "insured_value": 1464300.0,
+            "premium_total": 6030.0,
+            "pct_insured": 80.6
+          },
+          "_source_file": "2026-08-31_MIS 1BOX FR-02-Colomiers-639238197138486945.pdf"
         }
       ]
     },
@@ -1433,6 +1574,76 @@
             "pct_insured": 88.7
           },
           "_source_file": "2026-07-31_MIS 1BOX FR-03-Mérignac-639211413136651716.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 51.6,
+            "surface_pct": 55.5,
+            "total_units": 659,
+            "rented_units": 340,
+            "vacant_units": 313,
+            "total_sqm": 4549.18,
+            "rented_sqm": 2524.0,
+            "vacant_sqm": 1965.84,
+            "locked_units": 5,
+            "terminated_units": 2,
+            "reserved_units": 0,
+            "out_of_order_units": 13,
+            "business_units": 74,
+            "private_units": 266
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 27,
+            "move_ins_year": 231,
+            "vacates_today": 5,
+            "vacates_week": 5,
+            "vacates_month": 22,
+            "vacates_year": 145,
+            "net_today": -4,
+            "net_week": -4,
+            "net_month": 5,
+            "net_year": 84,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 0,
+            "transfers_in_year": 19,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 0,
+            "transfers_out_year": 21
+          },
+          "revenue": {
+            "gross_rent": 36491.08,
+            "discounts": 4137.65,
+            "net_rent": 32353.43,
+            "gross_insurance": 6195.03,
+            "net_insurance": 6195.03,
+            "gross_total": 56340.43,
+            "net_total": 52164.04,
+            "invoiced_in_advance": 51799.62,
+            "current_rent_amount": 31257.49,
+            "max_rent_potential": 69345.67,
+            "avg_rate_per_sqm": 12.38,
+            "max_rate_per_sqm": 15.24
+          },
+          "arrears": {
+            "outstanding_total": 43161.09,
+            "arrears_30_plus": 1559.82,
+            "arrears_count": 10,
+            "payment_without_inv": 1520.8,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 304,
+            "insured_value": 1572000.0,
+            "premium_total": 6175.0,
+            "pct_insured": 89.4
+          },
+          "_source_file": "2026-08-31_MIS 1BOX FR-03-Mérignac-639238197142549579.pdf"
         }
       ]
     },
@@ -2117,6 +2328,76 @@
             "pct_insured": 86.1
           },
           "_source_file": "2026-07-31_MIS 1BOX-01-Eindhoven-Best-639211410120591891.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 78.1,
+            "surface_pct": 83.3,
+            "total_units": 302,
+            "rented_units": 236,
+            "vacant_units": 53,
+            "total_sqm": 1430.06,
+            "rented_sqm": 1191.02,
+            "vacant_sqm": 183.91,
+            "locked_units": 1,
+            "terminated_units": 5,
+            "reserved_units": 0,
+            "out_of_order_units": 2,
+            "business_units": 39,
+            "private_units": 197
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 18,
+            "move_ins_year": 72,
+            "vacates_today": 5,
+            "vacates_week": 5,
+            "vacates_month": 13,
+            "vacates_year": 105,
+            "net_today": -4,
+            "net_week": -4,
+            "net_month": 5,
+            "net_year": -33,
+            "transfers_in_today": 1,
+            "transfers_in_week": 1,
+            "transfers_in_month": 1,
+            "transfers_in_year": 8,
+            "transfers_out_today": 1,
+            "transfers_out_week": 1,
+            "transfers_out_month": 1,
+            "transfers_out_year": 8
+          },
+          "revenue": {
+            "gross_rent": 27258.5,
+            "discounts": 373.57,
+            "net_rent": 26884.93,
+            "gross_insurance": 3440.44,
+            "net_insurance": 3440.44,
+            "gross_total": 30969.06,
+            "net_total": 30595.49,
+            "invoiced_in_advance": 36540.19,
+            "current_rent_amount": 26260.82,
+            "max_rent_potential": 19103.0,
+            "avg_rate_per_sqm": 22.05,
+            "max_rate_per_sqm": 13.36
+          },
+          "arrears": {
+            "outstanding_total": 714.25,
+            "arrears_30_plus": 44.12,
+            "arrears_count": 9,
+            "payment_without_inv": 530.06,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 208,
+            "insured_value": 787799.0,
+            "premium_total": 3539.0,
+            "pct_insured": 88.1
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-01-Eindhoven-Best-639238194121402888.pdf"
         }
       ]
     },
@@ -2607,6 +2888,76 @@
             "pct_insured": 86.3
           },
           "_source_file": "2026-07-31_MIS 1BOX-02-Den Bosch-639211410144832723.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 74.0,
+            "surface_pct": 77.5,
+            "total_units": 462,
+            "rented_units": 342,
+            "vacant_units": 113,
+            "total_sqm": 2528.58,
+            "rented_sqm": 1960.49,
+            "vacant_sqm": 524.8,
+            "locked_units": 5,
+            "terminated_units": 11,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 61,
+            "private_units": 281
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 14,
+            "move_ins_year": 105,
+            "vacates_today": 10,
+            "vacates_week": 10,
+            "vacates_month": 16,
+            "vacates_year": 133,
+            "net_today": -9,
+            "net_week": -9,
+            "net_month": -2,
+            "net_year": -27,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 2,
+            "transfers_in_year": 20,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 2,
+            "transfers_out_year": 19
+          },
+          "revenue": {
+            "gross_rent": 45609.36,
+            "discounts": 946.49,
+            "net_rent": 44662.87,
+            "gross_insurance": 5791.0,
+            "net_insurance": 5791.0,
+            "gross_total": 53337.33,
+            "net_total": 52383.34,
+            "invoiced_in_advance": 56524.87,
+            "current_rent_amount": 43467.35,
+            "max_rent_potential": 50737.0,
+            "avg_rate_per_sqm": 22.17,
+            "max_rate_per_sqm": 20.07
+          },
+          "arrears": {
+            "outstanding_total": 5954.0,
+            "arrears_30_plus": 1224.86,
+            "arrears_count": 23,
+            "payment_without_inv": 175.44,
+            "doubtful_debtors": 0
+          },
+          "insurance": {
+            "policies_count": 303,
+            "insured_value": 1296647.0,
+            "premium_total": 5821.0,
+            "pct_insured": 88.6
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-02-Den Bosch-639238194145509034.pdf"
         }
       ]
     },
@@ -3097,6 +3448,76 @@
             "pct_insured": 92.9
           },
           "_source_file": "2026-07-31_MIS 1BOX-03-Nijmegen-Wijchen-639211410148582759.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 83.7,
+            "surface_pct": 85.4,
+            "total_units": 295,
+            "rented_units": 247,
+            "vacant_units": 38,
+            "total_sqm": 1257.84,
+            "rented_sqm": 1073.66,
+            "vacant_sqm": 114.79,
+            "locked_units": 4,
+            "terminated_units": 3,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 52,
+            "private_units": 195
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 13,
+            "move_ins_year": 83,
+            "vacates_today": 1,
+            "vacates_week": 1,
+            "vacates_month": 9,
+            "vacates_year": 75,
+            "net_today": -1,
+            "net_week": -1,
+            "net_month": 6,
+            "net_year": 10,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 5,
+            "transfers_in_year": 20,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 3,
+            "transfers_out_year": 18
+          },
+          "revenue": {
+            "gross_rent": 23085.48,
+            "discounts": 536.0,
+            "net_rent": 22549.48,
+            "gross_insurance": 4162.13,
+            "net_insurance": 4162.13,
+            "gross_total": 33150.18,
+            "net_total": 32614.18,
+            "invoiced_in_advance": 36373.94,
+            "current_rent_amount": 21967.1,
+            "max_rent_potential": 21803.0,
+            "avg_rate_per_sqm": 20.46,
+            "max_rate_per_sqm": 17.33
+          },
+          "arrears": {
+            "outstanding_total": 510.08,
+            "arrears_30_plus": 86.3,
+            "arrears_count": 17,
+            "payment_without_inv": 1998.84,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 229,
+            "insured_value": 883498.0,
+            "premium_total": 4139.5,
+            "pct_insured": 92.7
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-03-Nijmegen-Wijchen-639238194149259082.pdf"
         }
       ]
     },
@@ -3587,6 +4008,76 @@
             "pct_insured": 84.8
           },
           "_source_file": "2026-07-31_MIS 1BOX-04-Boxtel-639211410152176571.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 75.4,
+            "surface_pct": 81.7,
+            "total_units": 134,
+            "rented_units": 101,
+            "vacant_units": 31,
+            "total_sqm": 704.73,
+            "rented_sqm": 575.49,
+            "vacant_sqm": 119.24,
+            "locked_units": 3,
+            "terminated_units": 2,
+            "reserved_units": 0,
+            "out_of_order_units": 1,
+            "business_units": 18,
+            "private_units": 83
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 8,
+            "move_ins_year": 36,
+            "vacates_today": 1,
+            "vacates_week": 1,
+            "vacates_month": 6,
+            "vacates_year": 50,
+            "net_today": -1,
+            "net_week": -1,
+            "net_month": 2,
+            "net_year": -15,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 0,
+            "transfers_in_year": 2,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 0,
+            "transfers_out_year": 3
+          },
+          "revenue": {
+            "gross_rent": 14436.16,
+            "discounts": 545.39,
+            "net_rent": 13890.77,
+            "gross_insurance": 1697.14,
+            "net_insurance": 1697.14,
+            "gross_total": 16289.71,
+            "net_total": 15744.32,
+            "invoiced_in_advance": 16323.25,
+            "current_rent_amount": 13576.89,
+            "max_rent_potential": 15846.0,
+            "avg_rate_per_sqm": 23.59,
+            "max_rate_per_sqm": 22.49
+          },
+          "arrears": {
+            "outstanding_total": 3525.77,
+            "arrears_30_plus": 1047.0,
+            "arrears_count": 12,
+            "payment_without_inv": 20.3,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 85,
+            "insured_value": 345000.0,
+            "premium_total": 1667.5,
+            "pct_insured": 84.2
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-04-Boxtel-639238194153634181.pdf"
         }
       ]
     },
@@ -4077,6 +4568,76 @@
             "pct_insured": 74.3
           },
           "_source_file": "2026-07-31_MIS 1BOX-05-Rijswijk-639211410155614107.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 80.4,
+            "surface_pct": 84.3,
+            "total_units": 693,
+            "rented_units": 557,
+            "vacant_units": 125,
+            "total_sqm": 2759.94,
+            "rented_sqm": 2326.52,
+            "vacant_sqm": 340.32,
+            "locked_units": 15,
+            "terminated_units": 11,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 74,
+            "private_units": 483
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 16,
+            "move_ins_year": 117,
+            "vacates_today": 3,
+            "vacates_week": 3,
+            "vacates_month": 14,
+            "vacates_year": 145,
+            "net_today": -3,
+            "net_week": -3,
+            "net_month": 1,
+            "net_year": -31,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 9,
+            "transfers_in_year": 31,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 10,
+            "transfers_out_year": 34
+          },
+          "revenue": {
+            "gross_rent": 65346.62,
+            "discounts": 795.52,
+            "net_rent": 64551.1,
+            "gross_insurance": 7377.09,
+            "net_insurance": 7377.09,
+            "gross_total": 73310.24,
+            "net_total": 72514.72,
+            "invoiced_in_advance": 74309.01,
+            "current_rent_amount": 64130.9,
+            "max_rent_potential": 71397.0,
+            "avg_rate_per_sqm": 27.57,
+            "max_rate_per_sqm": 25.87
+          },
+          "arrears": {
+            "outstanding_total": 10476.94,
+            "arrears_30_plus": 4265.37,
+            "arrears_count": 60,
+            "payment_without_inv": 278.96,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 416,
+            "insured_value": 1294440.0,
+            "premium_total": 7341.0,
+            "pct_insured": 74.7
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-05-Rijswijk-639238194157228003.pdf"
         }
       ]
     },
@@ -4567,6 +5128,76 @@
             "pct_insured": 77.5
           },
           "_source_file": "2026-07-31_MIS 1BOX-06-Groningen-639211410159676705.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 82.5,
+            "surface_pct": 81.3,
+            "total_units": 416,
+            "rented_units": 343,
+            "vacant_units": 66,
+            "total_sqm": 1585.2,
+            "rented_sqm": 1289.54,
+            "vacant_sqm": 258.32,
+            "locked_units": 8,
+            "terminated_units": 16,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 23,
+            "private_units": 320
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 26,
+            "move_ins_year": 139,
+            "vacates_today": 7,
+            "vacates_week": 7,
+            "vacates_month": 17,
+            "vacates_year": 143,
+            "net_today": -6,
+            "net_week": -6,
+            "net_month": 10,
+            "net_year": -6,
+            "transfers_in_today": 1,
+            "transfers_in_week": 1,
+            "transfers_in_month": 2,
+            "transfers_in_year": 21,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 1,
+            "transfers_out_year": 23
+          },
+          "revenue": {
+            "gross_rent": 28410.26,
+            "discounts": 592.13,
+            "net_rent": 27818.13,
+            "gross_insurance": 4257.83,
+            "net_insurance": 4257.83,
+            "gross_total": 33249.56,
+            "net_total": 32657.43,
+            "invoiced_in_advance": 35170.87,
+            "current_rent_amount": 27735.7,
+            "max_rent_potential": 35939.5,
+            "avg_rate_per_sqm": 21.51,
+            "max_rate_per_sqm": 22.67
+          },
+          "arrears": {
+            "outstanding_total": 2865.34,
+            "arrears_30_plus": 389.24,
+            "arrears_count": 16,
+            "payment_without_inv": 658.52,
+            "doubtful_debtors": 0
+          },
+          "insurance": {
+            "policies_count": 269,
+            "insured_value": 727278.0,
+            "premium_total": 4370.5,
+            "pct_insured": 78.4
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-06-Groningen-639238194161134361.pdf"
         }
       ]
     },
@@ -5057,6 +5688,76 @@
             "pct_insured": 89.6
           },
           "_source_file": "2026-07-31_MIS 1BOX-07-Venlo-639211410163114247.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 69.5,
+            "surface_pct": 73.6,
+            "total_units": 220,
+            "rented_units": 153,
+            "vacant_units": 63,
+            "total_sqm": 1247.93,
+            "rented_sqm": 918.04,
+            "vacant_sqm": 295.13,
+            "locked_units": 4,
+            "terminated_units": 5,
+            "reserved_units": 0,
+            "out_of_order_units": 1,
+            "business_units": 26,
+            "private_units": 127
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 8,
+            "move_ins_year": 62,
+            "vacates_today": 3,
+            "vacates_week": 3,
+            "vacates_month": 9,
+            "vacates_year": 70,
+            "net_today": -2,
+            "net_week": -2,
+            "net_month": -1,
+            "net_year": -10,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 2,
+            "transfers_in_year": 10,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 2,
+            "transfers_out_year": 12
+          },
+          "revenue": {
+            "gross_rent": 16908.26,
+            "discounts": 409.58,
+            "net_rent": 16498.68,
+            "gross_insurance": 2665.35,
+            "net_insurance": 2665.35,
+            "gross_total": 20342.4,
+            "net_total": 19932.82,
+            "invoiced_in_advance": 21319.3,
+            "current_rent_amount": 16222.7,
+            "max_rent_potential": 15558.0,
+            "avg_rate_per_sqm": 17.67,
+            "max_rate_per_sqm": 12.47
+          },
+          "arrears": {
+            "outstanding_total": 4601.03,
+            "arrears_30_plus": 1037.55,
+            "arrears_count": 19,
+            "payment_without_inv": 701.26,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 135,
+            "insured_value": 543700.0,
+            "premium_total": 2630.5,
+            "pct_insured": 88.2
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-07-Venlo-639238194164728115.pdf"
         }
       ]
     },
@@ -5547,6 +6248,76 @@
             "pct_insured": 91.0
           },
           "_source_file": "2026-07-31_MIS 1BOX-08-Roermond-639211410166864327.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 85.7,
+            "surface_pct": 85.8,
+            "total_units": 182,
+            "rented_units": 156,
+            "vacant_units": 22,
+            "total_sqm": 1160.51,
+            "rented_sqm": 995.84,
+            "vacant_sqm": 142.68,
+            "locked_units": 3,
+            "terminated_units": 8,
+            "reserved_units": 0,
+            "out_of_order_units": 1,
+            "business_units": 17,
+            "private_units": 139
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 12,
+            "move_ins_year": 61,
+            "vacates_today": 3,
+            "vacates_week": 3,
+            "vacates_month": 11,
+            "vacates_year": 68,
+            "net_today": -2,
+            "net_week": -2,
+            "net_month": 1,
+            "net_year": -8,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 1,
+            "transfers_in_year": 10,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 1,
+            "transfers_out_year": 11
+          },
+          "revenue": {
+            "gross_rent": 21168.16,
+            "discounts": 645.08,
+            "net_rent": 20523.08,
+            "gross_insurance": 2940.18,
+            "net_insurance": 2940.18,
+            "gross_total": 24707.89,
+            "net_total": 24062.81,
+            "invoiced_in_advance": 23886.97,
+            "current_rent_amount": 19568.56,
+            "max_rent_potential": 20202.0,
+            "avg_rate_per_sqm": 19.65,
+            "max_rate_per_sqm": 14.05
+          },
+          "arrears": {
+            "outstanding_total": 5344.28,
+            "arrears_30_plus": 2162.24,
+            "arrears_count": 19,
+            "payment_without_inv": -48.59,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 143,
+            "insured_value": 614289.0,
+            "premium_total": 2895.5,
+            "pct_insured": 91.7
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-08-Roermond-639238194168634473.pdf"
         }
       ]
     },
@@ -6037,6 +6808,76 @@
             "pct_insured": 88.9
           },
           "_source_file": "2026-07-31_MIS 1BOX-09-Sittard-639211410170770651.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 63.2,
+            "surface_pct": 70.7,
+            "total_units": 304,
+            "rented_units": 192,
+            "vacant_units": 108,
+            "total_sqm": 2170.07,
+            "rented_sqm": 1533.85,
+            "vacant_sqm": 603.46,
+            "locked_units": 6,
+            "terminated_units": 4,
+            "reserved_units": 0,
+            "out_of_order_units": 2,
+            "business_units": 30,
+            "private_units": 162
+          },
+          "rentals": {
+            "move_ins_today": 2,
+            "move_ins_week": 2,
+            "move_ins_month": 10,
+            "move_ins_year": 72,
+            "vacates_today": 1,
+            "vacates_week": 1,
+            "vacates_month": 7,
+            "vacates_year": 83,
+            "net_today": 1,
+            "net_week": 1,
+            "net_month": 3,
+            "net_year": -11,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 2,
+            "transfers_in_year": 16,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 2,
+            "transfers_out_year": 16
+          },
+          "revenue": {
+            "gross_rent": 28549.16,
+            "discounts": 755.9,
+            "net_rent": 27793.26,
+            "gross_insurance": 3341.68,
+            "net_insurance": 3341.68,
+            "gross_total": 32935.51,
+            "net_total": 32179.61,
+            "invoiced_in_advance": 39284.57,
+            "current_rent_amount": 27760.89,
+            "max_rent_potential": 35578.0,
+            "avg_rate_per_sqm": 18.1,
+            "max_rate_per_sqm": 16.39
+          },
+          "arrears": {
+            "outstanding_total": 6695.18,
+            "arrears_30_plus": 1334.23,
+            "arrears_count": 19,
+            "payment_without_inv": 233.28,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 166,
+            "insured_value": 698996.0,
+            "premium_total": 3354.5,
+            "pct_insured": 86.5
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-09-Sittard-639238194172696988.pdf"
         }
       ]
     },
@@ -6527,6 +7368,76 @@
             "pct_insured": 96.0
           },
           "_source_file": "2026-07-31_MIS 1BOX-10-Heerlen-639211410174208198.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 83.6,
+            "surface_pct": 86.2,
+            "total_units": 183,
+            "rented_units": 153,
+            "vacant_units": 25,
+            "total_sqm": 1182.56,
+            "rented_sqm": 1018.94,
+            "vacant_sqm": 135.02,
+            "locked_units": 3,
+            "terminated_units": 0,
+            "reserved_units": 0,
+            "out_of_order_units": 1,
+            "business_units": 18,
+            "private_units": 135
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 9,
+            "move_ins_year": 60,
+            "vacates_today": 0,
+            "vacates_week": 0,
+            "vacates_month": 5,
+            "vacates_year": 56,
+            "net_today": 1,
+            "net_week": 1,
+            "net_month": 5,
+            "net_year": 5,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 1,
+            "transfers_in_year": 10,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 0,
+            "transfers_out_year": 9
+          },
+          "revenue": {
+            "gross_rent": 15706.79,
+            "discounts": 217.85,
+            "net_rent": 15488.94,
+            "gross_insurance": 2935.73,
+            "net_insurance": 2935.73,
+            "gross_total": 19599.94,
+            "net_total": 19382.09,
+            "invoiced_in_advance": 21176.9,
+            "current_rent_amount": 15331.35,
+            "max_rent_potential": 15576.0,
+            "avg_rate_per_sqm": 15.05,
+            "max_rate_per_sqm": 11.78
+          },
+          "arrears": {
+            "outstanding_total": 949.73,
+            "arrears_30_plus": 307.8,
+            "arrears_count": 16,
+            "payment_without_inv": 546.93,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 143,
+            "insured_value": 598540.0,
+            "premium_total": 2903.5,
+            "pct_insured": 93.5
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-10-Heerlen-639238194176290784.pdf"
         }
       ]
     },
@@ -7017,6 +7928,76 @@
             "pct_insured": 74.7
           },
           "_source_file": "2026-07-31_MIS 1BOX-11-Bergen op Zoom-639211410178114532.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 63.6,
+            "surface_pct": 72.2,
+            "total_units": 275,
+            "rented_units": 175,
+            "vacant_units": 94,
+            "total_sqm": 1577.7,
+            "rented_sqm": 1138.4,
+            "vacant_sqm": 407.56,
+            "locked_units": 9,
+            "terminated_units": 6,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 21,
+            "private_units": 154
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 4,
+            "move_ins_year": 48,
+            "vacates_today": 4,
+            "vacates_week": 4,
+            "vacates_month": 11,
+            "vacates_year": 55,
+            "net_today": -3,
+            "net_week": -3,
+            "net_month": -7,
+            "net_year": -7,
+            "transfers_in_today": 1,
+            "transfers_in_week": 1,
+            "transfers_in_month": 1,
+            "transfers_in_year": 12,
+            "transfers_out_today": 1,
+            "transfers_out_week": 1,
+            "transfers_out_month": 1,
+            "transfers_out_year": 12
+          },
+          "revenue": {
+            "gross_rent": 21232.09,
+            "discounts": 300.42,
+            "net_rent": 20931.67,
+            "gross_insurance": 2636.81,
+            "net_insurance": 2636.81,
+            "gross_total": 24193.62,
+            "net_total": 23893.2,
+            "invoiced_in_advance": 24877.15,
+            "current_rent_amount": 19891.71,
+            "max_rent_potential": 24905.0,
+            "avg_rate_per_sqm": 17.47,
+            "max_rate_per_sqm": 15.79
+          },
+          "arrears": {
+            "outstanding_total": 5415.72,
+            "arrears_30_plus": 1582.36,
+            "arrears_count": 41,
+            "payment_without_inv": 244.16,
+            "doubtful_debtors": 0
+          },
+          "insurance": {
+            "policies_count": 131,
+            "insured_value": 517500.0,
+            "premium_total": 2537.0,
+            "pct_insured": 74.9
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-11-Bergen op Zoom-639238194180665865.pdf"
         }
       ]
     },
@@ -7507,6 +8488,76 @@
             "pct_insured": 74.1
           },
           "_source_file": "2026-07-31_MIS 1BOX-12-Goes-639211410181552112.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 71.6,
+            "surface_pct": 79.7,
+            "total_units": 303,
+            "rented_units": 217,
+            "vacant_units": 76,
+            "total_sqm": 1853.9,
+            "rented_sqm": 1477.89,
+            "vacant_sqm": 255.86,
+            "locked_units": 7,
+            "terminated_units": 4,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 38,
+            "private_units": 179
+          },
+          "rentals": {
+            "move_ins_today": 3,
+            "move_ins_week": 3,
+            "move_ins_month": 15,
+            "move_ins_year": 72,
+            "vacates_today": 3,
+            "vacates_week": 3,
+            "vacates_month": 9,
+            "vacates_year": 74,
+            "net_today": 0,
+            "net_week": 0,
+            "net_month": 5,
+            "net_year": -1,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 0,
+            "transfers_in_year": 11,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 1,
+            "transfers_out_year": 10
+          },
+          "revenue": {
+            "gross_rent": 28177.39,
+            "discounts": 609.37,
+            "net_rent": 27568.02,
+            "gross_insurance": 3226.19,
+            "net_insurance": 3226.19,
+            "gross_total": 31858.98,
+            "net_total": 31249.61,
+            "invoiced_in_advance": 35163.52,
+            "current_rent_amount": 27384.49,
+            "max_rent_potential": 35240.0,
+            "avg_rate_per_sqm": 18.53,
+            "max_rate_per_sqm": 19.01
+          },
+          "arrears": {
+            "outstanding_total": 4850.34,
+            "arrears_30_plus": 768.37,
+            "arrears_count": 34,
+            "payment_without_inv": 1593.34,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 166,
+            "insured_value": 708750.0,
+            "premium_total": 3304.5,
+            "pct_insured": 76.5
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-12-Goes-639238194184728424.pdf"
         }
       ]
     },
@@ -7997,6 +9048,76 @@
             "pct_insured": 82.7
           },
           "_source_file": "2026-07-31_MIS 1BOX-13-Hellevoetsluis-639211410185458430.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 84.7,
+            "surface_pct": 87.1,
+            "total_units": 321,
+            "rented_units": 272,
+            "vacant_units": 44,
+            "total_sqm": 1763.78,
+            "rented_sqm": 1536.05,
+            "vacant_sqm": 193.4,
+            "locked_units": 6,
+            "terminated_units": 6,
+            "reserved_units": 1,
+            "out_of_order_units": 0,
+            "business_units": 35,
+            "private_units": 237
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 15,
+            "move_ins_year": 90,
+            "vacates_today": 4,
+            "vacates_week": 4,
+            "vacates_month": 9,
+            "vacates_year": 104,
+            "net_today": -4,
+            "net_week": -4,
+            "net_month": 6,
+            "net_year": -14,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 1,
+            "transfers_in_year": 10,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 1,
+            "transfers_out_year": 10
+          },
+          "revenue": {
+            "gross_rent": 38935.03,
+            "discounts": 414.8,
+            "net_rent": 38520.23,
+            "gross_insurance": 4429.4,
+            "net_insurance": 4429.4,
+            "gross_total": 43683.84,
+            "net_total": 43269.04,
+            "invoiced_in_advance": 47580.78,
+            "current_rent_amount": 38266.57,
+            "max_rent_potential": 33140.0,
+            "avg_rate_per_sqm": 24.91,
+            "max_rate_per_sqm": 18.79
+          },
+          "arrears": {
+            "outstanding_total": 4962.29,
+            "arrears_30_plus": 1152.71,
+            "arrears_count": 26,
+            "payment_without_inv": 357.11,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 225,
+            "insured_value": 961750.0,
+            "premium_total": 4476.0,
+            "pct_insured": 82.7
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-13-Hellevoetsluis-639238194189110071.pdf"
         }
       ]
     },
@@ -8487,6 +9608,76 @@
             "pct_insured": 94.9
           },
           "_source_file": "2026-07-31_MIS 1BOX-14-Tilburg-639211410188895985.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 75.6,
+            "surface_pct": 74.0,
+            "total_units": 669,
+            "rented_units": 506,
+            "vacant_units": 150,
+            "total_sqm": 4594.57,
+            "rented_sqm": 3398.4,
+            "vacant_sqm": 1110.34,
+            "locked_units": 17,
+            "terminated_units": 32,
+            "reserved_units": 0,
+            "out_of_order_units": 2,
+            "business_units": 65,
+            "private_units": 441
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 31,
+            "move_ins_year": 215,
+            "vacates_today": 12,
+            "vacates_week": 12,
+            "vacates_month": 35,
+            "vacates_year": 215,
+            "net_today": -12,
+            "net_week": -12,
+            "net_month": -3,
+            "net_year": -3,
+            "transfers_in_today": 1,
+            "transfers_in_week": 1,
+            "transfers_in_month": 7,
+            "transfers_in_year": 26,
+            "transfers_out_today": 1,
+            "transfers_out_week": 1,
+            "transfers_out_month": 6,
+            "transfers_out_year": 29
+          },
+          "revenue": {
+            "gross_rent": 59215.97,
+            "discounts": 2056.23,
+            "net_rent": 57159.74,
+            "gross_insurance": 9885.44,
+            "net_insurance": 9885.44,
+            "gross_total": 76065.86,
+            "net_total": 74009.63,
+            "invoiced_in_advance": 74639.9,
+            "current_rent_amount": 54484.44,
+            "max_rent_potential": 69182.0,
+            "avg_rate_per_sqm": 16.03,
+            "max_rate_per_sqm": 15.06
+          },
+          "arrears": {
+            "outstanding_total": 15099.93,
+            "arrears_30_plus": 4507.9,
+            "arrears_count": 85,
+            "payment_without_inv": 1633.82,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 487,
+            "insured_value": 2097216.0,
+            "premium_total": 9868.0,
+            "pct_insured": 96.2
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-14-Tilburg-639238194192703668.pdf"
         }
       ]
     },
@@ -8977,6 +10168,76 @@
             "pct_insured": 88.9
           },
           "_source_file": "2026-07-31_MIS 1BOX-15-Breda-639211410192333600.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 61.7,
+            "surface_pct": 61.8,
+            "total_units": 737,
+            "rented_units": 455,
+            "vacant_units": 263,
+            "total_sqm": 4361.55,
+            "rented_sqm": 2696.86,
+            "vacant_sqm": 1494.72,
+            "locked_units": 13,
+            "terminated_units": 15,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 61,
+            "private_units": 394
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 38,
+            "move_ins_year": 230,
+            "vacates_today": 11,
+            "vacates_week": 11,
+            "vacates_month": 25,
+            "vacates_year": 174,
+            "net_today": -11,
+            "net_week": -11,
+            "net_month": 14,
+            "net_year": 54,
+            "transfers_in_today": 1,
+            "transfers_in_week": 1,
+            "transfers_in_month": 7,
+            "transfers_in_year": 34,
+            "transfers_out_today": 1,
+            "transfers_out_week": 1,
+            "transfers_out_month": 6,
+            "transfers_out_year": 36
+          },
+          "revenue": {
+            "gross_rent": 39885.92,
+            "discounts": 1791.78,
+            "net_rent": 38094.14,
+            "gross_insurance": 7561.98,
+            "net_insurance": 7561.98,
+            "gross_total": 52545.04,
+            "net_total": 50753.26,
+            "invoiced_in_advance": 62084.8,
+            "current_rent_amount": 37575.94,
+            "max_rent_potential": 66133.0,
+            "avg_rate_per_sqm": 13.93,
+            "max_rate_per_sqm": 15.16
+          },
+          "arrears": {
+            "outstanding_total": 6454.27,
+            "arrears_30_plus": 3073.7,
+            "arrears_count": 55,
+            "payment_without_inv": 3971.76,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 415,
+            "insured_value": 1574911.0,
+            "premium_total": 7767.5,
+            "pct_insured": 91.2
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-15-Breda-639238194196297458.pdf"
         }
       ]
     },
@@ -9467,6 +10728,76 @@
             "pct_insured": 94.7
           },
           "_source_file": "2026-07-31_MIS 1BOX-16-Den Haag-639211410196410231.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 84.9,
+            "surface_pct": 87.0,
+            "total_units": 723,
+            "rented_units": 614,
+            "vacant_units": 91,
+            "total_sqm": 2911.58,
+            "rented_sqm": 2533.82,
+            "vacant_sqm": 276.16,
+            "locked_units": 19,
+            "terminated_units": 18,
+            "reserved_units": 1,
+            "out_of_order_units": 1,
+            "business_units": 72,
+            "private_units": 542
+          },
+          "rentals": {
+            "move_ins_today": 2,
+            "move_ins_week": 2,
+            "move_ins_month": 45,
+            "move_ins_year": 217,
+            "vacates_today": 28,
+            "vacates_week": 28,
+            "vacates_month": 39,
+            "vacates_year": 230,
+            "net_today": -26,
+            "net_week": -26,
+            "net_month": 6,
+            "net_year": -14,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 5,
+            "transfers_in_year": 31,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 5,
+            "transfers_out_year": 32
+          },
+          "revenue": {
+            "gross_rent": 65109.71,
+            "discounts": 2337.32,
+            "net_rent": 62772.39,
+            "gross_insurance": 10156.39,
+            "net_insurance": 10156.39,
+            "gross_total": 82180.46,
+            "net_total": 79843.14,
+            "invoiced_in_advance": 93435.87,
+            "current_rent_amount": 61107.21,
+            "max_rent_potential": 78461.0,
+            "avg_rate_per_sqm": 24.12,
+            "max_rate_per_sqm": 26.95
+          },
+          "arrears": {
+            "outstanding_total": 13069.31,
+            "arrears_30_plus": 3152.42,
+            "arrears_count": 70,
+            "payment_without_inv": 2249.87,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 604,
+            "insured_value": 1716900.0,
+            "premium_total": 10387.5,
+            "pct_insured": 98.4
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-16-Den Haag-639238194200360043.pdf"
         }
       ]
     },
@@ -9957,6 +11288,76 @@
             "pct_insured": 92.7
           },
           "_source_file": "2026-07-31_MIS 1BOX-17-Utrecht-639211410200316524.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 65.8,
+            "surface_pct": 69.0,
+            "total_units": 579,
+            "rented_units": 381,
+            "vacant_units": 179,
+            "total_sqm": 3335.55,
+            "rented_sqm": 2302.05,
+            "vacant_sqm": 935.25,
+            "locked_units": 13,
+            "terminated_units": 13,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 53,
+            "private_units": 328
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 18,
+            "move_ins_year": 204,
+            "vacates_today": 6,
+            "vacates_week": 6,
+            "vacates_month": 24,
+            "vacates_year": 174,
+            "net_today": -6,
+            "net_week": -6,
+            "net_month": -5,
+            "net_year": 31,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 2,
+            "transfers_in_year": 24,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 1,
+            "transfers_out_year": 23
+          },
+          "revenue": {
+            "gross_rent": 36150.03,
+            "discounts": 2084.87,
+            "net_rent": 34065.16,
+            "gross_insurance": 7051.84,
+            "net_insurance": 7051.84,
+            "gross_total": 43854.91,
+            "net_total": 41770.04,
+            "invoiced_in_advance": 46665.85,
+            "current_rent_amount": 32475.82,
+            "max_rent_potential": 59801.0,
+            "avg_rate_per_sqm": 14.11,
+            "max_rate_per_sqm": 17.93
+          },
+          "arrears": {
+            "outstanding_total": 6213.18,
+            "arrears_30_plus": 2135.83,
+            "arrears_count": 53,
+            "payment_without_inv": 287.04,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 349,
+            "insured_value": 1348400.0,
+            "premium_total": 6790.5,
+            "pct_insured": 91.6
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-17-Utrecht-639238194204110086.pdf"
         }
       ]
     },
@@ -10447,6 +11848,76 @@
             "pct_insured": 92.3
           },
           "_source_file": "2026-07-31_MIS 1BOX-18-Barendrecht-639211410204537676.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 75.9,
+            "surface_pct": 80.3,
+            "total_units": 601,
+            "rented_units": 456,
+            "vacant_units": 136,
+            "total_sqm": 3641.32,
+            "rented_sqm": 2923.55,
+            "vacant_sqm": 635.69,
+            "locked_units": 6,
+            "terminated_units": 13,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 72,
+            "private_units": 384
+          },
+          "rentals": {
+            "move_ins_today": 2,
+            "move_ins_week": 2,
+            "move_ins_month": 18,
+            "move_ins_year": 165,
+            "vacates_today": 5,
+            "vacates_week": 5,
+            "vacates_month": 18,
+            "vacates_year": 188,
+            "net_today": -3,
+            "net_week": -3,
+            "net_month": 0,
+            "net_year": -26,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 11,
+            "transfers_in_year": 57,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 11,
+            "transfers_out_year": 60
+          },
+          "revenue": {
+            "gross_rent": 58684.86,
+            "discounts": 1695.04,
+            "net_rent": 56989.82,
+            "gross_insurance": 8112.07,
+            "net_insurance": 8112.07,
+            "gross_total": 67378.97,
+            "net_total": 65683.93,
+            "invoiced_in_advance": 70076.21,
+            "current_rent_amount": 56488.76,
+            "max_rent_potential": 68616.0,
+            "avg_rate_per_sqm": 19.32,
+            "max_rate_per_sqm": 18.84
+          },
+          "arrears": {
+            "outstanding_total": 7579.44,
+            "arrears_30_plus": 1422.0,
+            "arrears_count": 34,
+            "payment_without_inv": 136.99,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 419,
+            "insured_value": 1656200.0,
+            "premium_total": 8147.5,
+            "pct_insured": 91.9
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-18-Barendrecht-639238194208378850.pdf"
         }
       ]
     },
@@ -10937,6 +12408,76 @@
             "pct_insured": 58.9
           },
           "_source_file": "2026-07-31_MIS 1BOX-20-Helmond-639211410208754113.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 75.0,
+            "surface_pct": 77.7,
+            "total_units": 292,
+            "rented_units": 219,
+            "vacant_units": 63,
+            "total_sqm": 1779.82,
+            "rented_sqm": 1383.71,
+            "vacant_sqm": 348.01,
+            "locked_units": 10,
+            "terminated_units": 8,
+            "reserved_units": 1,
+            "out_of_order_units": 0,
+            "business_units": 34,
+            "private_units": 185
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 16,
+            "move_ins_year": 59,
+            "vacates_today": 1,
+            "vacates_week": 1,
+            "vacates_month": 6,
+            "vacates_year": 77,
+            "net_today": 0,
+            "net_week": 0,
+            "net_month": 10,
+            "net_year": -19,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 0,
+            "transfers_in_year": 7,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 0,
+            "transfers_out_year": 8
+          },
+          "revenue": {
+            "gross_rent": 28954.4,
+            "discounts": 1620.55,
+            "net_rent": 27333.85,
+            "gross_insurance": 2693.91,
+            "net_insurance": 2693.91,
+            "gross_total": 32103.71,
+            "net_total": 30483.16,
+            "invoiced_in_advance": 33314.08,
+            "current_rent_amount": 27102.89,
+            "max_rent_potential": 25903.0,
+            "avg_rate_per_sqm": 19.59,
+            "max_rate_per_sqm": 14.55
+          },
+          "arrears": {
+            "outstanding_total": 7113.41,
+            "arrears_30_plus": 2708.01,
+            "arrears_count": 43,
+            "payment_without_inv": 555.74,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 134,
+            "insured_value": 631900.0,
+            "premium_total": 2770.0,
+            "pct_insured": 61.2
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-20-Helmond-639238194212546864.pdf"
         }
       ]
     },
@@ -11427,6 +12968,76 @@
             "pct_insured": 93.9
           },
           "_source_file": "2026-07-31_MIS 1BOX-21-Heerlen-Heerlerbaan-639211410212660554.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 46.1,
+            "surface_pct": 64.3,
+            "total_units": 380,
+            "rented_units": 175,
+            "vacant_units": 198,
+            "total_sqm": 2198.81,
+            "rented_sqm": 1412.79,
+            "vacant_sqm": 745.05,
+            "locked_units": 5,
+            "terminated_units": 9,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 14,
+            "private_units": 161
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 8,
+            "move_ins_year": 92,
+            "vacates_today": 6,
+            "vacates_week": 6,
+            "vacates_month": 14,
+            "vacates_year": 90,
+            "net_today": -6,
+            "net_week": -6,
+            "net_month": -6,
+            "net_year": 0,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 2,
+            "transfers_in_year": 7,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 2,
+            "transfers_out_year": 9
+          },
+          "revenue": {
+            "gross_rent": 19909.1,
+            "discounts": 731.42,
+            "net_rent": 19177.68,
+            "gross_insurance": 3635.71,
+            "net_insurance": 3635.71,
+            "gross_total": 25003.29,
+            "net_total": 24271.87,
+            "invoiced_in_advance": 23111.41,
+            "current_rent_amount": 18101.3,
+            "max_rent_potential": 26483.0,
+            "avg_rate_per_sqm": 12.81,
+            "max_rate_per_sqm": 12.04
+          },
+          "arrears": {
+            "outstanding_total": 1995.8,
+            "arrears_30_plus": 580.75,
+            "arrears_count": 29,
+            "payment_without_inv": 323.69,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 165,
+            "insured_value": 752400.0,
+            "premium_total": 3510.5,
+            "pct_insured": 94.3
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-21-Heerlen-Heerlerbaan-639238194216296927.pdf"
         }
       ]
     },
@@ -11917,6 +13528,76 @@
             "pct_insured": 79.3
           },
           "_source_file": "2026-07-31_MIS 1BOX-22-Rotterdam Centrum-639211410216254340.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 71.4,
+            "surface_pct": 80.3,
+            "total_units": 901,
+            "rented_units": 643,
+            "vacant_units": 244,
+            "total_sqm": 3567.75,
+            "rented_sqm": 2864.57,
+            "vacant_sqm": 614.02,
+            "locked_units": 23,
+            "terminated_units": 21,
+            "reserved_units": 2,
+            "out_of_order_units": 4,
+            "business_units": 134,
+            "private_units": 509
+          },
+          "rentals": {
+            "move_ins_today": 3,
+            "move_ins_week": 3,
+            "move_ins_month": 37,
+            "move_ins_year": 195,
+            "vacates_today": 5,
+            "vacates_week": 5,
+            "vacates_month": 33,
+            "vacates_year": 209,
+            "net_today": -2,
+            "net_week": -2,
+            "net_month": 6,
+            "net_year": -10,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 5,
+            "transfers_in_year": 39,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 3,
+            "transfers_out_year": 35
+          },
+          "revenue": {
+            "gross_rent": 77372.88,
+            "discounts": 1431.73,
+            "net_rent": 75941.15,
+            "gross_insurance": 8892.0,
+            "net_insurance": 8892.0,
+            "gross_total": 93842.72,
+            "net_total": 92410.99,
+            "invoiced_in_advance": 102065.27,
+            "current_rent_amount": 73750.54,
+            "max_rent_potential": 62159.0,
+            "avg_rate_per_sqm": 25.75,
+            "max_rate_per_sqm": 17.42
+          },
+          "arrears": {
+            "outstanding_total": 19574.83,
+            "arrears_30_plus": 4850.76,
+            "arrears_count": 74,
+            "payment_without_inv": 1165.76,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 513,
+            "insured_value": 1683500.0,
+            "premium_total": 8866.5,
+            "pct_insured": 79.8
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-22-Rotterdam Centrum-639238194220047009.pdf"
         }
       ]
     },
@@ -12407,6 +14088,76 @@
             "pct_insured": 84.7
           },
           "_source_file": "2026-07-31_MIS 1BOX-23-Schiedam-639211410220004457.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 79.5,
+            "surface_pct": 86.6,
+            "total_units": 570,
+            "rented_units": 453,
+            "vacant_units": 104,
+            "total_sqm": 3037.54,
+            "rented_sqm": 2631.39,
+            "vacant_sqm": 356.95,
+            "locked_units": 9,
+            "terminated_units": 14,
+            "reserved_units": 1,
+            "out_of_order_units": 0,
+            "business_units": 124,
+            "private_units": 329
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 19,
+            "move_ins_year": 122,
+            "vacates_today": 0,
+            "vacates_week": 0,
+            "vacates_month": 17,
+            "vacates_year": 129,
+            "net_today": -4,
+            "net_week": -4,
+            "net_month": 2,
+            "net_year": -9,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 6,
+            "transfers_in_year": 39,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 6,
+            "transfers_out_year": 41
+          },
+          "revenue": {
+            "gross_rent": 70905.67,
+            "discounts": 1113.13,
+            "net_rent": 69792.54,
+            "gross_insurance": 7069.15,
+            "net_insurance": 7069.15,
+            "gross_total": 81420.43,
+            "net_total": 80266.27,
+            "invoiced_in_advance": 91063.24,
+            "current_rent_amount": 68767.0,
+            "max_rent_potential": 67868.0,
+            "avg_rate_per_sqm": 26.13,
+            "max_rate_per_sqm": 22.34
+          },
+          "arrears": {
+            "outstanding_total": 16012.09,
+            "arrears_30_plus": 1885.06,
+            "arrears_count": 28,
+            "payment_without_inv": 347.16,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 382,
+            "insured_value": 1496749.0,
+            "premium_total": 7046.0,
+            "pct_insured": 84.3
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-23-Schiedam-639238194224109604.pdf"
         }
       ]
     },
@@ -12897,6 +14648,76 @@
             "pct_insured": 85.6
           },
           "_source_file": "2026-07-31_MIS 1BOX-24-Rotterdam Zuid-639211410223598218.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 80.8,
+            "surface_pct": 85.1,
+            "total_units": 660,
+            "rented_units": 533,
+            "vacant_units": 116,
+            "total_sqm": 3418.7,
+            "rented_sqm": 2909.25,
+            "vacant_sqm": 433.95,
+            "locked_units": 31,
+            "terminated_units": 24,
+            "reserved_units": 1,
+            "out_of_order_units": 2,
+            "business_units": 97,
+            "private_units": 436
+          },
+          "rentals": {
+            "move_ins_today": 4,
+            "move_ins_week": 4,
+            "move_ins_month": 21,
+            "move_ins_year": 149,
+            "vacates_today": 2,
+            "vacates_week": 2,
+            "vacates_month": 24,
+            "vacates_year": 181,
+            "net_today": 2,
+            "net_week": 2,
+            "net_month": -2,
+            "net_year": -35,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 12,
+            "transfers_in_year": 34,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 11,
+            "transfers_out_year": 37
+          },
+          "revenue": {
+            "gross_rent": 79129.37,
+            "discounts": 1165.37,
+            "net_rent": 77964.0,
+            "gross_insurance": 8318.69,
+            "net_insurance": 8318.69,
+            "gross_total": 90852.92,
+            "net_total": 89687.55,
+            "invoiced_in_advance": 93372.27,
+            "current_rent_amount": 75838.92,
+            "max_rent_potential": 57155.0,
+            "avg_rate_per_sqm": 26.07,
+            "max_rate_per_sqm": 16.72
+          },
+          "arrears": {
+            "outstanding_total": 20660.92,
+            "arrears_30_plus": 8110.67,
+            "arrears_count": 108,
+            "payment_without_inv": 1387.3,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 458,
+            "insured_value": 1672000.0,
+            "premium_total": 8297.2,
+            "pct_insured": 85.9
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-24-Rotterdam Zuid-639238194227703459.pdf"
         }
       ]
     },
@@ -13387,6 +15208,76 @@
             "pct_insured": 83.4
           },
           "_source_file": "2026-07-31_MIS 1BOX-25-Alphen aan den Rijn-639211410227504473.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 85.0,
+            "surface_pct": 84.0,
+            "total_units": 513,
+            "rented_units": 436,
+            "vacant_units": 69,
+            "total_sqm": 2664.19,
+            "rented_sqm": 2239.19,
+            "vacant_sqm": 384.5,
+            "locked_units": 9,
+            "terminated_units": 7,
+            "reserved_units": 0,
+            "out_of_order_units": 1,
+            "business_units": 65,
+            "private_units": 371
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 23,
+            "move_ins_year": 129,
+            "vacates_today": 11,
+            "vacates_week": 11,
+            "vacates_month": 20,
+            "vacates_year": 162,
+            "net_today": -10,
+            "net_week": -10,
+            "net_month": 3,
+            "net_year": -34,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 2,
+            "transfers_in_year": 12,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 2,
+            "transfers_out_year": 13
+          },
+          "revenue": {
+            "gross_rent": 53736.51,
+            "discounts": 809.56,
+            "net_rent": 52926.95,
+            "gross_insurance": 6611.84,
+            "net_insurance": 6611.84,
+            "gross_total": 61366.33,
+            "net_total": 60556.77,
+            "invoiced_in_advance": 65965.51,
+            "current_rent_amount": 50658.8,
+            "max_rent_potential": 53381.0,
+            "avg_rate_per_sqm": 22.62,
+            "max_rate_per_sqm": 20.04
+          },
+          "arrears": {
+            "outstanding_total": 4947.0,
+            "arrears_30_plus": 1404.38,
+            "arrears_count": 30,
+            "payment_without_inv": 1027.63,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 372,
+            "insured_value": 1274100.0,
+            "premium_total": 6606.0,
+            "pct_insured": 85.3
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-25-Alphen aan den Rijn-639238194231453505.pdf"
         }
       ]
     },
@@ -13877,6 +15768,76 @@
             "pct_insured": 80.8
           },
           "_source_file": "2026-07-31_MIS 1BOX-26-Alkmaar-639211410231410849.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 80.0,
+            "surface_pct": 84.2,
+            "total_units": 365,
+            "rented_units": 292,
+            "vacant_units": 60,
+            "total_sqm": 1729.58,
+            "rented_sqm": 1456.43,
+            "vacant_sqm": 212.35,
+            "locked_units": 1,
+            "terminated_units": 7,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 44,
+            "private_units": 248
+          },
+          "rentals": {
+            "move_ins_today": 0,
+            "move_ins_week": 0,
+            "move_ins_month": 7,
+            "move_ins_year": 54,
+            "vacates_today": 1,
+            "vacates_week": 1,
+            "vacates_month": 9,
+            "vacates_year": 96,
+            "net_today": -1,
+            "net_week": -1,
+            "net_month": 6,
+            "net_year": -29,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 3,
+            "transfers_in_year": 19,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 3,
+            "transfers_out_year": 21
+          },
+          "revenue": {
+            "gross_rent": 30667.62,
+            "discounts": 730.8,
+            "net_rent": 29936.82,
+            "gross_insurance": 4323.76,
+            "net_insurance": 4323.76,
+            "gross_total": 51411.48,
+            "net_total": 50680.68,
+            "invoiced_in_advance": 55974.61,
+            "current_rent_amount": 29074.6,
+            "max_rent_potential": 30871.0,
+            "avg_rate_per_sqm": 19.96,
+            "max_rate_per_sqm": 17.85
+          },
+          "arrears": {
+            "outstanding_total": 17666.46,
+            "arrears_30_plus": -129.09,
+            "arrears_count": 10,
+            "payment_without_inv": 393.24,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 235,
+            "insured_value": 768100.0,
+            "premium_total": 4293.5,
+            "pct_insured": 80.5
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-26-Alkmaar-639238194235203489.pdf"
         }
       ]
     },
@@ -14367,6 +16328,76 @@
             "pct_insured": 98.4
           },
           "_source_file": "2026-07-31_MIS 1BOX-27-Amsterdam-639211410235160910.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 44.7,
+            "surface_pct": 39.6,
+            "total_units": 718,
+            "rented_units": 321,
+            "vacant_units": 390,
+            "total_sqm": 4961.47,
+            "rented_sqm": 1964.91,
+            "vacant_sqm": 2920.32,
+            "locked_units": 10,
+            "terminated_units": 18,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 48,
+            "private_units": 273
+          },
+          "rentals": {
+            "move_ins_today": 3,
+            "move_ins_week": 3,
+            "move_ins_month": 33,
+            "move_ins_year": 207,
+            "vacates_today": 13,
+            "vacates_week": 13,
+            "vacates_month": 26,
+            "vacates_year": 173,
+            "net_today": -10,
+            "net_week": -10,
+            "net_month": 7,
+            "net_year": 34,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 0,
+            "transfers_in_year": 10,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 0,
+            "transfers_out_year": 10
+          },
+          "revenue": {
+            "gross_rent": 34211.53,
+            "discounts": 2008.17,
+            "net_rent": 32203.36,
+            "gross_insurance": 6263.5,
+            "net_insurance": 6263.5,
+            "gross_total": 43499.35,
+            "net_total": 41491.18,
+            "invoiced_in_advance": 52421.64,
+            "current_rent_amount": 31177.71,
+            "max_rent_potential": 100189.0,
+            "avg_rate_per_sqm": 15.87,
+            "max_rate_per_sqm": 20.19
+          },
+          "arrears": {
+            "outstanding_total": 9117.16,
+            "arrears_30_plus": 4955.82,
+            "arrears_count": 36,
+            "payment_without_inv": 186.26,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 325,
+            "insured_value": 1352200.0,
+            "premium_total": 6259.5,
+            "pct_insured": 101.2
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-27-Amsterdam-639238194239109818.pdf"
         }
       ]
     },
@@ -14857,6 +16888,76 @@
             "pct_insured": 91.7
           },
           "_source_file": "2026-07-31_MIS 1BOX-28-Almere-639211410238910998.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 51.1,
+            "surface_pct": 65.7,
+            "total_units": 354,
+            "rented_units": 181,
+            "vacant_units": 159,
+            "total_sqm": 1876.69,
+            "rented_sqm": 1233.4,
+            "vacant_sqm": 546.12,
+            "locked_units": 7,
+            "terminated_units": 4,
+            "reserved_units": 2,
+            "out_of_order_units": 0,
+            "business_units": 28,
+            "private_units": 153
+          },
+          "rentals": {
+            "move_ins_today": 2,
+            "move_ins_week": 2,
+            "move_ins_month": 16,
+            "move_ins_year": 83,
+            "vacates_today": 2,
+            "vacates_week": 2,
+            "vacates_month": 6,
+            "vacates_year": 53,
+            "net_today": 0,
+            "net_week": 0,
+            "net_month": 12,
+            "net_year": 31,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 2,
+            "transfers_in_year": 8,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 0,
+            "transfers_out_year": 7
+          },
+          "revenue": {
+            "gross_rent": 14906.78,
+            "discounts": 338.27,
+            "net_rent": 14568.51,
+            "gross_insurance": 3291.52,
+            "net_insurance": 3291.52,
+            "gross_total": 19759.35,
+            "net_total": 19421.08,
+            "invoiced_in_advance": 22091.63,
+            "current_rent_amount": 14667.37,
+            "max_rent_potential": 23359.0,
+            "avg_rate_per_sqm": 11.89,
+            "max_rate_per_sqm": 12.45
+          },
+          "arrears": {
+            "outstanding_total": 4227.21,
+            "arrears_30_plus": 1420.15,
+            "arrears_count": 25,
+            "payment_without_inv": 130.03,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 167,
+            "insured_value": 731400.0,
+            "premium_total": 3400.5,
+            "pct_insured": 92.3
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-28-Almere-639238194243016109.pdf"
         }
       ]
     },
@@ -15347,6 +17448,76 @@
             "pct_insured": 98.7
           },
           "_source_file": "2026-07-31_MIS 1BOX-29-Helmond-Kanaaldijk-639211410242817298.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 41.4,
+            "surface_pct": 59.1,
+            "total_units": 594,
+            "rented_units": 246,
+            "vacant_units": 334,
+            "total_sqm": 4317.45,
+            "rented_sqm": 2553.65,
+            "vacant_sqm": 1579.69,
+            "locked_units": 5,
+            "terminated_units": 11,
+            "reserved_units": 1,
+            "out_of_order_units": 0,
+            "business_units": 52,
+            "private_units": 194
+          },
+          "rentals": {
+            "move_ins_today": 3,
+            "move_ins_week": 3,
+            "move_ins_month": 24,
+            "move_ins_year": 173,
+            "vacates_today": 3,
+            "vacates_week": 3,
+            "vacates_month": 9,
+            "vacates_year": 114,
+            "net_today": 0,
+            "net_week": 0,
+            "net_month": 16,
+            "net_year": 56,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 5,
+            "transfers_in_year": 25,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 4,
+            "transfers_out_year": 28
+          },
+          "revenue": {
+            "gross_rent": 30735.67,
+            "discounts": 2600.71,
+            "net_rent": 28134.96,
+            "gross_insurance": 5306.43,
+            "net_insurance": 5306.43,
+            "gross_total": 38312.01,
+            "net_total": 35711.3,
+            "invoiced_in_advance": 43702.76,
+            "current_rent_amount": 28406.41,
+            "max_rent_potential": 51477.0,
+            "avg_rate_per_sqm": 11.12,
+            "max_rate_per_sqm": 11.92
+          },
+          "arrears": {
+            "outstanding_total": 7135.48,
+            "arrears_30_plus": 2191.87,
+            "arrears_count": 39,
+            "payment_without_inv": 237.39,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 238,
+            "insured_value": 1434600.0,
+            "premium_total": 5506.5,
+            "pct_insured": 96.7
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-29-Helmond-Kanaaldijk-639238194246922424.pdf"
         }
       ]
     },
@@ -15837,6 +18008,76 @@
             "pct_insured": 90.9
           },
           "_source_file": "2026-07-31_MIS 1BOX-30-Lelystad-639211410246567293.pdf"
+        },
+        {
+          "month": "2026-08",
+          "report_date": "2026-08-31",
+          "occupancy": {
+            "unit_pct": 76.7,
+            "surface_pct": 78.8,
+            "total_units": 584,
+            "rented_units": 448,
+            "vacant_units": 119,
+            "total_sqm": 3289.52,
+            "rented_sqm": 2590.86,
+            "vacant_sqm": 595.71,
+            "locked_units": 20,
+            "terminated_units": 21,
+            "reserved_units": 0,
+            "out_of_order_units": 0,
+            "business_units": 38,
+            "private_units": 410
+          },
+          "rentals": {
+            "move_ins_today": 1,
+            "move_ins_week": 1,
+            "move_ins_month": 18,
+            "move_ins_year": 122,
+            "vacates_today": 5,
+            "vacates_week": 5,
+            "vacates_month": 20,
+            "vacates_year": 125,
+            "net_today": -4,
+            "net_week": -4,
+            "net_month": -1,
+            "net_year": -3,
+            "transfers_in_today": 0,
+            "transfers_in_week": 0,
+            "transfers_in_month": 7,
+            "transfers_in_year": 32,
+            "transfers_out_today": 0,
+            "transfers_out_week": 0,
+            "transfers_out_month": 6,
+            "transfers_out_year": 32
+          },
+          "revenue": {
+            "gross_rent": 48278.5,
+            "discounts": 2118.43,
+            "net_rent": 46160.07,
+            "gross_insurance": 8004.03,
+            "net_insurance": 8004.03,
+            "gross_total": 57122.41,
+            "net_total": 55003.98,
+            "invoiced_in_advance": 57657.23,
+            "current_rent_amount": 44705.82,
+            "max_rent_potential": 60152.0,
+            "avg_rate_per_sqm": 17.26,
+            "max_rate_per_sqm": 18.29
+          },
+          "arrears": {
+            "outstanding_total": 9711.72,
+            "arrears_30_plus": 3326.14,
+            "arrears_count": 70,
+            "payment_without_inv": 71.6,
+            "doubtful_debtors": 0.0
+          },
+          "insurance": {
+            "policies_count": 406,
+            "insured_value": 1605225.0,
+            "premium_total": 7819.7,
+            "pct_insured": 90.6
+          },
+          "_source_file": "2026-08-31_MIS 1BOX-30-Lelystad-639238194250985000.pdf"
         }
       ]
     },
